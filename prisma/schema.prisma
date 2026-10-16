@@ -1,0 +1,404 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  FACULTY
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum ItemType {
+  LOST
+  FOUND
+}
+
+enum ItemCategory {
+  ELECTRONICS
+  WALLETS
+  DOCUMENTS
+  BAGS
+  CLOTHING
+  ACCESSORIES
+  STATIONERY
+  KEYS
+  OTHERS
+}
+
+enum ItemStatus {
+  LOST_REPORTED
+  FOUND
+  READY_FOR_COLLECTION
+  RETURNED
+  ARCHIVED
+  UNCLAIMED
+}
+
+enum ClaimStatus {
+  PENDING
+  INFO_REQUESTED
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum VerificationLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum StorageLocationName {
+  SECURITY_OFFICE
+  LIBRARY
+  LABORATORY
+  DEPARTMENT_OFFICE
+  RECEPTION
+}
+
+enum NotificationType {
+  REPORT_SUBMITTED
+  POSSIBLE_MATCH
+  NEW_CLAIM
+  MORE_INFO_NEEDED
+  CLAIM_APPROVED
+  CLAIM_REJECTED
+  READY_FOR_COLLECTION
+  ITEM_RETURNED
+}
+
+enum MatchStatus {
+  SUGGESTED
+  CONFIRMED
+  DISMISSED
+}
+
+enum AppealStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum Channel {
+  IN_APP
+  EMAIL
+}
+
+enum QuestionSource {
+  AUTO
+  MANUAL
+}
+
+model Campus {
+  id               String            @id @default(uuid())
+  name             String
+  code             String            @unique
+  createdAt        DateTime          @default(now())
+  departments      Department[]
+  users            User[]
+  storageLocations StorageLocation[]
+  items            Item[]
+
+  @@map("campus")
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  campusId  String
+  name      String
+  code      String
+  createdAt DateTime @default(now())
+  campus    Campus   @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  users     User[]
+  items     Item[]
+
+  @@unique([campusId, code])
+  @@map("department")
+}
+
+model User {
+  id                     String                  @id @default(uuid())
+  name                   String
+  email                  String                  @unique
+  passwordHash           String
+  role                   Role                    @default(STUDENT)
+  campusId               String
+  departmentId           String?
+  status                 UserStatus              @default(ACTIVE)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  campus                 Campus                  @relation(fields: [campusId], references: [id])
+  department             Department?             @relation(fields: [departmentId], references: [id])
+  refreshTokens          RefreshToken[]
+  reportedItems          Item[]                  @relation("ItemReporter")
+  claims                 Claim[]                 @relation("ClaimClaimant")
+  decidedClaims          Claim[]                 @relation("ClaimDecider")
+  handoverOverrideClaims Claim[]                 @relation("ClaimHandoverOverride")
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
+  savedSearches          SavedSearch[]
+  appeals                Appeal[]                @relation("UserAppeals")
+  decidedAppeals         Appeal[]                @relation("AdminAppeals")
+  caseMessages           CaseMessage[]
+  auditLogs              AuditLog[]              @relation("AuditActor")
+
+  @@map("user")
+}
+
+model RefreshToken {
+  id           String        @id @default(uuid())
+  userId       String
+  familyId     String
+  tokenHash    String
+  replacedById String?       @unique
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime      @default(now())
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedBy   RefreshToken? @relation("TokenReplacement", fields: [replacedById], references: [id])
+  replaces     RefreshToken? @relation("TokenReplacement")
+
+  @@index([familyId])
+  @@map("refresh_token")
+}
+
+model StorageLocation {
+  id        String              @id @default(uuid())
+  campusId  String
+  name      StorageLocationName
+  createdAt DateTime            @default(now())
+  campus    Campus              @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  items     Item[]
+
+  @@unique([campusId, name])
+  @@map("storage_location")
+}
+
+model Item {
+  id                String           @id @default(uuid())
+  caseId            String           @unique
+  type              ItemType
+  reporterId        String
+  campusId          String
+  departmentId      String?
+  itemName          String
+  category          ItemCategory
+  description       String
+  colour            String
+  brand             String
+  identifyingMarks  String
+  serialNumber      String?
+  status            ItemStatus
+  dateLost          DateTime?
+  lastKnownLocation String?
+  dateFound         DateTime?
+  foundLocation     String?
+  storageLocationId String?
+  duplicateOfId     String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  archivedAt        DateTime?
+  reporter          User             @relation("ItemReporter", fields: [reporterId], references: [id])
+  campus            Campus           @relation(fields: [campusId], references: [id])
+  department        Department?      @relation(fields: [departmentId], references: [id])
+  storageLocation   StorageLocation? @relation(fields: [storageLocationId], references: [id])
+  duplicateOf       Item?            @relation("DuplicateItems", fields: [duplicateOfId], references: [id])
+  duplicates        Item[]           @relation("DuplicateItems")
+  images            ItemImage[]
+  claims            Claim[]
+  lostMatches       Match[]          @relation("LostItemMatches")
+  foundMatches      Match[]          @relation("FoundItemMatches")
+  caseMessages      CaseMessage[]
+
+  @@unique([id, type])
+  @@index([campusId, status])
+  @@index([category, status])
+  @@map("item")
+}
+
+model ItemImage {
+  id        String   @id @default(uuid())
+  itemId    String
+  url       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@map("item_image")
+}
+
+model Claim {
+  id                     String            @id @default(uuid())
+  itemId                 String
+  itemType               ItemType          @default(FOUND)
+  claimantId             String
+  description            String
+  dateLost               DateTime
+  placeLost              String
+  identifyingMarks       String
+  verificationLevel      VerificationLevel
+  status                 ClaimStatus       @default(PENDING)
+  decidedBy              String?
+  decidedAt              DateTime?
+  decisionReason         String?
+  handoverAt             DateTime?
+  receiptConfirmedAt     DateTime?
+  postReturnFeedback     String?
+  handoverOverrideBy     String?
+  handoverOverrideReason String?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  item                   Item              @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  claimant               User              @relation("ClaimClaimant", fields: [claimantId], references: [id])
+  decider                User?             @relation("ClaimDecider", fields: [decidedBy], references: [id])
+  handoverOverrideUser   User?             @relation("ClaimHandoverOverride", fields: [handoverOverrideBy], references: [id])
+  documents              ClaimDocument[]
+  questions              ClaimQuestion[]
+  collectionToken        CollectionToken?
+  appeals                Appeal[]
+
+  @@index([itemId, status])
+  @@map("claim")
+}
+
+model ClaimDocument {
+  id        String   @id @default(uuid())
+  claimId   String
+  url       String
+  docType   String
+  createdAt DateTime @default(now())
+  claim     Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  @@map("claim_document")
+}
+
+model ClaimQuestion {
+  id           String         @id @default(uuid())
+  claimId      String
+  questionText String
+  source       QuestionSource @default(AUTO)
+  answerText   String?
+  answeredAt   DateTime?
+  claim        Claim          @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  @@map("claim_question")
+}
+
+model Match {
+  id          String      @id @default(uuid())
+  lostItemId  String
+  foundItemId String
+  score       Float
+  status      MatchStatus @default(SUGGESTED)
+  createdAt   DateTime    @default(now())
+  lostItem    Item        @relation("LostItemMatches", fields: [lostItemId], references: [id], onDelete: Cascade)
+  foundItem   Item        @relation("FoundItemMatches", fields: [foundItemId], references: [id], onDelete: Cascade)
+
+  @@unique([lostItemId, foundItemId])
+  @@map("match")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  message   String
+  channel   Channel          @default(IN_APP)
+  eventKey  String?          @unique
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@map("notification")
+}
+
+model NotificationPreference {
+  userId        String   @id
+  emailEnabled  Boolean  @default(true)
+  digestEnabled Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preference")
+}
+
+model SavedSearch {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  criteria  Json
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, active])
+  @@map("saved_search")
+}
+
+model CollectionToken {
+  id        String    @id @default(uuid())
+  claimId   String    @unique
+  code      String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  claim     Claim     @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  @@map("collection_token")
+}
+
+model Appeal {
+  id          String       @id @default(uuid())
+  claimId     String
+  appellantId String
+  reason      String
+  status      AppealStatus @default(PENDING)
+  decidedBy   String?
+  decidedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  claim       Claim        @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  appellant   User         @relation("UserAppeals", fields: [appellantId], references: [id])
+  decider     User?        @relation("AdminAppeals", fields: [decidedBy], references: [id])
+
+  @@map("appeal")
+}
+
+model CaseMessage {
+  id             String   @id @default(uuid())
+  itemId         String
+  senderId       String
+  body           String
+  visibleToStaff Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  item           Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  sender         User     @relation(fields: [senderId], references: [id])
+
+  @@index([itemId, createdAt])
+  @@map("case_message")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  action     String
+  targetType String
+  targetId   String
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([targetType, targetId])
+  @@map("audit_log")
+}
