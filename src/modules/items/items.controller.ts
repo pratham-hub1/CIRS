@@ -16,13 +16,15 @@ import { CreateCaseMessageDto } from './dto/create-case-message.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { AuthUser } from '../../common/interfaces/auth-user.interface';
-import { ItemCategory, ItemStatus, ItemType, Role } from '../../domain/enums';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
+import { Role, ItemCategory, ItemStatus, ItemType } from '../../domain/enums';
 
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
   @Roles(Role.STUDENT, Role.FACULTY, Role.ADMIN)
+  @RateLimit({ limit: 20, ttlSeconds: 3600 })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createItem(

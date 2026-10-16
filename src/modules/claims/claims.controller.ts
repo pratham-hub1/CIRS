@@ -15,6 +15,7 @@ import { AddDocumentDto } from './dto/add-document.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { AuthUser } from '../../common/interfaces/auth-user.interface';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { Role } from '../../domain/enums';
 
 @Controller()
@@ -22,6 +23,7 @@ export class ClaimsController {
   constructor(private readonly claimsService: ClaimsService) {}
 
   @Roles(Role.STUDENT, Role.FACULTY)
+  @RateLimit({ limit: 20, ttlSeconds: 3600 })
   @Post('items/:caseId/claims')
   @HttpCode(HttpStatus.CREATED)
   async createClaim(

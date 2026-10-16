@@ -5,8 +5,7 @@ This log tracks the phase-by-phase implementation progress of the CIRS backend i
 ---
 
 ## Overall Status
-- Current Phase: Phase 7 — Admin, analytics & audit (Completed)
-- Next Phase: Phase 8 — Hardening & deployment prep
+- Current Status: ALL PHASES COMPLETED (Phase 0 through Phase 8)
 - Last Updated: 2026-10-16
 
 ---
@@ -176,5 +175,36 @@ This log tracks the phase-by-phase implementation progress of the CIRS backend i
   - `npm run build`: Clean TypeScript compile with 0 errors
 - **Next Phase:**
   - Phase 8 — Hardening & deployment prep (`RateLimiting` FR-36, security and NFR review, final verification).
+
+---
+
+## Phase 8: Hardening & Deployment Prep
+- **Status:** COMPLETED
+- **What Was Built:**
+  - `RateLimitingModule` (`src/modules/rate-limiting/`):
+    - `RateLimitService`: Sliding window hit counter tracking per-user and per-IP requests without memory leaks (`FR-36`).
+    - `RateLimitGuard`: ExecutionContext guard checking `@RateLimit()` metadata and enforcing throttles (`20 requests/hour` per user for claims and reports).
+    - Violation logging: Emits warnings and logs `RATE_LIMIT_EXCEEDED` audit events (`FR-36`, `INT-8`).
+    - Sets standard rate limit response headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`).
+    - Applied `@RateLimit({ limit: 20, ttlSeconds: 3600 })` to `POST /items` and `POST /items/:caseId/claims`.
+  - Global `APP_GUARD` registration in `AppModule` ensuring full pipeline enforcement.
+  - `DEPLOYMENT-RUNBOOK.md`: Comprehensive operational runbook covering system architecture, environment configuration, database migrations (`prisma migrate deploy`), production process management, health checks (`/health`), PostgreSQL backup/restore (`pg_dump` / `pg_restore`), and security checklist.
+- **Contracts Satisfied:**
+  - `FR-36` (Abuse / rate limiting: per-user throttles and violation audit logging)
+  - `NFR-1` (Performance: paginated endpoints, sliding window cache, and connection pooling)
+  - `NFR-2` (Security: argon2id password hashing, rotating JWT refresh tokens, input validation pipe, CORS/security headers, audit logging)
+  - `NFR-3` (Availability & backups: runbook procedures for pg_dump/pg_restore and storage sync)
+  - `NFR-4` (Scalability: multi-campus/multi-department tenancy isolation)
+  - `NFR-5` (Privacy: allowlist serialization, scoped queries)
+  - `NFR-6` (Maintainability: modular NestJS architecture with domain state machines)
+  - `NFR-7` (Observability: Terminus `/health` endpoint, Pino structured logging)
+- **Tests Run & Results:**
+  - `npm test`: 20 test suites passed (132 tests total)
+    - `test/rate-limit.guard.spec.ts` (PASS - request allowance, 429 Too Many Requests on limit breach, per-user isolation, violation audit logging)
+    - All 19 earlier test suites passed.
+  - `npm run check:ci`: All 3 CI structural checks passed (`INT-4`, `INT-5`, `INT-6`).
+  - `npm run test:e2e`: 1 test suite passed (1 test total).
+  - `npm run build`: Clean TypeScript compile with 0 errors.
+- **Project Complete:** All milestones M1 through M9 in `07-build-plan.md` §3 successfully delivered and verified.
 
 
