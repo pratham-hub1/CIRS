@@ -12,6 +12,7 @@ import { MatchingController } from '../../src/modules/matching/matching.controll
 import { ClaimsController } from '../../src/modules/claims/claims.controller';
 import { VerificationController } from '../../src/modules/verification/verification.controller';
 import { LifecycleController } from '../../src/modules/lifecycle/lifecycle.controller';
+import { AdminController } from '../../src/modules/admin/admin.controller';
 
 describe('INT-4: RBAC Completeness - Route-Role Declaration Structural Check', () => {
   const reflector = new Reflector();
@@ -29,6 +30,7 @@ describe('INT-4: RBAC Completeness - Route-Role Declaration Structural Check', (
     ClaimsController,
     VerificationController,
     LifecycleController,
+    AdminController,
   ];
 
   it('every route in registered controllers must explicitly declare @Roles() or @Public()', () => {

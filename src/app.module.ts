@@ -15,6 +15,8 @@ import { MatchingModule } from './modules/matching/matching.module';
 import { ClaimsModule } from './modules/claims/claims.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { LifecycleModule } from './modules/lifecycle/lifecycle.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { LifecycleModule } from './modules/lifecycle/lifecycle.module';
     ClaimsModule,
     VerificationModule,
     LifecycleModule,
+    AuditModule,
+    AdminModule,
     HealthModule,
   ],
 })
