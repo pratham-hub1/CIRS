@@ -460,5 +460,43 @@ describe('ItemsService (Phase 2: FR-6..9, FR-28, INV-DM-1, INV-DM-6)', () => {
         service.getCaseMessages(adminUser, 'CIRS-2026-000001'),
       ).resolves.toEqual([]);
     });
+
+    it('REV-8: surfaces matching engine errors directly without swallowing them', async () => {
+      const mockMatchingService = {
+        runMatchingForItem: jest.fn().mockRejectedValue(new Error('Matching engine cluster down')),
+      };
+
+      const customService = new ItemsService(
+        prisma,
+        tenancyService,
+        mockMatchingService as any,
+        undefined,
+      );
+
+      prisma.item.findUnique.mockResolvedValue(null);
+      prisma.item.create.mockResolvedValue({
+        id: 'item-match-err',
+        caseId: 'CIRS-2026-999999',
+        type: 'LOST',
+        itemName: 'Keys',
+        campusId: 'campus-1',
+        category: 'KEYS',
+        status: 'OPEN',
+      });
+
+      await expect(
+        customService.createItem(mockUser, {
+          type: ItemType.LOST,
+          itemName: 'Keys',
+          category: ItemCategory.KEYS,
+          description: 'Set of house keys with blue keychain',
+          colour: 'Silver',
+          brand: 'Yale',
+          identifyingMarks: 'Blue tag',
+          lastKnownLocation: 'Library',
+          dateLost: '2026-10-16T10:00:00.000Z',
+        }),
+      ).rejects.toThrow('Matching engine cluster down');
+    });
   });
 });

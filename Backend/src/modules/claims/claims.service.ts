@@ -5,7 +5,9 @@ import {
   ForbiddenException,
   ConflictException,
   Logger,
+  Optional,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenancyService } from '../tenancy/tenancy.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -23,6 +25,7 @@ import {
   QuestionSource,
   Role,
   CATEGORY_VERIFICATION_LEVEL_MAP,
+  getCategoryVerificationLevel,
 } from '../../domain/enums';
 import { getVerificationQuestionsForCategory } from '../../domain/verification-questions';
 
@@ -34,6 +37,7 @@ export class ClaimsService {
     private readonly prisma: PrismaService,
     private readonly tenancyService: TenancyService,
     private readonly notificationsService: NotificationsService,
+    @Optional() private readonly configService?: ConfigService,
   ) {}
 
   /**
@@ -91,9 +95,11 @@ export class ClaimsService {
       );
     }
 
-    // FR-16: Risk-based verification level derived from category
-    const verificationLevel =
-      CATEGORY_VERIFICATION_LEVEL_MAP[item.category];
+    // FR-16: Risk-based verification level derived from category (configurable via policy overrides, REV-9)
+    const overrides = this.configService?.get<Record<string, any>>(
+      'policy.categoryVerificationOverrides',
+    );
+    const verificationLevel = getCategoryVerificationLevel(item.category, overrides);
 
     // FR-17: Proposed category-specific questions
     const defaultQuestions = getVerificationQuestionsForCategory(item.category);

@@ -10,7 +10,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       await this.$connect();
       this.logger.log('Prisma connected to PostgreSQL successfully.');
     } catch (error) {
-      this.logger.warn(`Prisma failed to connect to PostgreSQL on startup: ${(error as Error).message}`);
+      this.logger.error(
+        `Prisma failed to connect to PostgreSQL on startup: ${(error as Error).message}`,
+      );
+      throw error;
     }
   }
 

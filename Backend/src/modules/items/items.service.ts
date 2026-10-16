@@ -153,13 +153,9 @@ export class ItemsService {
       });
     }
 
-    // INT-2: Run auto-matching post-commit
+    // INT-2: Run auto-matching post-commit (REV-8: surface errors fail-fast, do not swallow)
     if (this.matchingService) {
-      try {
-        await this.matchingService.runMatchingForItem(item);
-      } catch (err: any) {
-        this.logger.error(`Matching engine error: ${err.message}`, err.stack);
-      }
+      await this.matchingService.runMatchingForItem(item);
     }
 
     return item;

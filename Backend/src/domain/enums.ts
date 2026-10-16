@@ -41,3 +41,14 @@ export const CATEGORY_VERIFICATION_LEVEL_MAP: Record<ItemCategory, VerificationL
   [ItemCategory.KEYS]: VerificationLevel.LOW,
   [ItemCategory.OTHERS]: VerificationLevel.LOW,
 };
+
+export function getCategoryVerificationLevel(
+  category: ItemCategory,
+  overrides?: Record<string, VerificationLevel>,
+): VerificationLevel {
+  if (overrides && overrides[category]) {
+    return overrides[category];
+  }
+  return CATEGORY_VERIFICATION_LEVEL_MAP[category] ?? VerificationLevel.LOW;
+}
+

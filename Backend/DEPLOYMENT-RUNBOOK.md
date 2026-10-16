@@ -66,6 +66,16 @@ All configuration is provided via environment variables. **No secrets are ever h
    ```
    *Note: In accordance with `INV-DM-8` and `07-build-plan.md` §6, migrations are strictly forward-only.*
 
+4. **Enforce DB Role Privileges for Application User (INV-DM-8 / REV-2):**
+   For dedicated application users (e.g. `cirs_app`), ensure only `SELECT` and `INSERT` permissions are granted on `audit_log`:
+   ```sql
+   -- Run as PostgreSQL superuser / owner:
+   REVOKE UPDATE, DELETE, TRUNCATE ON "audit_log" FROM cirs_dev;
+   REVOKE UPDATE, DELETE, TRUNCATE ON "audit_log" FROM PUBLIC;
+   GRANT SELECT, INSERT ON "audit_log" TO cirs_dev;
+   ```
+   *(Note: The database trigger `trg_prevent_audit_log_modification` created by migration also unconditionally rejects all UPDATE/DELETE attempts at the DB engine level).*
+
 ---
 
 ## 4. Starting the Service

@@ -2,8 +2,11 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
   Logger,
+  Optional,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { Channel, NotificationType } from '../../domain/enums';
 
@@ -11,7 +14,10 @@ import { Channel, NotificationType } from '../../domain/enums';
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly configService?: ConfigService,
+  ) {}
 
   /**
    * WF-5: Notification idempotency with deterministic eventKey.
@@ -25,12 +31,20 @@ export class NotificationsService {
   }) {
     const { userId, type, message, eventKey, channel = Channel.IN_APP } = params;
 
+    // Fail-fast if EMAIL channel requested while external email delivery is disabled/out-of-scope (REV-4)
+    if (channel === Channel.EMAIL) {
+      const emailEnabled = this.configService?.get<boolean>('email.enabled') ?? false;
+      if (!emailEnabled) {
+        throw new BadRequestException(
+          'Email channel delivery is explicitly disabled / out-of-scope. Outbound email transport is not configured.',
+        );
+      }
+    }
+
     // Check user notification preferences (FR-30, FR-31)
     const prefs = await this.prisma.notificationPreference.findUnique({
       where: { userId },
     });
-
-    const isEmailEnabled = prefs ? prefs.emailEnabled : true;
 
     // If eventKey is provided, ensure idempotency (WF-5)
     if (eventKey) {
@@ -55,13 +69,6 @@ export class NotificationsService {
           eventKey: eventKey || null,
         },
       });
-
-      // Email channel simulation (FR-30)
-      if (isEmailEnabled) {
-        this.logger.log(
-          `[Email Notification Sent] To User: ${userId} | Type: ${type} | Message: ${message}`,
-        );
-      }
 
       return notification;
     } catch (error: any) {

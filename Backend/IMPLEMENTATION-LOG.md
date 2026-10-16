@@ -207,4 +207,48 @@ This log tracks the phase-by-phase implementation progress of the CIRS backend i
   - `npm run build`: Clean TypeScript compile with 0 errors.
 - **Project Complete:** All milestones M1 through M9 in `07-build-plan.md` §3 successfully delivered and verified.
 
+---
+
+## Review Findings Resolution (REV-1 through REV-10)
+- **Status:** COMPLETED
+- **Findings Addressed:**
+  - **`REV-1` (Fix First - Fail-Fast Secrets):**
+    - Updated `src/common/config/configuration.ts` to strictly throw fatal startup errors if `JWT_ACCESS_SECRET` or `JWT_REFRESH_SECRET` are missing or shorter than 32 characters, or if `DATABASE_URL` is empty. Removed all hardcoded default fallback secrets.
+    - Verified via unit test suite `test/configuration.spec.ts` (6 tests passing).
+  - **`REV-2` (Enforce INV-DM-8 at DB Layer):**
+    - Created database migration `20261016100000_rev2_rev3_audit_append_only_and_claim_composite_fk`:
+      - Added PostgreSQL trigger `trg_prevent_audit_log_modification` that unconditionally raises an exception on any `UPDATE` or `DELETE` attempt on `audit_log`.
+      - Executed `REVOKE UPDATE, DELETE, TRUNCATE ON TABLE "audit_log" FROM PUBLIC`.
+    - Documented explicit database application role permission configuration in `DEPLOYMENT-RUNBOOK.md`.
+  - **`REV-3` (Composite FK on Claim for INV-DM-2):**
+    - Added composite foreign key constraint `ALTER TABLE "claim" ADD CONSTRAINT "claim_itemId_itemType_fkey" FOREIGN KEY ("itemId", "itemType") REFERENCES "item"("id", "type")` in the migration.
+    - Guarantees at the database schema level that claims can strictly only reference items with `type = 'FOUND'`.
+  - **`REV-4` (Email Channel Delivery & Disablement):**
+    - Removed the misleading console log stub (`[Email Notification Sent]`) that simulated email sending without an active transport.
+    - Added explicit `email.enabled` configuration. In `NotificationsService`, any call with `channel = Channel.EMAIL` strictly fails fast with `BadRequestException` if external email delivery is disabled/unconfigured.
+    - Verified via unit test in `test/notifications.service.spec.ts`.
+  - **`REV-5` (GitHub Actions CI Workflow):**
+    - Added `.github/workflows/ci.yml` at repository root running on Node 22 (`ubuntu-latest`).
+    - Configured automated execution of `npm ci`, `npm run prisma:generate`, `npm run build`, `npm test`, and `npm run check:ci` on PRs and merges to `main` and `master`.
+  - **`REV-6` (INT-4 Dynamic Route & Controller Discovery):**
+    - Refactored `test/structural/int4-route-role.spec.ts` from a static array to dynamic runtime enumeration using NestJS `ModulesContainer` from `AppModule`.
+    - Guarantees that any newly created controller cannot escape `@Roles()` or `@Public()` structural validation.
+  - **`REV-7` (Prisma Fail-Fast Startup Connection):**
+    - Updated `PrismaService.onModuleInit()` to log and re-throw `$connect()` errors instead of catching and swallowing them with `logger.warn`.
+    - Added unit test in `test/prisma.service.spec.ts` verifying immediate failure on DB refusal.
+  - **`REV-8` (Surface Matching Engine Errors):**
+    - In `ItemsService.createItem()`, removed the error-swallowing try/catch block around `matchingService.runMatchingForItem(item)`. Matching engine errors are surfaced fail-fast to the caller and logging pipeline.
+    - Added unit test in `test/items.service.spec.ts` verifying error propagation.
+  - **`REV-9` (Configurable Policy Parameters & Confirmation):**
+    - Kept retention window (`RETENTION_WINDOW_DAYS`, default 365), rate limit thresholds (`RATE_LIMIT_TTL`, `RATE_LIMIT_MAX`), and category-to-verification-level mapping (`CATEGORY_VERIFICATION_OVERRIDES`) fully configurable via environment variables and `AppConfig.policy`.
+    - Created `getCategoryVerificationLevel(category, overrides)` helper and integrated into `ClaimsService.createClaim()`.
+  - **`REV-10` (Node Version Check & Full Suite Verification):**
+    - Verified host environment runs Node.js `v24.16.0` (≥22).
+    - Executed full test and build suite:
+      - `npm run build`: Exit code 0 (clean TypeScript build).
+      - `npm test`: 22 test suites passed (143/143 tests passing).
+      - `npm run check:ci`: 3 structural check suites passed (6/6 tests passing for `INT-4`, `INT-5`, `INT-6`).
+      - `npm run test:e2e`: Passed.
+
+
 

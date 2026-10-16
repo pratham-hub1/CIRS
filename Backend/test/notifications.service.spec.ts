@@ -71,6 +71,19 @@ describe('NotificationsService (Phase 4: WF-5, FR-29..31)', () => {
       expect(res!.id).toBe('notif-existing');
       expect(prisma.notification.create).not.toHaveBeenCalled();
     });
+
+    it('REV-4: fails fast when EMAIL channel requested but email delivery is disabled', async () => {
+      prisma.notificationPreference.findUnique.mockResolvedValue({ emailEnabled: true });
+
+      await expect(
+        service.notify({
+          userId: 'user-1',
+          type: NotificationType.REPORT_SUBMITTED,
+          message: 'Report created',
+          channel: 'EMAIL' as any,
+        }),
+      ).rejects.toThrow('Email channel delivery is explicitly disabled / out-of-scope');
+    });
   });
 
   describe('Read Status Management', () => {

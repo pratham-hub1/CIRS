@@ -1,37 +1,41 @@
-import { Reflector } from '@nestjs/core';
+import { Reflector, ModulesContainer } from '@nestjs/core';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppModule } from '../../src/app.module';
+import { PrismaService } from '../../src/modules/prisma/prisma.service';
 import { ROLES_KEY } from '../../src/common/decorators/roles.decorator';
 import { IS_PUBLIC_KEY } from '../../src/common/decorators/public.decorator';
-import { HealthController } from '../../src/modules/health/health.controller';
-import { AuthController } from '../../src/modules/auth/auth.controller';
-import { UsersController } from '../../src/modules/users/users.controller';
-import { FilesController } from '../../src/modules/files/files.controller';
-import { ItemsController } from '../../src/modules/items/items.controller';
-import { SearchController } from '../../src/modules/search/search.controller';
-import { NotificationsController } from '../../src/modules/notifications/notifications.controller';
-import { MatchingController } from '../../src/modules/matching/matching.controller';
-import { ClaimsController } from '../../src/modules/claims/claims.controller';
-import { VerificationController } from '../../src/modules/verification/verification.controller';
-import { LifecycleController } from '../../src/modules/lifecycle/lifecycle.controller';
-import { AdminController } from '../../src/modules/admin/admin.controller';
 
 describe('INT-4: RBAC Completeness - Route-Role Declaration Structural Check', () => {
   const reflector = new Reflector();
+  let controllers: any[] = [];
 
-  // All controllers registered in the application
-  const controllers = [
-    HealthController,
-    AuthController,
-    UsersController,
-    FilesController,
-    ItemsController,
-    SearchController,
-    NotificationsController,
-    MatchingController,
-    ClaimsController,
-    VerificationController,
-    LifecycleController,
-    AdminController,
-  ];
+  beforeAll(async () => {
+    // REV-6: Dynamically enumerate all controllers from the Nest route/module registry
+    // Overrides PrismaService so no live DB connection is needed during structural scanning
+    const moduleRef: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    })
+      .overrideProvider(PrismaService)
+      .useValue({})
+      .compile();
+
+    const modulesContainer = moduleRef.get(ModulesContainer);
+    for (const module of modulesContainer.values()) {
+      for (const wrapper of module.controllers.values()) {
+        if (wrapper.metatype && !controllers.includes(wrapper.metatype)) {
+          controllers.push(wrapper.metatype);
+        }
+      }
+    }
+  });
+
+  it('REV-6: dynamically discovers all controllers from Nest application registry', () => {
+    expect(controllers.length).toBeGreaterThan(0);
+    const controllerNames = controllers.map((c) => c.name);
+    expect(controllerNames).toContain('AuthController');
+    expect(controllerNames).toContain('ItemsController');
+    expect(controllerNames).toContain('AdminController');
+  });
 
   it('every route in registered controllers must explicitly declare @Roles() or @Public()', () => {
     const violations: string[] = [];
