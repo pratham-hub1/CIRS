@@ -10,6 +10,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const adapter = new FastifyAdapter({
+    trustProxy: true,
     logger: false, // Let nestjs-pino handle HTTP logging
   });
 
@@ -19,6 +20,14 @@ async function bootstrap() {
 
   const pinoLogger = app.get(Logger);
   app.useLogger(pinoLogger);
+
+  // Enable CORS for frontend connectivity (including local dev and Cloudflare tunnels)
+  app.enableCors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  });
 
   // Register Fastify plugins
   await app.register(fastifyCookie as any);
