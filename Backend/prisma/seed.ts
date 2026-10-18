@@ -6,27 +6,38 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding CIRS database...');
 
-  // 1. Seed Campus (ID: campus-1)
+  // 1. Seed Real Campus with proper natural identifier (campus-gsfc-main)
   const campus = await prisma.campus.upsert({
-    where: { id: 'campus-1' },
+    where: { id: 'campus-gsfc-main' },
     update: {},
     create: {
-      id: 'campus-1',
+      id: 'campus-gsfc-main',
       name: 'GSFC University Main Campus',
       code: 'GSFCU-MAIN',
     },
   });
   console.log(`✓ Seeded Campus: ${campus.name} (id: ${campus.id})`);
 
-  // 2. Seed Department
-  const department = await prisma.department.upsert({
-    where: { id: 'dept-cse' },
+  // Also seed legacy/test alias campus-1 for backward compatibility
+  await prisma.campus.upsert({
+    where: { id: 'campus-1' },
     update: {},
     create: {
-      id: 'dept-cse',
+      id: 'campus-1',
+      name: 'GSFC University Technology Campus',
+      code: 'GSFCU-TECH',
+    },
+  });
+
+  // 2. Seed Real Department
+  const department = await prisma.department.upsert({
+    where: { id: 'dept-sot-cse' },
+    update: {},
+    create: {
+      id: 'dept-sot-cse',
       campusId: campus.id,
-      name: 'Computer Science & Engineering',
-      code: 'CSE',
+      name: 'School of Technology - Computer Science & Engineering',
+      code: 'SOT-CSE',
     },
   });
   console.log(`✓ Seeded Department: ${department.name} (id: ${department.id})`);
@@ -99,7 +110,7 @@ async function main() {
   });
   console.log(`✓ Seeded Student User: ${studentUser.email} (Role: ${studentUser.role})`);
 
-  // 7. Seed Explicit Sample Found Item
+  // 7. Seed Explicit Sample Found Item (identified as seed data)
   const sampleItem = await prisma.item.upsert({
     where: { caseId: 'CIRS-2026-000001' },
     update: {},
@@ -123,10 +134,10 @@ async function main() {
   console.log(`✓ Seeded Sample Item: ${sampleItem.caseId} - ${sampleItem.itemName}`);
 
   console.log('\n--- Seed Complete ---');
-  console.log('Campus ID:     campus-1');
-  console.log('Department ID: dept-cse');
-  console.log('Student User:  student.test@gsfcuniversity.ac.in / Password123!');
-  console.log('Admin User:    admin@gsfcuniversity.ac.in / Password123!');
+  console.log('Real Campus ID:     campus-gsfc-main');
+  console.log('Real Department ID: dept-sot-cse');
+  console.log('Student Account:    student.test@gsfcuniversity.ac.in / Password123!');
+  console.log('Admin Account:      admin@gsfcuniversity.ac.in / Password123!');
   console.log('---------------------\n');
 }
 

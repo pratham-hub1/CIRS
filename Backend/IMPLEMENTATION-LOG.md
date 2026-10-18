@@ -280,8 +280,12 @@ This log tracks the phase-by-phase implementation progress of the CIRS backend i
     - Proved that authenticated non-admin users (Role `STUDENT`) receive `403 Forbidden` when attempting to access admin functionality.
   - **CI Environment Fix:**
     - Added `test/setup.ts` and configured `jest.setupFiles` in `package.json` to ensure test suites booting `AppModule` have required environment variables preset.
+  - **Contract Amendment (Public Campus Discovery):**
+    - Per user directive (Option B), implemented public `GET /api/v1/campuses` returning `{ data: [ { id, name, code, departments: [ { id, name, code } ] } ] }` via `CampusesController` and `TenancyService.getPublicCampuses()`.
+    - Added integration test `test/campuses.controller.spec.ts` confirming unauthenticated public discovery.
+    - Updated `prisma/seed.ts` with natural campus ID `campus-gsfc-main` (and legacy alias `campus-1`) and department `dept-sot-cse`.
 - **Tests Run & Results:**
-  - `npm test`: 26 test suites passed (165/165 tests passing).
+  - `npm test`: 27 test suites passed (166/166 tests passing).
   - `npm run check:ci`: 3 structural check suites passed (6/6 tests passing for `INT-4`, `INT-5`, `INT-6`).
   - `npm run test:e2e`: 1 passed.
   - `npm run build`: Clean TypeScript build with 0 errors.

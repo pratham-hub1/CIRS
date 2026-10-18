@@ -39,4 +39,25 @@ export class TenancyService {
       );
     }
   }
+
+  async getPublicCampuses() {
+    const campuses = await this.prisma.campus.findMany({
+      select: {
+        id: true,
+        name: true,
+        code: true,
+        departments: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+          orderBy: { name: 'asc' },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return { data: campuses };
+  }
 }
