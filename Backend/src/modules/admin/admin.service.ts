@@ -17,6 +17,7 @@ import {
 import { CreateStorageLocationDto } from './dto/create-storage-location.dto';
 import { UpdateStorageLocationDto } from './dto/update-storage-location.dto';
 import { AdminItemsQueryDto } from './dto/admin-items-query.dto';
+import { applyCampusScope } from '../../common/repositories/scoped.repository';
 
 @Injectable()
 export class AdminService {
@@ -34,9 +35,7 @@ export class AdminService {
     const limit = query.limit && query.limit > 0 ? query.limit : 50;
     const skip = (page - 1) * limit;
 
-    const where: any = {
-      campusId: adminUser.campusId, // Scoped to admin's campus (INT-6)
-    };
+    const where: any = applyCampusScope(adminUser.campusId, {});
 
     if (query.category) {
       where.category = query.category;
@@ -112,10 +111,9 @@ export class AdminService {
    * List all storage locations in the campus (FR-33).
    */
   async getStorageLocations(adminUser: AuthUser) {
+    const where = applyCampusScope(adminUser.campusId, {});
     return this.prisma.storageLocation.findMany({
-      where: {
-        campusId: adminUser.campusId,
-      },
+      where,
       include: {
         _count: {
           select: { items: true },

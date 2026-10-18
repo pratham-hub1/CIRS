@@ -21,6 +21,7 @@ import {
   NotificationType,
   QuestionSource,
 } from '../../domain/enums';
+import { applyCampusScope } from '../../common/repositories/scoped.repository';
 
 @Injectable()
 export class VerificationService {
@@ -36,9 +37,10 @@ export class VerificationService {
    * List claims for staff review.
    */
   async getClaims(adminUser: AuthUser, status?: ClaimStatus) {
+    const itemWhere = applyCampusScope(adminUser.campusId, {});
     return this.prisma.claim.findMany({
       where: {
-        item: { campusId: adminUser.campusId },
+        item: itemWhere,
         ...(status ? { status } : {}),
       },
       include: {

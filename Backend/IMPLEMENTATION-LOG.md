@@ -290,5 +290,43 @@ This log tracks the phase-by-phase implementation progress of the CIRS backend i
   - `npm run test:e2e`: 1 passed.
   - `npm run build`: Clean TypeScript build with 0 errors.
 
+---
+
+## Account & Tenancy Isolation Verification (Issue 4)
+- **Status:** COMPLETED
+- **What Was Built & Fixed:**
+  - **Identified & Fixed Tenancy Leak Vulnerability (INT-6):**
+    - In Prisma Client, `where: { campusId: undefined }` ignores undefined filters, which would query across all campuses unscoped if a missing or empty `campusId` ever passed into a repository query.
+    - Exported the standalone scoped helper `applyCampusScope<T>(campusId, where)` from `src/common/repositories/scoped.repository.ts` and integrated it into `TenancyService`, `ItemsService` (`getItems`, `getMyItems`), `SearchService` (`getCommunityFeed`, `searchItems`), `AdminService` (`getItems`, `getStorageLocations`), and `VerificationService` (`getClaims`).
+    - The scoped helper strictly validates `campusId` and throws fatal `Error('Tenancy violation: campusId must be provided for scoped queries')` if missing, null, or empty string, completely preventing unscoped fallbacks.
+  - **Comprehensive End-to-End Regression Test Suite:**
+    - Created `test/account-and-tenancy-isolation.spec.ts` (29 automated tests) verifying all isolation properties end-to-end:
+      1. **Per-User Isolation:**
+         - `/items/mine`, `/claims/mine`, `/notifications`, `/saved-searches` return strictly the caller's own records.
+         - `GET /items/:caseId` returns full case details (including serialNumber and reporter email) to the owner, but strictly masked public view (`serializePublicItem`) to non-owners in the same campus (sensitive fields dropped).
+         - Non-owners cannot edit (`PATCH /items/:caseId`), cancel (`POST /items/:caseId/cancel`), or view case messages (`GET /items/:caseId/messages`) -> `403 Forbidden`, no state mutations.
+         - Non-claimants cannot view claim detail (`GET /claims/:id`), withdraw (`POST /claims/:id/withdraw`), answer questions (`POST /claims/:id/answers`), or appeal (`POST /claims/:id/appeals`) -> `403 Forbidden`, no state mutations.
+         - Users cannot mark another user's notifications as read -> `403 Forbidden`, no mutation.
+         - Users cannot delete another user's saved searches -> `403 Forbidden`, no mutation.
+         - Finders cannot claim their own found items -> `400 Bad Request`.
+      2. **Campus (Tenancy) Isolation (INV-DM-7, INT-6):**
+         - Cross-campus item read: User in Campus 2 calling `GET /items/:caseId` for an item in Campus 1 receives `403 Forbidden` (`Tenancy violation: Cross-campus access is forbidden`).
+         - Cross-campus feed scoping: `GET /feed` for Campus 1 returns only Campus 1 items; Campus 2 items are excluded.
+         - Cross-campus claims: User in Campus 2 attempting to claim Campus 1 item receives `403 Forbidden`.
+         - Storage locations: Admin in Campus 1 receives only Campus 1 storage locations; Admin in Campus 2 receives `403 Forbidden` when attempting to modify Campus 1 storage location.
+         - Admin items: Admin in Campus 2 receives strictly Campus 2 items.
+         - Scoped helper fail-fast: `applyCampusScope` throws on empty, whitespace, or undefined `campusId`.
+      3. **Auth Boundary:**
+         - Unauthenticated requests to `/items/mine`, `/claims/mine`, `/admin/items` return `401 Unauthorized`.
+         - Non-admin (student) requests to `/admin/items` and `/admin/storage-locations` return `403 Forbidden`.
+      4. **Tie to Issue #2 (Distinct Accounts):**
+         - A freshly registered student account starts with zero initial items, claims, notifications, and saved searches (`[]`), directly disproving "same data after registering".
+- **Tests Run & Results:**
+  - `npm test`: 28 test suites passed (195/195 tests passing).
+  - `npm run check:ci`: 3 structural check suites passed (6/6 tests passing for `INT-4`, `INT-5`, `INT-6`).
+  - `npm run test:e2e`: Passed (`/health` returns status `ok`).
+  - `npm run build`: Clean TypeScript build with 0 errors.
+
+
 
 

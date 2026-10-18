@@ -14,6 +14,7 @@ import {
   PublicItemDto,
   serializePublicItem,
 } from '../../common/serializers/public-item.serializer';
+import { applyCampusScope } from '../../common/repositories/scoped.repository';
 
 @Injectable()
 export class SearchService {
@@ -34,8 +35,7 @@ export class SearchService {
   ): Promise<{ data: PublicItemDto[]; nextCursor?: string }> {
     const limit = Math.min(query.limit || 20, 100);
 
-    const where: any = {
-      campusId: user.campusId,
+    const where: any = applyCampusScope(user.campusId, {
       status: {
         in: [
           ItemStatus.LOST_REPORTED,
@@ -44,7 +44,7 @@ export class SearchService {
         ],
       },
       archivedAt: null,
-    };
+    });
 
     if (query.category) where.category = query.category;
     if (query.type) where.type = query.type;
@@ -89,10 +89,8 @@ export class SearchService {
     query: SearchQueryDto,
   ): Promise<{ data: PublicItemDto[]; nextCursor?: string }> {
     const limit = Math.min(query.limit || 20, 100);
+    const where: any = applyCampusScope(user.campusId, {});
 
-    const where: any = {
-      campusId: user.campusId,
-    };
 
     // Public users cannot search archived cases unless staff
     if (user.role !== Role.ADMIN) {

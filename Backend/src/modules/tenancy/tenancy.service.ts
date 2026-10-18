@@ -1,9 +1,17 @@
 import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { applyCampusScope } from '../../common/repositories/scoped.repository';
 
 @Injectable()
 export class TenancyService {
   constructor(private readonly prisma: PrismaService) {}
+
+  applyCampusScope<T extends Record<string, any>>(
+    campusId: string,
+    where: T = {} as T,
+  ): T & { campusId: string } {
+    return applyCampusScope(campusId, where);
+  }
 
   async validateCampus(campusId: string) {
     const campus = await this.prisma.campus.findUnique({
