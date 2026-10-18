@@ -4,6 +4,7 @@ import {
   NotFoundException,
   ForbiddenException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,11 +13,11 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { AuthUser } from '../../common/interfaces/auth-user.interface';
 import { ItemStatus, ItemType, Role } from '../../domain/enums';
-import { Optional } from '@nestjs/common';
 import { serializePublicItem } from '../../common/serializers/public-item.serializer';
 import { MatchingService } from '../matching/matching.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../../domain/enums';
+import { applyCampusScope } from '../../common/repositories/scoped.repository';
 
 @Injectable()
 export class ItemsService {
@@ -173,9 +174,7 @@ export class ItemsService {
       search?: string;
     } = {},
   ) {
-    const where: any = {
-      campusId: user.campusId,
-    };
+    const where: any = applyCampusScope(user.campusId, {});
 
     if (options.category) where.category = options.category;
     if (options.status) where.status = options.status;
@@ -204,11 +203,12 @@ export class ItemsService {
    * FR-28: Fetch my active cases.
    */
   async getMyItems(user: AuthUser) {
+    const where = applyCampusScope(user.campusId, {
+      reporterId: user.id,
+    });
+
     return this.prisma.item.findMany({
-      where: {
-        reporterId: user.id,
-        campusId: user.campusId,
-      },
+      where,
       include: {
         images: true,
         storageLocation: true,

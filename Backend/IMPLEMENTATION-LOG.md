@@ -250,5 +250,83 @@ This log tracks the phase-by-phase implementation progress of the CIRS backend i
       - `npm run check:ci`: 3 structural check suites passed (6/6 tests passing for `INT-4`, `INT-5`, `INT-6`).
       - `npm run test:e2e`: Passed.
 
+---
+
+## Frontend Integration & Verification Fixes
+- **Status:** COMPLETED
+- **Issues Addressed:**
+  - **Issue 1 (Registration Validation & Campus Resolution):**
+    - Updated `TenancyService.validateCampus` and `validateDepartment` to return `400 Bad Request` (`BadRequestException`) with a clear validation error message (`Validation failed: Campus with ID '...' does not exist`) instead of an ambiguous `404 Not Found`.
+    - Identified that the frontend attempted to use `campusId: "campus-1"` before database seed data was present.
+    - Added database seed script `prisma/seed.ts` providing `campus-1` and `dept-cse`.
+  - **Issue 2 (Sample Data & Real Database Verification):**
+    - Created idempotent seed script `prisma/seed.ts` (configured in `package.json` under `scripts.seed` and `prisma.seed`).
+    - Seed script populates:
+      - Campus: `campus-1` (`GSFC University Main Campus`)
+      - Department: `dept-cse` (`Computer Science & Engineering`)
+      - Storage Location: `loc-sec-office` (`SECURITY_OFFICE`)
+      - Student account: `student.test@gsfcuniversity.ac.in` (password `Password123!`, argon2id)
+      - Admin account: `admin@gsfcuniversity.ac.in` (password `Password123!`, argon2id)
+      - Explicit seed item: `CIRS-2026-000001` (`[SEED DATA] Blue Water Bottle`)
+    - Added automated verification test `test/registration-and-feed-evidence.spec.ts` confirming:
+      - Registration creates distinct database records with argon2id hashed passwords.
+      - Login authenticates real credentials and issues unique tokens.
+      - `GET /api/v1/users/me` returns real user database fields.
+      - `GET /api/v1/feed` and search queries query live database rows without hardcoded mock responses.
+  - **Issue 3 (Authentication & Authorization Security Proof):**
+    - Created unit tests `test/jwt-auth.guard.spec.ts` (7 tests) and integration suite `test/security.spec.ts` (8 tests).
+    - Proved that protected routes (`/api/v1/users/me`, `/api/v1/items`, `/api/v1/feed`) reject unauthenticated requests with `401 Unauthorized`.
+    - Proved that unauthenticated requests cannot reach admin endpoints (`/api/v1/admin/analytics`, `/api/v1/admin/items`, `/api/v1/admin/audit-log`).
+    - Proved that authenticated non-admin users (Role `STUDENT`) receive `403 Forbidden` when attempting to access admin functionality.
+  - **CI Environment Fix:**
+    - Added `test/setup.ts` and configured `jest.setupFiles` in `package.json` to ensure test suites booting `AppModule` have required environment variables preset.
+  - **Contract Amendment (Public Campus Discovery):**
+    - Per user directive (Option B), implemented public `GET /api/v1/campuses` returning `{ data: [ { id, name, code, departments: [ { id, name, code } ] } ] }` via `CampusesController` and `TenancyService.getPublicCampuses()`.
+    - Added integration test `test/campuses.controller.spec.ts` confirming unauthenticated public discovery.
+    - Updated `prisma/seed.ts` with natural campus ID `campus-gsfc-main` (and legacy alias `campus-1`) and department `dept-sot-cse`.
+- **Tests Run & Results:**
+  - `npm test`: 27 test suites passed (166/166 tests passing).
+  - `npm run check:ci`: 3 structural check suites passed (6/6 tests passing for `INT-4`, `INT-5`, `INT-6`).
+  - `npm run test:e2e`: 1 passed.
+  - `npm run build`: Clean TypeScript build with 0 errors.
+
+---
+
+## Account & Tenancy Isolation Verification (Issue 4)
+- **Status:** COMPLETED
+- **What Was Built & Fixed:**
+  - **Identified & Fixed Tenancy Leak Vulnerability (INT-6):**
+    - In Prisma Client, `where: { campusId: undefined }` ignores undefined filters, which would query across all campuses unscoped if a missing or empty `campusId` ever passed into a repository query.
+    - Exported the standalone scoped helper `applyCampusScope<T>(campusId, where)` from `src/common/repositories/scoped.repository.ts` and integrated it into `TenancyService`, `ItemsService` (`getItems`, `getMyItems`), `SearchService` (`getCommunityFeed`, `searchItems`), `AdminService` (`getItems`, `getStorageLocations`), and `VerificationService` (`getClaims`).
+    - The scoped helper strictly validates `campusId` and throws fatal `Error('Tenancy violation: campusId must be provided for scoped queries')` if missing, null, or empty string, completely preventing unscoped fallbacks.
+  - **Comprehensive End-to-End Regression Test Suite:**
+    - Created `test/account-and-tenancy-isolation.spec.ts` (29 automated tests) verifying all isolation properties end-to-end:
+      1. **Per-User Isolation:**
+         - `/items/mine`, `/claims/mine`, `/notifications`, `/saved-searches` return strictly the caller's own records.
+         - `GET /items/:caseId` returns full case details (including serialNumber and reporter email) to the owner, but strictly masked public view (`serializePublicItem`) to non-owners in the same campus (sensitive fields dropped).
+         - Non-owners cannot edit (`PATCH /items/:caseId`), cancel (`POST /items/:caseId/cancel`), or view case messages (`GET /items/:caseId/messages`) -> `403 Forbidden`, no state mutations.
+         - Non-claimants cannot view claim detail (`GET /claims/:id`), withdraw (`POST /claims/:id/withdraw`), answer questions (`POST /claims/:id/answers`), or appeal (`POST /claims/:id/appeals`) -> `403 Forbidden`, no state mutations.
+         - Users cannot mark another user's notifications as read -> `403 Forbidden`, no mutation.
+         - Users cannot delete another user's saved searches -> `403 Forbidden`, no mutation.
+         - Finders cannot claim their own found items -> `400 Bad Request`.
+      2. **Campus (Tenancy) Isolation (INV-DM-7, INT-6):**
+         - Cross-campus item read: User in Campus 2 calling `GET /items/:caseId` for an item in Campus 1 receives `403 Forbidden` (`Tenancy violation: Cross-campus access is forbidden`).
+         - Cross-campus feed scoping: `GET /feed` for Campus 1 returns only Campus 1 items; Campus 2 items are excluded.
+         - Cross-campus claims: User in Campus 2 attempting to claim Campus 1 item receives `403 Forbidden`.
+         - Storage locations: Admin in Campus 1 receives only Campus 1 storage locations; Admin in Campus 2 receives `403 Forbidden` when attempting to modify Campus 1 storage location.
+         - Admin items: Admin in Campus 2 receives strictly Campus 2 items.
+         - Scoped helper fail-fast: `applyCampusScope` throws on empty, whitespace, or undefined `campusId`.
+      3. **Auth Boundary:**
+         - Unauthenticated requests to `/items/mine`, `/claims/mine`, `/admin/items` return `401 Unauthorized`.
+         - Non-admin (student) requests to `/admin/items` and `/admin/storage-locations` return `403 Forbidden`.
+      4. **Tie to Issue #2 (Distinct Accounts):**
+         - A freshly registered student account starts with zero initial items, claims, notifications, and saved searches (`[]`), directly disproving "same data after registering".
+- **Tests Run & Results:**
+  - `npm test`: 28 test suites passed (195/195 tests passing).
+  - `npm run check:ci`: 3 structural check suites passed (6/6 tests passing for `INT-4`, `INT-5`, `INT-6`).
+  - `npm run test:e2e`: Passed (`/health` returns status `ok`).
+  - `npm run build`: Clean TypeScript build with 0 errors.
+
+
 
 

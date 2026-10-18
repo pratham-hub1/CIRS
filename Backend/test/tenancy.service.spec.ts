@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, BadRequestException } from '@nestjs/common';
 import { TenancyService } from '../src/modules/tenancy/tenancy.service';
 
 describe('TenancyService (FR-35, INT-6, INV-DM-7)', () => {
@@ -23,10 +23,10 @@ describe('TenancyService (FR-35, INT-6, INV-DM-7)', () => {
     expect(result.id).toBe('campus-1');
   });
 
-  it('throws NotFoundException when campus does not exist', async () => {
+  it('throws BadRequestException when campus does not exist', async () => {
     prisma.campus.findUnique.mockResolvedValue(null);
     await expect(service.validateCampus('campus-unknown')).rejects.toThrow(
-      NotFoundException,
+      BadRequestException,
     );
   });
 
@@ -41,11 +41,11 @@ describe('TenancyService (FR-35, INT-6, INV-DM-7)', () => {
     expect(result.id).toBe('dept-1');
   });
 
-  it('throws NotFoundException if department does not belong to the campus', async () => {
+  it('throws BadRequestException if department does not belong to the campus', async () => {
     prisma.department.findFirst.mockResolvedValue(null);
     await expect(
       service.validateDepartment('campus-1', 'dept-wrong'),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('allows same-campus access assertion', () => {
