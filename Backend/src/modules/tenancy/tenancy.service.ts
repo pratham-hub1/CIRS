@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -10,7 +10,9 @@ export class TenancyService {
       where: { id: campusId },
     });
     if (!campus) {
-      throw new NotFoundException(`Campus with ID ${campusId} not found`);
+      throw new BadRequestException(
+        `Validation failed: Campus with ID '${campusId}' does not exist. Please provide a valid registered campusId.`,
+      );
     }
     return campus;
   }
@@ -23,8 +25,8 @@ export class TenancyService {
       },
     });
     if (!department) {
-      throw new NotFoundException(
-        `Department with ID ${departmentId} does not belong to campus ${campusId}`,
+      throw new BadRequestException(
+        `Validation failed: Department with ID '${departmentId}' does not belong to campus '${campusId}'.`,
       );
     }
     return department;

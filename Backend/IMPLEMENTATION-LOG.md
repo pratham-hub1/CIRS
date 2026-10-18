@@ -250,5 +250,41 @@ This log tracks the phase-by-phase implementation progress of the CIRS backend i
       - `npm run check:ci`: 3 structural check suites passed (6/6 tests passing for `INT-4`, `INT-5`, `INT-6`).
       - `npm run test:e2e`: Passed.
 
+---
+
+## Frontend Integration & Verification Fixes
+- **Status:** COMPLETED
+- **Issues Addressed:**
+  - **Issue 1 (Registration Validation & Campus Resolution):**
+    - Updated `TenancyService.validateCampus` and `validateDepartment` to return `400 Bad Request` (`BadRequestException`) with a clear validation error message (`Validation failed: Campus with ID '...' does not exist`) instead of an ambiguous `404 Not Found`.
+    - Identified that the frontend attempted to use `campusId: "campus-1"` before database seed data was present.
+    - Added database seed script `prisma/seed.ts` providing `campus-1` and `dept-cse`.
+  - **Issue 2 (Sample Data & Real Database Verification):**
+    - Created idempotent seed script `prisma/seed.ts` (configured in `package.json` under `scripts.seed` and `prisma.seed`).
+    - Seed script populates:
+      - Campus: `campus-1` (`GSFC University Main Campus`)
+      - Department: `dept-cse` (`Computer Science & Engineering`)
+      - Storage Location: `loc-sec-office` (`SECURITY_OFFICE`)
+      - Student account: `student.test@gsfcuniversity.ac.in` (password `Password123!`, argon2id)
+      - Admin account: `admin@gsfcuniversity.ac.in` (password `Password123!`, argon2id)
+      - Explicit seed item: `CIRS-2026-000001` (`[SEED DATA] Blue Water Bottle`)
+    - Added automated verification test `test/registration-and-feed-evidence.spec.ts` confirming:
+      - Registration creates distinct database records with argon2id hashed passwords.
+      - Login authenticates real credentials and issues unique tokens.
+      - `GET /api/v1/users/me` returns real user database fields.
+      - `GET /api/v1/feed` and search queries query live database rows without hardcoded mock responses.
+  - **Issue 3 (Authentication & Authorization Security Proof):**
+    - Created unit tests `test/jwt-auth.guard.spec.ts` (7 tests) and integration suite `test/security.spec.ts` (8 tests).
+    - Proved that protected routes (`/api/v1/users/me`, `/api/v1/items`, `/api/v1/feed`) reject unauthenticated requests with `401 Unauthorized`.
+    - Proved that unauthenticated requests cannot reach admin endpoints (`/api/v1/admin/analytics`, `/api/v1/admin/items`, `/api/v1/admin/audit-log`).
+    - Proved that authenticated non-admin users (Role `STUDENT`) receive `403 Forbidden` when attempting to access admin functionality.
+  - **CI Environment Fix:**
+    - Added `test/setup.ts` and configured `jest.setupFiles` in `package.json` to ensure test suites booting `AppModule` have required environment variables preset.
+- **Tests Run & Results:**
+  - `npm test`: 26 test suites passed (165/165 tests passing).
+  - `npm run check:ci`: 3 structural check suites passed (6/6 tests passing for `INT-4`, `INT-5`, `INT-6`).
+  - `npm run test:e2e`: 1 passed.
+  - `npm run build`: Clean TypeScript build with 0 errors.
+
 
 
