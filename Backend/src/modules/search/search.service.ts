@@ -74,7 +74,9 @@ export class SearchService {
     const data = items.map((item) =>
       serializePublicItem({
         ...item,
-        images: item.images.map((img) => img.url),
+        images: item.images.map((img: any) =>
+          img.fileId ? `/api/v1/files/${img.fileId}` : (img.url || `/api/v1/files/${img.id}`),
+        ),
       }),
     );
 
@@ -171,7 +173,9 @@ export class SearchService {
     const data = items.map((item) =>
       serializePublicItem({
         ...item,
-        images: item.images.map((img) => img.url),
+        images: item.images.map((img: any) =>
+          img.fileId ? `/api/v1/files/${img.fileId}` : (img.url || `/api/v1/files/${img.id}`),
+        ),
       }),
     );
 

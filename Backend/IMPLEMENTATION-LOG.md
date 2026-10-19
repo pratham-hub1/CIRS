@@ -327,6 +327,44 @@ This log tracks the phase-by-phase implementation progress of the CIRS backend i
   - `npm run test:e2e`: Passed (`/health` returns status `ok`).
   - `npm run build`: Clean TypeScript build with 0 errors.
 
+---
+
+## File Serving (INV-DM-11) & Storage Locations Access Control
+- **Status:** COMPLETED
+- **What Was Built & Fixed:**
+  1. **First-Class File Entity & Abstract Storage Driver (03 §2.1, INV-DM-11):**
+     - Introduced `File` model and `FileVisibility` enum (`AUTHENTICATED`, `PRIVATE`) in `prisma/schema.prisma`.
+     - Migrated `item_image` and `claim_document` tables to reference `fileId` (foreign key to `file(id)`) instead of raw static URLs. Created migration `20261019120000_add_file_entity_and_visibility` and deployed to PostgreSQL.
+     - Implemented `StorageDriver` interface (`save`, `getStream`, `exists`, `delete`) and `LocalStorageDriver` storing files on disk behind the `STORAGE_DRIVER` injection token (future-ready for S3 without API contract changes).
+     - Upgraded `FilesService` and `FilesController`:
+       - `POST /api/v1/files/upload`: Parses multipart uploads, stores files via `StorageDriver`, creates database `File` row, sets visibility by context (`item_image` → `AUTHENTICATED`; `claim_document` → `PRIVATE`), and returns file references as `/api/v1/files/<fileId>` (never raw paths like `/uploads/...`).
+       - `GET /api/v1/files/:id`: Authenticated streaming endpoint enforcing `INV-DM-11`:
+         - `AUTHENTICATED` files (item images) stream to any authenticated student, faculty, or admin.
+         - `PRIVATE` files (claim documents / ownership proof) stream only to the uploader or staff (ADMIN). Non-owner students receive `403 Forbidden`.
+         - Unauthenticated requests receive `401 Unauthorized`.
+         - Non-existent files receive `404 Not Found`.
+  2. **Storage Locations Access for Found Reports (FR-33):**
+     - Created `StorageLocationsController` and `StorageLocationsModule` mounted at `GET /api/v1/storage-locations` with `@Roles('AUTHENTICATED')`.
+     - Scoped to the caller's campus via `applyCampusScope(user.campusId, {})`, returning `{ id, name }[]` so students and faculty can populate the found report storage location dropdown.
+     - Preserved admin-only CRUD (`GET/POST/PATCH /admin/storage-locations`) with `@Roles(Role.ADMIN)`.
+     - Seeded all 5 storage locations (`SECURITY_OFFICE`, `LIBRARY`, `LABORATORY`, `DEPARTMENT_OFFICE`, `RECEPTION`) for `campus-gsfc-main` and `campus-1` in `prisma/seed.ts`.
+  3. **Items & Claims Integration:**
+     - Updated `ItemsService` to extract `fileId` when creating `ItemImage` records and serialize item images as `/api/v1/files/<fileId>`.
+     - Updated `ClaimsService` to extract `fileId` when creating `ClaimDocument` records and serialize claim documents as `/api/v1/files/<fileId>`.
+     - Updated `SearchService`, `AdminService`, and `VerificationService` to format image and document references as `/api/v1/files/<fileId>`.
+- **Contracts Satisfied:**
+  - `INV-DM-11` (Stored files served strictly per their visibility)
+  - `INT-4` (RBAC completeness verified across all registered controllers including `StorageLocationsController` and `FilesController`)
+  - `INT-5` (Public DTO whitelist and privacy masking)
+  - `INT-6` (Tenancy isolation on storage locations)
+  - `FR-33` (Storage locations listing and campus scoping)
+- **Tests Run & Results:**
+  - `test/file-serving-and-storage-locations.spec.ts`: 9/9 tests passed (storage locations dropdown, unauthenticated 401, admin CRUD 403 for student, authenticated file streaming, private file owner/admin access, private file non-owner 403).
+  - `test/files.service.spec.ts`: 9/9 tests passed (file validation, size limits, visibility assignment, streaming access checks).
+  - `npm test`: 29 test suites passed (210/210 tests passing).
+  - `npm run check:ci`: 3 structural test suites passed (6/6 tests passing for `INT-4`, `INT-5`, `INT-6`).
+  - `npm run build`: Clean TypeScript build with 0 errors.
+
 
 
 

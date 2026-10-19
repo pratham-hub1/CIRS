@@ -4,6 +4,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { configuration } from './common/config/configuration';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { HealthModule } from './modules/health/health.module';
+import { StorageLocationsModule } from './modules/storage-locations/storage-locations.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -57,6 +58,7 @@ import { RateLimitGuard } from './modules/rate-limiting/rate-limit.guard';
     AdminModule,
     RateLimitingModule,
     HealthModule,
+    StorageLocationsModule,
   ],
   providers: [
     {
