@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { AppLayout } from './components/layout/AppLayout';
 import { Role } from './types/enums';
+import { useAuth } from './context/AuthContext';
 
 // Auth Pages
 import { Login } from './pages/auth/Login';
@@ -11,6 +12,7 @@ import { Register } from './pages/auth/Register';
 // User / General Pages
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { CommunityFeed } from './pages/feed/CommunityFeed';
+import { SearchBrowse } from './pages/search/SearchBrowse';
 import { ReportItem } from './pages/items/ReportItem';
 import { ItemDetails } from './pages/items/ItemDetails';
 import { MyCases } from './pages/items/MyCases';
@@ -25,12 +27,22 @@ import { AdminOverview } from './pages/admin/AdminOverview';
 import { AdminCases } from './pages/admin/AdminCases';
 import { AdminClaims } from './pages/admin/AdminClaims';
 import { AdminMatches } from './pages/admin/AdminMatches';
+import { AdminFoundItems } from './pages/admin/AdminFoundItems';
 import { AdminStorageLocations } from './pages/admin/AdminStorageLocations';
 import { AdminRedeemToken } from './pages/admin/AdminRedeemToken';
+import { AdminAppeals } from './pages/admin/AdminAppeals';
 import { AdminAuditLog } from './pages/admin/AdminAuditLog';
 
 // Fallback Page
 import { NotFound } from './pages/NotFound';
+
+const RootRedirect: React.FC = () => {
+  const { role } = useAuth();
+  if (role === Role.ADMIN) {
+    return <Navigate to="/admin" replace />;
+  }
+  return <Navigate to="/dashboard" replace />;
+};
 
 export const App: React.FC = () => {
   return (
@@ -47,8 +59,9 @@ export const App: React.FC = () => {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route index element={<RootRedirect />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="search" element={<SearchBrowse />} />
         <Route path="feed" element={<CommunityFeed />} />
         <Route path="report" element={<ReportItem />} />
         <Route path="report/:initialType" element={<ReportItem />} />
@@ -94,6 +107,14 @@ export const App: React.FC = () => {
           }
         />
         <Route
+          path="admin/found-items"
+          element={
+            <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+              <AdminFoundItems />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="admin/storage"
           element={
             <ProtectedRoute allowedRoles={[Role.ADMIN]}>
@@ -106,6 +127,22 @@ export const App: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={[Role.ADMIN]}>
               <AdminRedeemToken />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/appeals"
+          element={
+            <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+              <AdminAppeals />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/analytics"
+          element={
+            <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+              <AdminOverview />
             </ProtectedRoute>
           }
         />

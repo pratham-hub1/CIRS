@@ -26,7 +26,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
   }
 
   if (allowedRoles && role && !allowedRoles.includes(role)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={role === Role.ADMIN ? '/admin' : '/dashboard'} replace />;
   }
 
   return children ? <>{children}</> : null;

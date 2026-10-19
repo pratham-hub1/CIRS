@@ -9,6 +9,7 @@ import {
   CLAIM_STATUS_LABELS,
   CATEGORY_LABELS,
   Role,
+  AppealStatus,
 } from '../../types/enums';
 import { cn } from '../../lib/utils';
 
@@ -206,3 +207,33 @@ export const RoleBadge: React.FC<{ role?: Role | null; className?: string }> = (
     </span>
   );
 };
+
+export const AppealStatusBadge: React.FC<{ status: AppealStatus; className?: string }> = ({
+  status,
+  className,
+}) => {
+  let color = 'bg-amber-50 text-amber-700 border-amber-200';
+  let dotColor = 'bg-amber-500';
+
+  if (status === AppealStatus.ACCEPTED) {
+    color = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    dotColor = 'bg-emerald-500';
+  } else if (status === AppealStatus.REJECTED) {
+    color = 'bg-rose-50 text-rose-700 border-rose-200';
+    dotColor = 'bg-rose-500';
+  }
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border shadow-subtle tracking-tight',
+        color,
+        className,
+      )}
+    >
+      <span className={cn('inline-flex rounded-full h-1.5 w-1.5 mr-1.5 shrink-0', dotColor)} />
+      <span>{status === AppealStatus.PENDING ? 'Pending Decision' : status}</span>
+    </span>
+  );
+};
+

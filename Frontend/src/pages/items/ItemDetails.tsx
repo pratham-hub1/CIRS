@@ -79,30 +79,37 @@ export const ItemDetails: React.FC = () => {
       setEditBrand(data.brand);
       setEditColour(data.colour);
 
-      // Load case messages and matches in parallel
-      const [msgsRes, matchesRes] = await Promise.allSettled([
-        itemsService.getCaseMessages(caseId),
-        matchingService.getMatchesForCase(caseId),
-      ]);
-      if (msgsRes.status === 'fulfilled') setMessages(msgsRes.value || []);
-      if (matchesRes.status === 'fulfilled') setMatches(matchesRes.value || []);
+      // Load case messages and matches in parallel only if user is owner or admin
+      const hasPrivilegedAccess = Boolean(
+        (user && (data as Item).reporterId === user.id) || isAdmin,
+      );
+      if (hasPrivilegedAccess) {
+        const [msgsRes, matchesRes] = await Promise.allSettled([
+          itemsService.getCaseMessages(caseId),
+          matchingService.getMatchesForCase(caseId),
+        ]);
+        if (msgsRes.status === 'fulfilled') setMessages(msgsRes.value || []);
+        if (matchesRes.status === 'fulfilled') setMatches(matchesRes.value || []);
+      }
     } catch (err: any) {
       console.error('Error loading case:', err);
       error(err.message || 'Failed to load case details');
     } finally {
       setIsLoading(false);
     }
-  }, [caseId, error]);
+  }, [caseId, error, user, isAdmin]);
 
   useEffect(() => {
     loadCase();
   }, [loadCase]);
 
-  const isOwner = user && item && item.reporterId === user.id;
+  const isOwner = Boolean(user && item && item.reporterId === user.id);
+  const canViewPrivateDetails = Boolean(isOwner || isAdmin);
   const isEditable =
     isOwner && (item?.status === ItemStatus.LOST_REPORTED || item?.status === ItemStatus.FOUND);
   const canClaim =
     !isOwner &&
+    !isAdmin &&
     item?.type === ItemType.FOUND &&
     item?.status !== ItemStatus.RETURNED &&
     item?.status !== ItemStatus.ARCHIVED &&
@@ -440,7 +447,9 @@ export const ItemDetails: React.FC = () => {
                   Serial Number
                 </span>
                 <span className="font-mono font-bold text-slate-800 mt-1 block">
-                  {item.serialNumber || 'N/A'}
+                  {canViewPrivateDetails
+                    ? item.serialNumber || 'N/A'
+                    : '•••••••• (Verification required)'}
                 </span>
               </div>
               <div className="col-span-2 sm:col-span-3 pt-3 border-t border-slate-200/60">
@@ -448,7 +457,9 @@ export const ItemDetails: React.FC = () => {
                   Identifying Marks & Features
                 </span>
                 <span className="text-slate-800 mt-1 block leading-relaxed font-medium">
-                  {item.identifyingMarks || 'None stated'}
+                  {canViewPrivateDetails
+                    ? item.identifyingMarks || 'None stated'
+                    : '•••••••• (Hidden for anti-fraud security. You will be asked about distinguishing features during ownership verification.)'}
                 </span>
               </div>
             </div>
@@ -486,8 +497,8 @@ export const ItemDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Candidate Matches Section */}
-      {matches.length > 0 && (
+      {/* Candidate Matches Section (Private to owner & staff) */}
+      {canViewPrivateDetails && matches.length > 0 && (
         <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900 flex items-center">
@@ -555,93 +566,95 @@ export const ItemDetails: React.FC = () => {
         </div>
       )}
 
-      {/* Staff-mediated Case Messages Thread */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle space-y-4">
-        <div>
-          <h2 className="text-base font-bold text-slate-900 flex items-center">
-            <MessageSquare className="w-4 h-4 mr-2 text-brand-600" />
-            Official Security Communications
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5 font-normal">
-            Encrypted staff channel for this case. Direct handover coordination is mediated by campus security officers.
-          </p>
-        </div>
+      {/* Staff-mediated Case Messages Thread (Private to owner & staff) */}
+      {canViewPrivateDetails && (
+        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle space-y-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 flex items-center">
+              <MessageSquare className="w-4 h-4 mr-2 text-brand-600" />
+              Official Security Communications
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5 font-normal">
+              Encrypted staff channel for this case. Direct handover coordination is mediated by campus security officers.
+            </p>
+          </div>
 
-        {/* Messages List */}
-        <div className="space-y-3 max-h-80 overflow-y-auto p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 scrollbar-thin">
-          {messages.length === 0 ? (
-            <div className="text-center py-6 text-slate-400">
-              <MessageSquare className="w-8 h-8 mx-auto mb-1 opacity-40" />
-              <p className="text-xs font-medium">No messages posted yet for this case.</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">
-                Post an inquiry or update below to alert security staff.
-              </p>
-            </div>
-          ) : (
-            messages.map((msg) => {
-              const isStaff = msg.sender?.role === Role.ADMIN;
-              const isCurrentUser = user && msg.senderId === user.id;
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}
-                >
-                  <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mb-1 px-1">
-                    <span className="font-bold text-slate-700">
-                      {isCurrentUser ? 'You' : msg.sender?.name || 'Member'}
-                    </span>
-                    {isStaff && (
-                      <span className="px-1.5 py-0.2 rounded text-[9px] bg-brand-100 text-brand-700 font-bold uppercase">
-                        Staff
-                      </span>
-                    )}
-                    <span>•</span>
-                    <span>
-                      {new Date(msg.createdAt).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  </div>
+          {/* Messages List */}
+          <div className="space-y-3 max-h-80 overflow-y-auto p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 scrollbar-thin">
+            {messages.length === 0 ? (
+              <div className="text-center py-6 text-slate-400">
+                <MessageSquare className="w-8 h-8 mx-auto mb-1 opacity-40" />
+                <p className="text-xs font-medium">No messages posted yet for this case.</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  Post an inquiry or update below to alert security staff.
+                </p>
+              </div>
+            ) : (
+              messages.map((msg) => {
+                const isStaff = msg.sender?.role === Role.ADMIN;
+                const isCurrentUser = user && msg.senderId === user.id;
+                return (
                   <div
-                    className={`max-w-md p-3 rounded-2xl text-xs leading-relaxed ${
-                      isCurrentUser
-                        ? 'bg-brand-600 text-white rounded-tr-none shadow-subtle'
-                        : isStaff
-                        ? 'bg-brand-50 text-brand-950 border border-brand-200 rounded-tl-none font-medium'
-                        : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none shadow-subtle'
-                    }`}
+                    key={msg.id}
+                    className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}
                   >
-                    {msg.body}
+                    <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mb-1 px-1">
+                      <span className="font-bold text-slate-700">
+                        {isCurrentUser ? 'You' : msg.sender?.name || 'Member'}
+                      </span>
+                      {isStaff && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-brand-100 text-brand-700 font-bold uppercase">
+                          Staff
+                        </span>
+                      )}
+                      <span>•</span>
+                      <span>
+                        {new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                    <div
+                      className={`max-w-md p-3 rounded-2xl text-xs leading-relaxed ${
+                        isCurrentUser
+                          ? 'bg-brand-600 text-white rounded-tr-none shadow-subtle'
+                          : isStaff
+                          ? 'bg-brand-50 text-brand-950 border border-brand-200 rounded-tl-none font-medium'
+                          : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none shadow-subtle'
+                      }`}
+                    >
+                      {msg.body}
+                    </div>
                   </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+                );
+              })
+            )}
+          </div>
 
-        {/* Message Input */}
-        <form onSubmit={handleSendMessage} className="flex gap-2.5 pt-1">
-          <input
-            type="text"
-            required
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message or inquiry to campus security officers..."
-            className="flex-1 px-4 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
-          />
-          <Button
-            type="submit"
-            variant="primary"
-            size="sm"
-            isLoading={isSendingMessage}
-            className="px-5"
-          >
-            <Send className="w-3.5 h-3.5 mr-1.5" />
-            Send
-          </Button>
-        </form>
-      </div>
+          {/* Message Input */}
+          <form onSubmit={handleSendMessage} className="flex gap-2.5 pt-1">
+            <input
+              type="text"
+              required
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message or inquiry to campus security officers..."
+              className="flex-1 px-4 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+            />
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              isLoading={isSendingMessage}
+              className="px-5"
+            >
+              <Send className="w-3.5 h-3.5 mr-1.5" />
+              Send
+            </Button>
+          </form>
+        </div>
+      )}
 
       {/* Image Preview Modal */}
       <AnimatePresence>

@@ -48,7 +48,8 @@ export function getApiConfig() {
  * - Fixes relative paths such as 'uploads/example.jpg' or '/uploads/example.jpg'
  *   to point to the configured backend origin or existing Vite proxy.
  */
-export function resolveImageUrl(url?: string | null): string {
+export function resolveImageUrl(input?: string | { url?: string } | null): string {
+  const url = typeof input === 'object' && input !== null ? input.url : input;
   if (!url || typeof url !== 'string') return '';
   const trimmed = url.trim();
   if (!trimmed) return '';
