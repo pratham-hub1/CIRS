@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 import { filesService } from '../../services/filesService';
+import { resolveImageUrl } from '../../services/apiClient';
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, filename: string) => void;
@@ -84,9 +85,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
               </div>
             ) : (
               <img
-                src={previewUrl}
+                src={resolveImageUrl(previewUrl)}
                 alt="Upload preview"
                 className="w-12 h-12 object-cover rounded-lg border border-slate-200 flex-shrink-0"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
+                }}
               />
             )}
             <div className="truncate">

@@ -24,7 +24,7 @@ export const notificationsService = {
       }
       throw new Error(`Notification ${id} not found`);
     }
-    return apiClient.post<Notification>(`/notifications/${id}/read`);
+    return apiClient.post<Notification>(`/notifications/${id}/read`, {});
   },
 
   async markAllAsRead(): Promise<{ message?: string }> {
@@ -34,6 +34,6 @@ export const notificationsService = {
       });
       return { message: 'All marked as read' };
     }
-    return apiClient.post<{ message?: string }>('/notifications/read-all');
+    return apiClient.post<{ message?: string }>('/notifications/read-all', {});
   },
 };

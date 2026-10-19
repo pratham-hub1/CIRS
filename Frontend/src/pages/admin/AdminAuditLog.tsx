@@ -2,22 +2,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   History,
   Search,
-  Filter,
   RefreshCw,
   FileCode,
-  ArrowRight,
-  ShieldAlert,
   ChevronDown,
   ChevronRight,
-  UserCheck,
-  Calendar,
-  Layers,
+  ShieldAlert,
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { AuditLogEntry, AuditLogResponse } from '../../types/admin';
 import { RoleBadge } from '../../components/common/Badge';
 import { TableRowSkeleton } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
+import { Button } from '../../components/common/Button';
+import { FadeIn } from '../../components/common/AnimatedTransitions';
 import { useToast } from '../../context/ToastContext';
 
 export const AdminAuditLog: React.FC = () => {
@@ -71,56 +68,64 @@ export const AdminAuditLog: React.FC = () => {
     if (act.includes('OVERRIDE')) return 'bg-rose-100 text-rose-800 border-rose-200';
     if (act.includes('REJECT') || act.includes('CANCEL') || act.includes('DISMISS'))
       return 'bg-red-100 text-red-800 border-red-200';
-    if (act.includes('APPROVE') || act.includes('HANDOVER') || act.includes('RETURN') || act.includes('REDEEM'))
+    if (
+      act.includes('APPROVE') ||
+      act.includes('HANDOVER') ||
+      act.includes('RETURN') ||
+      act.includes('REDEEM')
+    )
       return 'bg-emerald-100 text-emerald-800 border-emerald-200';
     if (act.includes('READY') || act.includes('HOLD') || act.includes('STATUS'))
       return 'bg-amber-100 text-amber-800 border-amber-200';
     if (act.includes('MATCH') || act.includes('CREATE'))
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    return 'bg-gray-100 text-gray-800 border-gray-200';
+      return 'bg-brand-100 text-brand-800 border-brand-200';
+    return 'bg-slate-100 text-slate-800 border-slate-200';
   };
 
   const totalPages = Math.ceil(totalCount / limit) || 1;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <FadeIn className="space-y-6 sm:space-y-8 max-w-7xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/90 pb-5">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-primary-50 rounded-lg text-primary-600">
-              <History className="w-5 h-5" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-              Audit &amp; Chain-of-Custody Log
-            </h1>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200/60 flex items-center">
+              <History className="w-3 h-3 mr-1 text-brand-600" />
+              Security Governance Trail
+            </span>
           </div>
-          <p className="mt-1 text-sm text-gray-500">
-            Append-only, immutable activity log recording all status transitions, verification rulings, handovers, and staff actions.
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Audit &amp; Chain-of-Custody Log
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-slate-500 max-w-xl font-normal">
+            Append-only, immutable security event log recording all custody transitions, verifications, handovers, and staff actions.
           </p>
         </div>
-        <button
+
+        <Button
+          variant="outline"
+          size="sm"
           onClick={fetchLogs}
-          disabled={isLoading}
-          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors self-start sm:self-auto"
+          isLoading={isLoading}
+          className="self-start sm:self-auto"
         >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh Log
-        </button>
+          <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh Log
+        </Button>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3">
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-subtle space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Target ID Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by Target ID / Case ID..."
               value={searchTarget}
               onChange={(e) => setSearchTarget(e.target.value)}
-              className="w-full pl-9 pr-3.5 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
             />
           </div>
 
@@ -131,7 +136,7 @@ export const AdminAuditLog: React.FC = () => {
               setSelectedAction(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 font-sans"
+            className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
           >
             <option value="">All Actions</option>
             <option value="ITEM_CREATED">ITEM_CREATED</option>
@@ -153,7 +158,7 @@ export const AdminAuditLog: React.FC = () => {
               setSelectedTargetType(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 font-sans"
+            className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
           >
             <option value="">All Target Types</option>
             <option value="ITEM">ITEM</option>
@@ -166,33 +171,31 @@ export const AdminAuditLog: React.FC = () => {
       </div>
 
       {/* Audit Log Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-subtle overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-700">
-            <thead className="bg-gray-50/75 text-xs uppercase font-semibold text-gray-500 border-b border-gray-200">
+          <table className="w-full text-left text-xs text-slate-700">
+            <thead className="bg-slate-50/80 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-200/80 tracking-wider">
               <tr>
-                <th className="py-3 px-4 w-10"></th>
-                <th className="py-3 px-4">Timestamp</th>
-                <th className="py-3 px-4">Actor</th>
-                <th className="py-3 px-4">Action</th>
-                <th className="py-3 px-4">Target</th>
-                <th className="py-3 px-4 text-right">State Diff</th>
+                <th className="py-3.5 px-4 w-10"></th>
+                <th className="py-3.5 px-4">Timestamp</th>
+                <th className="py-3.5 px-4">Actor</th>
+                <th className="py-3.5 px-4">Action</th>
+                <th className="py-3.5 px-4">Target</th>
+                <th className="py-3.5 px-4 text-right">Payload</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <>
-                  <TableRowSkeleton columns={6} />
-                  <TableRowSkeleton columns={6} />
                   <TableRowSkeleton columns={6} />
                   <TableRowSkeleton columns={6} />
                   <TableRowSkeleton columns={6} />
                 </>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-400">
+                  <td colSpan={6} className="py-12 text-center text-slate-400">
                     <History className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                    <p className="text-sm font-medium">No audit log entries matching criteria.</p>
+                    <p className="text-xs font-medium">No audit events match current criteria.</p>
                   </td>
                 </tr>
               ) : (
@@ -202,16 +205,20 @@ export const AdminAuditLog: React.FC = () => {
 
                   return (
                     <React.Fragment key={entry.id}>
-                      <tr className={`hover:bg-gray-50/75 transition-colors ${isExpanded ? 'bg-primary-50/20' : ''}`}>
-                        <td className="py-3 px-4 text-center">
+                      <tr
+                        className={`hover:bg-slate-50/60 transition-colors ${
+                          isExpanded ? 'bg-brand-50/20' : ''
+                        }`}
+                      >
+                        <td className="py-3.5 px-4 text-center">
                           {hasDiff ? (
                             <button
                               onClick={() => toggleExpand(entry.id)}
-                              className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                              className="text-slate-400 hover:text-slate-600 focus:outline-none"
                               title="Toggle Details"
                             >
                               {isExpanded ? (
-                                <ChevronDown className="w-4 h-4 text-primary-600" />
+                                <ChevronDown className="w-4 h-4 text-brand-600" />
                               ) : (
                                 <ChevronRight className="w-4 h-4" />
                               )}
@@ -220,56 +227,59 @@ export const AdminAuditLog: React.FC = () => {
                             <span className="w-4 h-4 inline-block" />
                           )}
                         </td>
-                        <td className="py-3 px-4 whitespace-nowrap text-xs text-gray-500 font-mono">
+                        <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-500 font-mono">
                           {new Date(entry.createdAt).toLocaleString(undefined, {
                             dateStyle: 'medium',
                             timeStyle: 'short',
                           })}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3.5 px-4">
                           {entry.actor ? (
                             <div className="flex items-center gap-2">
                               <div>
-                                <span className="font-medium text-gray-900 block text-xs">
+                                <span className="font-bold text-slate-900 block text-xs">
                                   {entry.actor.name}
                                 </span>
-                                <span className="text-[11px] text-gray-500 font-mono">
+                                <span className="text-[11px] text-slate-400 font-mono">
                                   {entry.actor.email}
                                 </span>
                               </div>
                               <RoleBadge role={entry.actor.role} />
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400 italic">SYSTEM AUTOMATION</span>
+                            <span className="text-xs text-slate-400 italic">SYSTEM AUTOMATION</span>
                           )}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3.5 px-4">
                           <span
-                            className={`inline-block px-2 py-0.5 text-xs font-mono font-medium rounded border ${getActionBadgeColor(
-                              entry.action
+                            className={`inline-block px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full border ${getActionBadgeColor(
+                              entry.action,
                             )}`}
                           >
                             {entry.action}
                           </span>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5 text-xs">
-                            <span className="text-gray-500 uppercase font-semibold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded">
+                            <span className="text-slate-500 uppercase font-bold text-[10px] bg-slate-100 px-2 py-0.5 rounded">
                               {entry.targetType}
                             </span>
-                            <span className="font-mono text-gray-800 truncate max-w-[140px]" title={entry.targetId}>
+                            <span
+                              className="font-mono text-slate-800 truncate max-w-[140px] font-medium"
+                              title={entry.targetId}
+                            >
                               {entry.targetId}
                             </span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-right">
+                        <td className="py-3.5 px-4 text-right">
                           {hasDiff && (
                             <button
                               onClick={() => setInspectEntry(entry)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded border border-primary-200 transition-colors"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-lg border border-brand-200 transition-colors"
                             >
                               <FileCode className="w-3.5 h-3.5" />
-                              Inspect Payload
+                              Payload
                             </button>
                           )}
                         </td>
@@ -277,22 +287,24 @@ export const AdminAuditLog: React.FC = () => {
 
                       {/* Inline Expanded Diff Row */}
                       {isExpanded && (
-                        <tr className="bg-gray-50/60">
-                          <td colSpan={6} className="p-4">
+                        <tr className="bg-slate-50/70">
+                          <td colSpan={6} className="p-4 sm:p-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-                              <div className="p-3 bg-white rounded-lg border border-gray-200">
-                                <span className="text-gray-500 font-sans font-semibold block mb-1">
+                              <div className="p-3.5 bg-white rounded-xl border border-slate-200">
+                                <span className="text-slate-500 font-sans font-bold block mb-1 text-[10px] uppercase">
                                   Before Snapshot:
                                 </span>
-                                <pre className="text-gray-700 overflow-x-auto max-h-48 text-[11px] whitespace-pre-wrap">
-                                  {entry.before ? JSON.stringify(entry.before, null, 2) : 'null (Initial Creation)'}
+                                <pre className="text-slate-700 overflow-x-auto max-h-48 text-[11px] whitespace-pre-wrap">
+                                  {entry.before
+                                    ? JSON.stringify(entry.before, null, 2)
+                                    : 'null (Initial Creation)'}
                                 </pre>
                               </div>
-                              <div className="p-3 bg-white rounded-lg border border-gray-200">
-                                <span className="text-gray-500 font-sans font-semibold block mb-1">
+                              <div className="p-3.5 bg-white rounded-xl border border-slate-200">
+                                <span className="text-slate-500 font-sans font-bold block mb-1 text-[10px] uppercase">
                                   After Snapshot:
                                 </span>
-                                <pre className="text-gray-700 overflow-x-auto max-h-48 text-[11px] whitespace-pre-wrap">
+                                <pre className="text-slate-700 overflow-x-auto max-h-48 text-[11px] whitespace-pre-wrap">
                                   {entry.after ? JSON.stringify(entry.after, null, 2) : 'null (Deleted)'}
                                 </pre>
                               </div>
@@ -309,16 +321,16 @@ export const AdminAuditLog: React.FC = () => {
         </div>
 
         {/* Pagination Footer */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
+        <div className="p-4 border-t border-slate-100 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 font-medium">
           <div>
-            Showing <span className="font-semibold">{logs.length}</span> of{' '}
-            <span className="font-semibold">{totalCount}</span> logged events
+            Showing <span className="font-bold text-slate-800">{logs.length}</span> of{' '}
+            <span className="font-bold text-slate-800">{totalCount}</span> logged events
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage <= 1 || isLoading}
-              className="px-3 py-1.5 bg-white border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-subtle"
             >
               Previous
             </button>
@@ -328,7 +340,7 @@ export const AdminAuditLog: React.FC = () => {
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage >= totalPages || isLoading}
-              className="px-3 py-1.5 bg-white border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-subtle"
             >
               Next
             </button>
@@ -344,43 +356,46 @@ export const AdminAuditLog: React.FC = () => {
           title={`Audit Payload: ${inspectEntry.action}`}
         >
           <div className="space-y-4">
-            <div className="text-xs text-gray-500 space-y-1">
+            <div className="text-xs text-slate-500 space-y-1">
               <p>
-                <strong className="text-gray-700">Record ID:</strong>{' '}
+                <strong className="text-slate-700">Record ID:</strong>{' '}
                 <span className="font-mono">{inspectEntry.id}</span>
               </p>
               <p>
-                <strong className="text-gray-700">Target:</strong> {inspectEntry.targetType} #{' '}
+                <strong className="text-slate-700">Target:</strong> {inspectEntry.targetType} #{' '}
                 <span className="font-mono">{inspectEntry.targetId}</span>
               </p>
               <p>
-                <strong className="text-gray-700">Actor:</strong>{' '}
+                <strong className="text-slate-700">Actor:</strong>{' '}
                 {inspectEntry.actor?.name || 'SYSTEM'} ({inspectEntry.actor?.email || 'N/A'})
               </p>
               <p>
-                <strong className="text-gray-700">Logged At:</strong>{' '}
+                <strong className="text-slate-700">Logged At:</strong>{' '}
                 {new Date(inspectEntry.createdAt).toLocaleString()}
               </p>
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-semibold text-gray-700 block">Complete Event State Record:</span>
-              <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto max-h-80">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+                Complete Event State Record:
+              </span>
+              <div className="bg-slate-950 text-slate-100 p-4 rounded-xl font-mono text-xs overflow-x-auto max-h-80">
                 <pre>{JSON.stringify(inspectEntry, null, 2)}</pre>
               </div>
             </div>
 
             <div className="flex justify-end pt-2">
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setInspectEntry(null)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
               >
                 Close Inspector
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
       )}
-    </div>
+    </FadeIn>
   );
 };

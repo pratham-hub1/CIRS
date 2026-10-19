@@ -7,6 +7,8 @@ import { ItemCategory, ItemType, CATEGORY_LABELS } from '../../types/enums';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { PageTransition, StaggerContainer, StaggerItem } from '../../components/common/AnimatedTransitions';
+import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
 
 export const SavedSearches: React.FC = () => {
@@ -86,7 +88,7 @@ export const SavedSearches: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <PageTransition className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Saved Searches & Watches</h1>
@@ -95,13 +97,15 @@ export const SavedSearches: React.FC = () => {
           </p>
         </div>
 
-        <button
+        <Button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors self-start sm:self-auto"
+          variant="primary"
+          size="sm"
+          className="self-start sm:self-auto inline-flex items-center"
         >
-          <Plus className="w-3.5 h-3.5 mr-1.5" />
+          <Plus className="w-4 h-4 mr-1.5" />
           Create Watch
-        </button>
+        </Button>
       </div>
 
       {isLoading ? (
@@ -115,11 +119,11 @@ export const SavedSearches: React.FC = () => {
           onAction={() => setShowCreateModal(true)}
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {searches.map((s) => (
-            <div
+            <StaggerItem
               key={s.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 shadow-subtle hover:shadow-elevated transition-shadow flex flex-col justify-between"
+              className="bg-white rounded-xl border border-slate-200 p-5 shadow-subtle hover:shadow-elevated transition-all flex flex-col justify-between"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -128,7 +132,7 @@ export const SavedSearches: React.FC = () => {
                   </span>
                   <button
                     onClick={() => setDeleteTargetId(s.id)}
-                    className="p-1 text-slate-400 hover:text-rose-600 rounded"
+                    className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors"
                     title="Delete watch"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -170,14 +174,14 @@ export const SavedSearches: React.FC = () => {
                   to={`/feed?${s.criteria.q ? `q=${encodeURIComponent(s.criteria.q)}&` : ''}${
                     s.criteria.category ? `category=${s.criteria.category}&` : ''
                   }${s.criteria.type ? `type=${s.criteria.type}` : ''}`}
-                  className="inline-flex items-center text-xs font-semibold text-brand-600 hover:text-brand-700"
+                  className="inline-flex items-center text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors"
                 >
                   Run Search <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
               </div>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       )}
 
       {/* Create Modal */}
@@ -251,20 +255,22 @@ export const SavedSearches: React.FC = () => {
           </div>
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setShowCreateModal(false)}
-              className="px-4 py-2 text-xs font-medium text-slate-600"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isCreating}
-              className="px-5 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              isLoading={isCreating}
             >
-              {isCreating ? 'Saving...' : 'Activate Watch'}
-            </button>
+              Activate Watch
+            </Button>
           </div>
         </form>
       </Modal>
@@ -280,6 +286,6 @@ export const SavedSearches: React.FC = () => {
         isDestructive={true}
         isLoading={isDeleting}
       />
-    </div>
+    </PageTransition>
   );
 };

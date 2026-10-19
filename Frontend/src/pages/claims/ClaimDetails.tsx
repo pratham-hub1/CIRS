@@ -15,16 +15,31 @@ import {
   RotateCcw,
   Send,
   ExternalLink,
+  Sparkles,
+  Ticket,
 } from 'lucide-react';
 import { claimsService } from '../../services/claimsService';
+import { resolveImageUrl } from '../../services/apiClient';
 import { Claim } from '../../types/claim';
-import { ClaimStatus, VerificationLevel, STORAGE_LOCATION_LABELS, StorageLocationName } from '../../types/enums';
-import { ClaimStatusBadge, VerificationLevelBadge, CategoryBadge } from '../../components/common/Badge';
+import {
+  ClaimStatus,
+  VerificationLevel,
+  STORAGE_LOCATION_LABELS,
+  StorageLocationName,
+} from '../../types/enums';
+import {
+  ClaimStatusBadge,
+  VerificationLevelBadge,
+  CategoryBadge,
+} from '../../components/common/Badge';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { Button } from '../../components/common/Button';
 import { FileUpload } from '../../components/common/FileUpload';
+import { FadeIn } from '../../components/common/AnimatedTransitions';
 import { useToast } from '../../context/ToastContext';
+import { formatRelativeTime } from '../../lib/utils';
 
 export const ClaimDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -144,7 +159,7 @@ export const ClaimDetails: React.FC = () => {
       const updated = await claimsService.withdrawClaim(id);
       setClaim(updated);
       setShowWithdrawDialog(false);
-      success('Claim withdrawn');
+      success('Claim withdrawn successfully');
     } catch (err: any) {
       error(err.message || 'Failed to withdraw claim');
     } finally {
@@ -200,106 +215,115 @@ export const ClaimDetails: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
-        <LoadingSpinner size="lg" label="Loading claim information..." />
+        <LoadingSpinner size="lg" label="Accessing claim verification dossier..." />
       </div>
     );
   }
 
   if (!claim) {
     return (
-      <div className="p-8 text-center bg-white rounded-xl border border-slate-200">
-        <h3 className="text-lg font-semibold text-slate-800">Claim Not Found</h3>
+      <div className="p-8 text-center bg-white rounded-2xl border border-slate-200">
+        <h3 className="text-lg font-bold text-slate-800">Claim Not Found</h3>
         <button
           onClick={() => navigate('/my-claims')}
-          className="mt-4 px-4 py-2 text-sm font-medium text-brand-600 hover:underline"
+          className="mt-4 px-4 py-2 text-xs font-bold text-brand-600 hover:underline"
         >
-          ← Return to My Claims
+          Return to My Claims
         </button>
       </div>
     );
   }
 
-  const canWithdraw = claim.status === ClaimStatus.PENDING || claim.status === ClaimStatus.INFO_REQUESTED;
+  const canWithdraw =
+    claim.status === ClaimStatus.PENDING || claim.status === ClaimStatus.INFO_REQUESTED;
   const canAppeal = claim.status === ClaimStatus.REJECTED;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Top back bar */}
+    <FadeIn className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+      {/* Top back bar and options */}
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate('/my-claims')}
-          className="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Claims
         </button>
 
         <div className="flex items-center space-x-2">
           {canWithdraw && (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setShowWithdrawDialog(true)}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
             >
               Withdraw Claim
-            </button>
+            </Button>
           )}
 
           {canAppeal && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => setShowAppealModal(true)}
-              className="px-3.5 py-1.5 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors"
             >
-              <RotateCcw className="w-3.5 h-3.5 mr-1.5 inline" />
+              <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
               Appeal Decision
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       {/* Main Status & Collection Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-subtle p-6 sm:p-8 space-y-6">
+      <div className="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-subtle p-6 sm:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
-            <div className="flex items-center space-x-2 mb-1.5">
+            <div className="flex items-center space-x-2 mb-2">
               <ClaimStatusBadge status={claim.status} size="md" />
               <VerificationLevelBadge level={claim.verificationLevel} />
               {claim.item && <CategoryBadge category={claim.item.category} />}
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Claim on {claim.item?.itemName || 'Reported Belonging'}
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Claim Ref: <span className="font-mono font-medium">{claim.id}</span>
+            <p className="text-xs text-slate-500 mt-1 font-medium">
+              Claim Ref: <span className="font-mono text-slate-700">{claim.id}</span>
             </p>
           </div>
 
           {claim.item && (
             <Link
               to={`/items/${claim.item.caseId}`}
-              className="inline-flex items-center px-3.5 py-2 text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition-colors self-start sm:self-auto"
+              className="inline-flex items-center px-4 py-2 text-xs font-bold text-brand-700 bg-brand-50 border border-brand-200 rounded-xl hover:bg-brand-100 transition-colors self-start sm:self-auto shadow-subtle"
             >
-              View Case {claim.item.caseId} <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+              <span>View Case {claim.item.caseId}</span>
+              <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
             </Link>
           )}
         </div>
 
-        {/* Collection Token Banner (If Approved) */}
+        {/* Golden Collection Pass (When Approved) */}
         {claim.status === ClaimStatus.APPROVED && claim.collectionToken && (
-          <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-4">
-            <div className="flex items-center space-x-2 text-emerald-800 font-bold text-base">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <span>Claim Approved! Item Ready For Physical Collection</span>
+          <div className="relative overflow-hidden p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-amber-500/15 via-amber-400/10 to-amber-500/20 border-2 border-amber-400/60 shadow-elevated space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-amber-900 font-extrabold text-base">
+                <Ticket className="w-5 h-5 text-amber-600" />
+                <span>GSFC University Official Collection Pass</span>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-amber-950 uppercase tracking-wider">
+                Authorized Handover
+              </span>
             </div>
 
-            <div className="bg-white p-5 rounded-xl border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="bg-white/95 backdrop-blur-sm p-6 rounded-2xl border border-amber-300/80 shadow-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-5">
               <div>
-                <span className="text-xs uppercase tracking-wider font-semibold text-slate-500 block">
-                  Your Single-Use Collection Code
+                <span className="text-[11px] uppercase tracking-wider font-extrabold text-amber-800 block">
+                  Single-Use Secure Collection Code
                 </span>
-                <span className="text-2xl sm:text-3xl font-mono font-extrabold text-emerald-950 tracking-widest mt-1 block">
+                <span className="text-3xl sm:text-4xl font-mono font-black text-slate-900 tracking-widest mt-1.5 block">
                   {claim.collectionToken.code}
                 </span>
-                <span className="text-xs text-slate-500 mt-1 block">
-                  Valid until:{' '}
+                <span className="text-xs text-slate-500 mt-1.5 block font-medium">
+                  Expires:{' '}
                   {new Date(claim.collectionToken.expiresAt).toLocaleDateString([], {
                     month: 'short',
                     day: 'numeric',
@@ -311,109 +335,122 @@ export const ClaimDetails: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="inline-flex items-center px-4 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors self-start sm:self-auto"
+                className="inline-flex items-center px-5 py-2.5 text-xs font-bold text-amber-950 bg-amber-100 border border-amber-300 rounded-xl hover:bg-amber-200 transition-all self-start sm:self-auto shadow-sm"
               >
                 {copiedToken ? (
                   <>
-                    <Check className="w-4 h-4 mr-1.5 text-emerald-600" /> Copied!
+                    <Check className="w-4 h-4 mr-1.5 text-emerald-700" />
+                    <span>Copied to Clipboard</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4 h-4 mr-1.5" /> Copy Code
+                    <Copy className="w-4 h-4 mr-1.5 text-amber-800" />
+                    <span>Copy Voucher Code</span>
                   </>
                 )}
               </button>
             </div>
 
             {/* Offline Collection Instructions */}
-            <div className="text-xs text-emerald-900/90 space-y-1.5 pt-2">
-              <p className="font-semibold text-emerald-950">Campus Collection Instructions:</p>
-              <p>• Visit the <strong>Campus Security Office (Academic Block Ground Floor)</strong>.</p>
-              <p>• Present your official GSFC University student/faculty ID card.</p>
-              <p>• Show this collection code to the security officer on duty for redemption.</p>
+            <div className="text-xs text-amber-950/90 space-y-1.5 pt-1 font-medium">
+              <p className="font-bold text-amber-950">Campus Handover Protocol:</p>
+              <p>• Visit the <strong>Campus Security Office (Main Academic Block, Ground Floor)</strong>.</p>
+              <p>• Carry your university student or faculty identity card for visual match.</p>
+              <p>• Present this 6-character code to the on-duty security officer for token redemption.</p>
             </div>
           </div>
         )}
 
         {/* Info Requested Alert */}
         {claim.status === ClaimStatus.INFO_REQUESTED && (
-          <div className="p-4 rounded-xl bg-purple-50 border border-purple-200 text-xs text-purple-900 space-y-1">
+          <div className="p-5 rounded-2xl bg-purple-50 border border-purple-200 text-xs text-purple-900 space-y-1.5 shadow-subtle">
             <div className="flex items-center font-bold text-sm text-purple-950">
-              <AlertCircle className="w-4 h-4 mr-2 text-purple-600" />
+              <AlertCircle className="w-4 h-4 mr-2 text-purple-600 animate-pulse" />
               Additional Verification Required
             </div>
-            <p className="text-purple-800">
-              Campus security reviewed your claim and requested answers to the questions below before approving recovery.
+            <p className="text-purple-800 leading-relaxed font-normal">
+              Campus security officers have reviewed your claim and requested responses to the questions below before approving physical collection.
             </p>
           </div>
         )}
 
-        {/* Decision Reason (If Rejected) */}
+        {/* Rejection Reason */}
         {claim.status === ClaimStatus.REJECTED && claim.decisionReason && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1">
-            <span className="font-bold text-sm text-rose-950 block">Rejection Reason:</span>
-            <p className="text-rose-800 leading-relaxed">{claim.decisionReason}</p>
-            <p className="text-[11px] text-rose-600 mt-2">
-              If you have supplementary evidence, you may submit an appeal using the button above.
+          <div className="p-5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1.5 shadow-subtle">
+            <span className="font-bold text-sm text-rose-950 block">Rejection Rationale:</span>
+            <p className="text-rose-800 leading-relaxed font-normal">{claim.decisionReason}</p>
+            <p className="text-[11px] text-rose-700 font-semibold mt-2">
+              If you have supplementary evidence, you may file an appeal for supervisory review.
             </p>
           </div>
         )}
 
         {/* Submitted Incident Details */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 border-b border-slate-100 pb-1.5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
             Submitted Incident Details
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <span className="text-slate-400 block font-medium">Date Lost</span>
-              <span className="font-semibold text-slate-800 mt-0.5 block">
-                {new Date(claim.dateLost).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+              <span className="text-slate-400 block font-semibold text-[11px]">Estimated Date Lost</span>
+              <span className="font-bold text-slate-800 mt-1 block">
+                {new Date(claim.dateLost).toLocaleString([], {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block font-medium">Place Lost</span>
-              <span className="font-semibold text-slate-800 mt-0.5 block">{claim.placeLost}</span>
+              <span className="text-slate-400 block font-semibold text-[11px]">Place Lost</span>
+              <span className="font-bold text-slate-800 mt-1 block">{claim.placeLost}</span>
             </div>
             <div className="col-span-1 sm:col-span-2">
-              <span className="text-slate-400 block font-medium">Identifying Marks Submitted</span>
-              <span className="text-slate-800 mt-0.5 block">{claim.identifyingMarks}</span>
+              <span className="text-slate-400 block font-semibold text-[11px]">
+                Identifying Marks Submitted
+              </span>
+              <span className="text-slate-800 mt-1 block leading-relaxed font-medium">
+                {claim.identifyingMarks}
+              </span>
             </div>
             <div className="col-span-1 sm:col-span-2">
-              <span className="text-slate-400 block font-medium">Description</span>
-              <span className="text-slate-800 mt-0.5 block leading-relaxed">{claim.description}</span>
+              <span className="text-slate-400 block font-semibold text-[11px]">Description</span>
+              <span className="text-slate-800 mt-1 block leading-relaxed font-medium">
+                {claim.description}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Verification Questions and Answers */}
         <div className="space-y-4 pt-4 border-t border-slate-100">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 border-b border-slate-100 pb-1.5">
-            Verification Questions & Answers
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
+            Verification Questions & Responses
           </h3>
 
           <div className="space-y-3">
             {claim.questions.map((q, idx) => {
-              const isUnanswered = !q.answerText;
               return (
-                <div key={q.id} className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-                  <div className="font-semibold text-slate-800 flex items-center justify-between">
+                <div
+                  key={q.id}
+                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs space-y-2"
+                >
+                  <div className="font-bold text-slate-800 flex items-center justify-between">
                     <span>
                       {idx + 1}. {q.questionText}
                     </span>
                     {q.answeredAt ? (
-                      <span className="text-[10px] text-emerald-600 flex items-center font-medium">
+                      <span className="text-[10px] text-emerald-600 flex items-center font-bold">
                         <Check className="w-3 h-3 mr-0.5" /> Answered
                       </span>
                     ) : (
-                      <span className="text-[10px] text-purple-600 font-semibold uppercase">
-                        Pending Answer
+                      <span className="text-[10px] text-purple-600 font-bold uppercase">
+                        Pending Response
                       </span>
                     )}
                   </div>
 
                   {q.answerText ? (
-                    <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-slate-700">
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 text-slate-700 font-medium">
                       {q.answerText}
                     </div>
                   ) : claim.status === ClaimStatus.INFO_REQUESTED ? (
@@ -423,7 +460,7 @@ export const ClaimDetails: React.FC = () => {
                         value={answersState[q.id] || ''}
                         onChange={(e) => handleAnswerChange(q.id, e.target.value)}
                         placeholder="Type your response to this verification question..."
-                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 bg-white"
+                        className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
                       />
                     </div>
                   ) : (
@@ -434,17 +471,17 @@ export const ClaimDetails: React.FC = () => {
             })}
           </div>
 
-          {/* Submit responses button if info requested */}
           {claim.status === ClaimStatus.INFO_REQUESTED && (
             <div className="flex justify-end pt-2">
-              <button
+              <Button
                 type="button"
+                variant="primary"
+                size="sm"
                 onClick={handleSubmitAnswers}
-                disabled={isSubmittingAnswers}
-                className="px-5 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm disabled:opacity-50"
+                isLoading={isSubmittingAnswers}
               >
-                {isSubmittingAnswers ? 'Submitting Responses...' : 'Submit Responses to Staff'}
-              </button>
+                Submit Responses to Staff
+              </Button>
             </div>
           )}
         </div>
@@ -452,12 +489,12 @@ export const ClaimDetails: React.FC = () => {
         {/* Attached Proof Documents */}
         <div className="space-y-3 pt-4 border-t border-slate-100">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Attached Proof Documents ({claim.documents.length})
             </h3>
             <button
               onClick={() => setShowDocModal(true)}
-              className="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center"
+              className="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center"
             >
               <Upload className="w-3.5 h-3.5 mr-1" /> Attach Additional Proof
             </button>
@@ -470,17 +507,17 @@ export const ClaimDetails: React.FC = () => {
               {claim.documents.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-slate-50 text-xs"
+                  className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs shadow-subtle"
                 >
-                  <div className="flex items-center space-x-2 truncate">
+                  <div className="flex items-center space-x-2.5 truncate">
                     <FileText className="w-4 h-4 text-brand-600 flex-shrink-0" />
-                    <span className="font-medium text-slate-800 truncate">{doc.docType}</span>
+                    <span className="font-bold text-slate-800 truncate">{doc.docType}</span>
                   </div>
                   <a
-                    href={doc.url}
+                    href={resolveImageUrl(doc.url)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-semibold text-brand-600 hover:underline flex-shrink-0 ml-2"
+                    className="text-xs font-bold text-brand-600 hover:underline flex-shrink-0 ml-2"
                   >
                     View
                   </a>
@@ -490,25 +527,29 @@ export const ClaimDetails: React.FC = () => {
           )}
         </div>
 
-        {/* Post-Return Feedback Form (When approved/collected) */}
+        {/* Post-Return Feedback Form */}
         {claim.status === ClaimStatus.APPROVED && (
           <div className="space-y-4 pt-6 border-t border-slate-100">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Post-Collection Recovery Feedback
             </h3>
 
             {feedbackSubmitted ? (
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-medium">
-                ✓ Thank you! Your post-return feedback has been recorded for campus audit verification.
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-bold flex items-center">
+                <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" />
+                Thank you! Your recovery audit verification has been safely recorded.
               </div>
             ) : (
-              <form onSubmit={handleFeedbackSubmit} className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-4 text-xs">
-                <p className="text-slate-600">
-                  Did you receive your exact lost belonging during physical collection?
+              <form
+                onSubmit={handleFeedbackSubmit}
+                className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 text-xs shadow-subtle"
+              >
+                <p className="text-slate-700 font-medium">
+                  Did you receive your exact lost belonging during physical handover at campus security?
                 </p>
 
-                <div className="flex items-center space-x-4">
-                  <label className="flex items-center space-x-2 cursor-pointer">
+                <div className="flex items-center space-x-5">
+                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-slate-800">
                     <input
                       type="radio"
                       name="correctItem"
@@ -516,9 +557,9 @@ export const ClaimDetails: React.FC = () => {
                       onChange={() => setIsCorrectItem(true)}
                       className="text-brand-600 focus:ring-brand-500"
                     />
-                    <span className="font-semibold text-slate-800">Yes, it was my exact item</span>
+                    <span>Yes, verified exact belonging</span>
                   </label>
-                  <label className="flex items-center space-x-2 cursor-pointer">
+                  <label className="flex items-center space-x-2 cursor-pointer font-bold text-slate-800">
                     <input
                       type="radio"
                       name="correctItem"
@@ -526,30 +567,31 @@ export const ClaimDetails: React.FC = () => {
                       onChange={() => setIsCorrectItem(false)}
                       className="text-rose-600 focus:ring-rose-500"
                     />
-                    <span className="font-semibold text-slate-800">No, discrepancy observed</span>
+                    <span>No, discrepancy observed</span>
                   </label>
                 </div>
 
                 <div>
-                  <label className="block text-slate-600 mb-1 font-medium">
+                  <label className="block text-slate-600 mb-1 font-semibold text-[11px]">
                     Comments or Officer Feedback (Optional)
                   </label>
                   <input
                     type="text"
                     value={feedbackComments}
                     onChange={(e) => setFeedbackComments(e.target.value)}
-                    placeholder="e.g. Smooth handover at security desk, condition verified..."
-                    className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 bg-white"
+                    placeholder="e.g. Handover was quick and orderly..."
+                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
                   />
                 </div>
 
-                <button
+                <Button
                   type="submit"
-                  disabled={isSubmittingFeedback}
-                  className="px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg disabled:opacity-50"
+                  variant="primary"
+                  size="sm"
+                  isLoading={isSubmittingFeedback}
                 >
-                  {isSubmittingFeedback ? 'Submitting Feedback...' : 'Submit Feedback'}
-                </button>
+                  Submit Audit Confirmation
+                </Button>
               </form>
             )}
           </div>
@@ -565,16 +607,16 @@ export const ClaimDetails: React.FC = () => {
       >
         <form onSubmit={handleAddDocument} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
-              Document Type Description
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              Document Description
             </label>
             <input
               type="text"
               required
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
-              placeholder="e.g. Purchase Invoice, Warranty Card, Serial Photo"
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              placeholder="e.g. Purchase Invoice, Warranty Card, Photo with Item"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
             />
           </div>
 
@@ -584,20 +626,23 @@ export const ClaimDetails: React.FC = () => {
           />
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setShowDocModal(false)}
-              className="px-4 py-2 text-xs font-medium text-slate-600"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isAddingDoc || !docUrl}
-              className="px-5 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              isLoading={isAddingDoc}
+              disabled={!docUrl}
             >
-              {isAddingDoc ? 'Attaching...' : 'Attach Proof'}
-            </button>
+              Attach Proof
+            </Button>
           </div>
         </form>
       </Modal>
@@ -611,7 +656,7 @@ export const ClaimDetails: React.FC = () => {
       >
         <form onSubmit={handleAppealSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               Reason for Appeal
             </label>
             <textarea
@@ -620,25 +665,27 @@ export const ClaimDetails: React.FC = () => {
               value={appealReason}
               onChange={(e) => setAppealReason(e.target.value)}
               placeholder="Explain why the rejection should be reconsidered and clarify any previously missing details..."
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
             />
           </div>
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setShowAppealModal(false)}
-              className="px-4 py-2 text-xs font-medium text-slate-600"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSubmittingAppeal}
-              className="px-5 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              isLoading={isSubmittingAppeal}
             >
-              {isSubmittingAppeal ? 'Submitting Appeal...' : 'Submit Appeal'}
-            </button>
+              Submit Appeal
+            </Button>
           </div>
         </form>
       </Modal>
@@ -654,6 +701,6 @@ export const ClaimDetails: React.FC = () => {
         isDestructive={true}
         isLoading={isWithdrawing}
       />
-    </div>
+    </FadeIn>
   );
 };

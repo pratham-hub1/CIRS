@@ -6,6 +6,8 @@ import { adminService } from '../../services/adminService';
 import { Match } from '../../types/matching';
 import { MatchStatus } from '../../types/enums';
 import { EmptyState } from '../../components/common/EmptyState';
+import { PageTransition } from '../../components/common/AnimatedTransitions';
+import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
 import { apiClient } from '../../services/apiClient';
 import { DEMO_MATCHES } from '../../services/demoFixtures';
@@ -91,7 +93,7 @@ export const AdminMatches: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <PageTransition className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Candidate Match Reviews</h1>
@@ -109,15 +111,17 @@ export const AdminMatches: React.FC = () => {
               placeholder="Look up Case ID (e.g. CIRS-2026-0001)"
               value={searchCaseId}
               onChange={(e) => setSearchCaseId(e.target.value)}
-              className="pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 w-64"
+              className="pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 w-64"
             />
           </div>
-          <button
+          <Button
             type="submit"
-            className="px-3 py-1.5 text-xs font-semibold bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+            variant="primary"
+            size="sm"
+            className="py-1.5 px-3 text-xs font-semibold h-auto"
           >
             Find
-          </button>
+          </Button>
           <button
             type="button"
             onClick={() => {
@@ -125,7 +129,7 @@ export const AdminMatches: React.FC = () => {
               fetchMatches('');
             }}
             title="Refresh All"
-            className="p-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600"
+            className="p-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
@@ -145,11 +149,11 @@ export const AdminMatches: React.FC = () => {
           {matches.map((m) => (
             <div
               key={m.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 shadow-subtle space-y-4"
+              className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 shadow-subtle hover:shadow-elevated transition-shadow space-y-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center space-x-2">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-primary-100 text-primary-800">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
                     {(m.score * 100).toFixed(0)}% Similarity Score
                   </span>
                   <span
@@ -182,7 +186,7 @@ export const AdminMatches: React.FC = () => {
                     <span className="font-mono">{m.lostItem?.caseId}</span>
                     <Link
                       to={`/items/${m.lostItem?.caseId}`}
-                      className="text-primary-600 hover:underline flex items-center font-medium"
+                      className="text-brand-600 hover:underline flex items-center font-medium"
                     >
                       View Report <ExternalLink className="w-3 h-3 ml-1" />
                     </Link>
@@ -200,7 +204,7 @@ export const AdminMatches: React.FC = () => {
                     <span className="font-mono">{m.foundItem?.caseId}</span>
                     <Link
                       to={`/items/${m.foundItem?.caseId}`}
-                      className="text-primary-600 hover:underline flex items-center font-medium"
+                      className="text-brand-600 hover:underline flex items-center font-medium"
                     >
                       View Report <ExternalLink className="w-3 h-3 ml-1" />
                     </Link>
@@ -211,26 +215,30 @@ export const AdminMatches: React.FC = () => {
               {/* Action Buttons for Pending Matches */}
               {m.status === MatchStatus.SUGGESTED && (
                 <div className="flex justify-end space-x-3 pt-2">
-                  <button
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => handleDismiss(m.id)}
-                    className="inline-flex items-center px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                    className="inline-flex items-center text-slate-700 hover:bg-slate-50"
                   >
                     <XCircle className="w-4 h-4 mr-1.5 text-slate-400" />
                     Dismiss Match
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="success"
                     onClick={() => handleConfirm(m.id)}
-                    className="inline-flex items-center px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs font-semibold text-white shadow-sm transition-colors"
+                    className="inline-flex items-center shadow-sm"
                   >
                     <CheckCircle className="w-4 h-4 mr-1.5" />
                     Confirm Match
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
           ))}
         </div>
       )}
-    </div>
+    </PageTransition>
   );
 };

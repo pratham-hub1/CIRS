@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -34,8 +35,6 @@ export const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   const maxWidthClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -46,38 +45,52 @@ export const Modal: React.FC<ModalProps> = ({
   }[maxWidth];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Modal Dialog */}
-      <div
-        className={`relative bg-white rounded-xl shadow-2xl border border-slate-200 w-full ${maxWidthClasses} overflow-hidden transform transition-all z-10 my-8`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-          <div>
-            <h3 id="modal-title" className="text-lg font-semibold text-slate-900">
-              {title}
-            </h3>
-            {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
-          </div>
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          {/* Backdrop with blur */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          />
 
-        <div className="p-6 max-h-[calc(100vh-12rem)] overflow-y-auto">{children}</div>
-      </div>
-    </div>
+          {/* Modal Dialog */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ type: 'spring', duration: 0.35, bounce: 0.15 }}
+            className={`relative bg-white rounded-2xl shadow-float border border-slate-200/90 w-full ${maxWidthClasses} overflow-hidden z-10 my-8`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-white">
+              <div>
+                <h3 id="modal-title" className="text-lg font-bold text-slate-900 tracking-tight">
+                  {title}
+                </h3>
+                {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
+              </div>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 max-h-[calc(100vh-12rem)] overflow-y-auto scrollbar-thin">
+              {children}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };

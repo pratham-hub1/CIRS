@@ -2,24 +2,29 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Search,
-  Filter,
   X,
   MapPin,
   Calendar,
   Bookmark,
-  Layers,
   Sparkles,
   ArrowRight,
   Package,
+  SlidersHorizontal,
+  ChevronRight,
+  Camera,
 } from 'lucide-react';
 import { searchService, FeedQueryParams } from '../../services/searchService';
+import { resolveImageUrl } from '../../services/apiClient';
 import { PublicItem } from '../../types/item';
 import { ItemCategory, ItemStatus, ItemType, CATEGORY_LABELS } from '../../types/enums';
 import { ItemStatusBadge, ItemTypeBadge, CategoryBadge } from '../../components/common/Badge';
 import { EmptyState } from '../../components/common/EmptyState';
 import { CardSkeleton } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
+import { Button } from '../../components/common/Button';
+import { StaggerContainer, StaggerItem, FadeIn } from '../../components/common/AnimatedTransitions';
 import { useToast } from '../../context/ToastContext';
+import { formatRelativeTime } from '../../lib/utils';
 
 export const CommunityFeed: React.FC = () => {
   const { success, error } = useToast();
@@ -39,36 +44,39 @@ export const CommunityFeed: React.FC = () => {
   const [watchName, setWatchName] = useState('');
   const [isSavingWatch, setIsSavingWatch] = useState(false);
 
-  const fetchFeed = useCallback(async (isLoadMore: boolean = false) => {
-    if (isLoadMore) setIsLoadingMore(true);
-    else setIsLoading(true);
+  const fetchFeed = useCallback(
+    async (isLoadMore: boolean = false) => {
+      if (isLoadMore) setIsLoadingMore(true);
+      else setIsLoading(true);
 
-    try {
-      const params: FeedQueryParams = {
-        limit: 12,
-        cursor: isLoadMore ? nextCursor : undefined,
-      };
+      try {
+        const params: FeedQueryParams = {
+          limit: 12,
+          cursor: isLoadMore ? nextCursor : undefined,
+        };
 
-      if (searchQuery.trim()) params.q = searchQuery.trim();
-      if (selectedType) params.type = selectedType;
-      if (selectedCategory) params.category = selectedCategory;
-      if (selectedStatus) params.status = selectedStatus;
+        if (searchQuery.trim()) params.q = searchQuery.trim();
+        if (selectedType) params.type = selectedType;
+        if (selectedCategory) params.category = selectedCategory;
+        if (selectedStatus) params.status = selectedStatus;
 
-      const res = await searchService.getCommunityFeed(params);
-      if (isLoadMore) {
-        setItems((prev) => [...prev, ...(res.data || [])]);
-      } else {
-        setItems(res.data || []);
+        const res = await searchService.getCommunityFeed(params);
+        if (isLoadMore) {
+          setItems((prev) => [...prev, ...(res.data || [])]);
+        } else {
+          setItems(res.data || []);
+        }
+        setNextCursor(res.nextCursor);
+      } catch (err: any) {
+        console.error('Error fetching feed:', err);
+        error(err.message || 'Failed to fetch community feed');
+      } finally {
+        setIsLoading(false);
+        setIsLoadingMore(false);
       }
-      setNextCursor(res.nextCursor);
-    } catch (err: any) {
-      console.error('Error fetching feed:', err);
-      error(err.message || 'Failed to fetch community feed');
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  }, [searchQuery, selectedType, selectedCategory, selectedStatus, nextCursor, error]);
+    },
+    [searchQuery, selectedType, selectedCategory, selectedStatus, nextCursor, error],
+  );
 
   useEffect(() => {
     fetchFeed(false);
@@ -95,7 +103,7 @@ export const CommunityFeed: React.FC = () => {
           type: selectedType || undefined,
         },
       });
-      success(`Watch '${watchName}' created. You'll be notified of new reports!`);
+      success(`Watch '${watchName}' created. You will receive alerts for new matches!`);
       setShowSaveModal(false);
       setWatchName('');
     } catch (err: any) {
@@ -105,64 +113,93 @@ export const CommunityFeed: React.FC = () => {
     }
   };
 
-  const hasActiveFilters = Boolean(searchQuery || selectedType || selectedCategory || selectedStatus);
+  const hasActiveFilters = Boolean(
+    searchQuery || selectedType || selectedCategory || selectedStatus,
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Community Feed</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Browse and discover lost and found items posted across GSFC University.
-          </p>
-        </div>
+      <FadeIn>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center space-x-2 mb-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full border border-brand-200/60">
+                Campus Registry
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Community Discovery Feed
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl font-normal">
+              Live bulletin of all reported lost items and secured campus recoveries at GSFC University.
+            </p>
+          </div>
 
-        <button
-          onClick={() => setShowSaveModal(true)}
-          className="inline-flex items-center px-3.5 py-2 text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition-colors shadow-sm self-start sm:self-auto"
-        >
-          <Bookmark className="w-3.5 h-3.5 mr-1.5" />
-          Save Search Watch
-        </button>
-      </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSaveModal(true)}
+            className="self-start sm:self-auto border-brand-200 text-brand-700 bg-brand-50/50 hover:bg-brand-50"
+          >
+            <Bookmark className="w-3.5 h-3.5 mr-1.5 text-brand-600" />
+            Create Search Watch
+          </Button>
+        </div>
+      </FadeIn>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-subtle space-y-3">
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-subtle space-y-4">
+        {/* Search input */}
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by item name, description, brand, or color..."
-            className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-slate-50/50"
+            placeholder="Search by keywords, model, serial hint, color, or location..."
+            className="w-full pl-11 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-slate-50/60 font-medium placeholder:text-slate-400 transition-all"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-          {/* Item Type filter */}
-          <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50">
+        {/* Filter controls row */}
+        <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-slate-100 text-xs">
+          {/* Segmented Type Switch */}
+          <div className="inline-flex rounded-xl border border-slate-200/90 p-0.5 bg-slate-100/70">
             <button
               onClick={() => setSelectedType('')}
-              className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                selectedType === '' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                selectedType === ''
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               All Types
             </button>
             <button
               onClick={() => setSelectedType(ItemType.LOST)}
-              className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                selectedType === ItemType.LOST ? 'bg-rose-50 text-rose-700 font-semibold shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                selectedType === ItemType.LOST
+                  ? 'bg-rose-50 text-rose-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Lost
             </button>
             <button
               onClick={() => setSelectedType(ItemType.FOUND)}
-              className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                selectedType === ItemType.FOUND ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-sm' : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                selectedType === ItemType.FOUND
+                  ? 'bg-emerald-50 text-emerald-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Found
@@ -173,7 +210,7 @@ export const CommunityFeed: React.FC = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value as ItemCategory | '')}
-            className="py-1.5 px-2.5 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 focus:ring-2 focus:ring-brand-500"
+            className="py-1.5 px-3 text-xs font-semibold border border-slate-200/90 rounded-xl bg-white text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-sm"
           >
             <option value="">All Categories</option>
             {Object.values(ItemCategory).map((cat) => (
@@ -187,9 +224,9 @@ export const CommunityFeed: React.FC = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value as ItemStatus | '')}
-            className="py-1.5 px-2.5 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 focus:ring-2 focus:ring-brand-500"
+            className="py-1.5 px-3 text-xs font-semibold border border-slate-200/90 rounded-xl bg-white text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-sm"
           >
-            <option value="">All Active Statuses</option>
+            <option value="">All Statuses</option>
             <option value={ItemStatus.LOST_REPORTED}>Lost Reported</option>
             <option value={ItemStatus.FOUND}>Found (In Custody)</option>
             <option value={ItemStatus.READY_FOR_COLLECTION}>Ready for Collection</option>
@@ -198,9 +235,9 @@ export const CommunityFeed: React.FC = () => {
           {hasActiveFilters && (
             <button
               onClick={handleClearFilters}
-              className="inline-flex items-center px-2 py-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors ml-auto"
+              className="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50/80 rounded-xl transition-colors ml-auto"
             >
-              <X className="w-3.5 h-3.5 mr-1" /> Clear Filters
+              <X className="w-3.5 h-3.5 mr-1" /> Reset Filters
             </button>
           )}
         </div>
@@ -222,97 +259,118 @@ export const CommunityFeed: React.FC = () => {
           title="No items found"
           description={
             hasActiveFilters
-              ? "We couldn't find any items matching your selected filters. Try broadening your search or clear all filters."
-              : 'There are currently no items reported in the community feed.'
+              ? 'No items match your active search and filter criteria. Try clearing some filters to expand your search.'
+              : 'There are currently no items logged in the community feed.'
           }
           actionLabel={hasActiveFilters ? 'Clear Filters' : 'Report an Item'}
-          onAction={hasActiveFilters ? handleClearFilters : () => (window.location.href = '/report/lost')}
+          onAction={
+            hasActiveFilters ? handleClearFilters : () => (window.location.href = '/report/lost')
+          }
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {items.map((item) => {
-            const displayImage = item.images && item.images.length > 0 ? item.images[0] : null;
+            const rawImage = item.images && item.images.length > 0 ? item.images[0] : null;
+            const displayImage = resolveImageUrl(rawImage);
             return (
-              <div
-                key={item.caseId}
-                className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-subtle hover:shadow-elevated transition-all flex flex-col justify-between"
-              >
-                <div>
-                  {/* Photo or Category Placeholder Banner */}
-                  {displayImage ? (
-                    <div className="h-44 w-full bg-slate-100 overflow-hidden relative">
-                      <img
-                        src={displayImage}
-                        alt={item.itemName}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-2.5 left-2.5">
-                        <ItemTypeBadge type={item.type} />
+              <StaggerItem key={item.caseId}>
+                <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-subtle hover:shadow-elevated transition-all duration-200 flex flex-col justify-between group h-full">
+                  <div>
+                    {/* Photo or Category Placeholder Banner */}
+                    {displayImage ? (
+                      <div className="h-44 w-full bg-slate-100 overflow-hidden relative">
+                        <img
+                          src={displayImage}
+                          alt={item.itemName}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = 'none';
+                            const fallback = (e.currentTarget as HTMLImageElement).nextElementSibling;
+                            if (fallback) {
+                              (fallback as HTMLElement).style.display = 'flex';
+                            }
+                          }}
+                        />
+                        <div
+                          style={{ display: 'none' }}
+                          className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 items-center justify-center"
+                        >
+                          <Package className="w-10 h-10 text-slate-300" />
+                        </div>
+                        <div className="absolute top-3 left-3">
+                          <ItemTypeBadge type={item.type} />
+                        </div>
+                        {item.images && item.images.length > 1 && (
+                          <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-[10px] font-bold text-white flex items-center space-x-1">
+                            <Camera className="w-3 h-3" />
+                            <span>{item.images.length}</span>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ) : (
-                    <div className="h-32 w-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative">
-                      <Package className="w-10 h-10 text-slate-300" />
-                      <div className="absolute top-2.5 left-2.5">
-                        <ItemTypeBadge type={item.type} />
+                    ) : (
+                      <div className="h-32 w-full bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 flex items-center justify-center relative">
+                        <Package className="w-10 h-10 text-slate-300 group-hover:scale-110 transition-transform duration-200" />
+                        <div className="absolute top-3 left-3">
+                          <ItemTypeBadge type={item.type} />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <div className="p-4 sm:p-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <CategoryBadge category={item.category} />
-                      <ItemStatusBadge status={item.status} size="sm" />
-                    </div>
-
-                    <h3 className="font-bold text-slate-900 text-base leading-snug line-clamp-1">
-                      {item.itemName}
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                      {item.description}
-                    </p>
-
-                    <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500">
-                      <div className="flex items-center truncate">
-                        <MapPin className="w-3.5 h-3.5 mr-1.5 text-slate-400 flex-shrink-0" />
-                        <span className="truncate">
-                          {item.foundLocation || item.lastKnownLocation || 'Campus premises'}
-                        </span>
+                    <div className="p-4 sm:p-5">
+                      <div className="flex items-center justify-between mb-2.5">
+                        <CategoryBadge category={item.category} />
+                        <ItemStatusBadge status={item.status} size="sm" />
                       </div>
-                      <div className="flex items-center text-slate-400 text-[11px]">
-                        <Calendar className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
-                        <span>
-                          Reported on {new Date(item.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
+
+                      <h3 className="font-bold text-slate-900 text-base leading-snug line-clamp-1 group-hover:text-brand-600 transition-colors">
+                        {item.itemName}
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
+                        {item.description}
+                      </p>
+
+                      <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500">
+                        <div className="flex items-center text-slate-600">
+                          <MapPin className="w-3.5 h-3.5 mr-1.5 text-slate-400 flex-shrink-0" />
+                          <span className="truncate font-medium text-[11px]">
+                            {item.foundLocation || item.lastKnownLocation || 'Campus premises'}
+                          </span>
+                        </div>
+                        <div className="flex items-center text-slate-400 text-[11px]">
+                          <Calendar className="w-3.5 h-3.5 mr-1.5 flex-shrink-0 text-slate-400" />
+                          <span>Reported {formatRelativeTime(item.createdAt)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="px-5 pb-4 pt-0">
-                  <Link
-                    to={`/items/${item.caseId}`}
-                    className="w-full flex items-center justify-center py-2 px-3 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 transition-colors"
-                  >
-                    View Details & Claim <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                  </Link>
+                  <div className="px-5 pb-5 pt-0">
+                    <Link
+                      to={`/items/${item.caseId}`}
+                      className="w-full flex items-center justify-center py-2 px-3 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 transition-all shadow-subtle group-hover:border-brand-300"
+                    >
+                      <span>View Details & Claim</span>
+                      <ChevronRight className="w-3.5 h-3.5 ml-1 text-slate-400 group-hover:text-brand-600 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerContainer>
       )}
 
       {/* Load More Button */}
       {nextCursor && (
         <div className="text-center pt-4">
-          <button
+          <Button
+            variant="outline"
             onClick={() => fetchFeed(true)}
-            disabled={isLoadingMore}
-            className="px-6 py-2.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+            isLoading={isLoadingMore}
+            className="px-6 py-2.5"
           >
-            {isLoadingMore ? 'Loading items...' : 'Load more items'}
-          </button>
+            Load more items
+          </Button>
         </div>
       )}
 
@@ -321,46 +379,50 @@ export const CommunityFeed: React.FC = () => {
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
         title="Create Search Watch"
-        description="Receive in-app alerts whenever a newly reported item matches this search."
+        description="Receive proactive in-app alerts whenever a newly reported item matches this search."
         maxWidth="md"
       >
         <form onSubmit={handleSaveWatch} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
-              Watch Name
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              Watch Label
             </label>
             <input
               type="text"
               required
               value={watchName}
               onChange={(e) => setWatchName(e.target.value)}
-              placeholder="e.g. My Lost Dell XPS or Blue Backpack"
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              placeholder="e.g. My Blue Titan Rucksack or Calculator"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
             />
           </div>
 
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
-            <span className="font-semibold block text-slate-700 mb-1">Watch Criteria:</span>
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1.5 font-medium">
+            <span className="font-bold block text-slate-800">Watch Query Parameters:</span>
             <p>• Keyword: {searchQuery || 'Any keyword'}</p>
             <p>• Type: {selectedType || 'Lost or Found'}</p>
-            <p>• Category: {selectedCategory ? CATEGORY_LABELS[selectedCategory] : 'All Categories'}</p>
+            <p>
+              • Category: {selectedCategory ? CATEGORY_LABELS[selectedCategory] : 'All Categories'}
+            </p>
           </div>
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setShowSaveModal(false)}
-              className="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-800"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSavingWatch}
-              className="px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              isLoading={isSavingWatch}
             >
-              {isSavingWatch ? 'Saving...' : 'Save Watch'}
-            </button>
+              Save Watch
+            </Button>
           </div>
         </form>
       </Modal>

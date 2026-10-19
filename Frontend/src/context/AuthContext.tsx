@@ -18,7 +18,6 @@ interface AuthContextValue {
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
-  switchDemoRole: (role: Role) => void;
   toggleDemoMode: (enabled?: boolean) => void;
 }
 
@@ -29,14 +28,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isDemoMode, setIsDemoMode] = useState<boolean>(apiClient.isDemoMode());
 
+  // Subscribe to auth failure from apiClient (e.g., refresh token revoked or expired)
+  useEffect(() => {
+    apiClient.setOnAuthFailure(() => {
+      setUser(null);
+      apiClient.setAccessToken(null);
+      try {
+        localStorage.removeItem('cirs_demo_role');
+        localStorage.removeItem('cirs_demo_mode');
+      } catch {
+        // Storage access may be restricted
+      }
+      // Cleanly redirect to /login if currently on an authenticated route
+      if (
+        typeof window !== 'undefined' &&
+        window.location.pathname !== '/login' &&
+        window.location.pathname !== '/register'
+      ) {
+        window.location.replace('/login');
+      }
+    });
+  }, []);
+
   const initSession = useCallback(async () => {
     setIsLoading(true);
+    // Purge any stale mock role flags from past previews
+    try {
+      localStorage.removeItem('cirs_demo_role');
+      localStorage.removeItem('cirs_demo_mode');
+    } catch {
+      // Storage access may be restricted
+    }
+
     try {
       if (apiClient.isDemoMode()) {
-        const savedRole = (localStorage.getItem('cirs_demo_role') as Role) || Role.STUDENT;
-        if (savedRole === Role.ADMIN) setUser(DEMO_USERS.admin);
-        else if (savedRole === Role.FACULTY) setUser(DEMO_USERS.faculty);
-        else setUser(DEMO_USERS.student);
+        setUser(DEMO_USERS.student);
         setIsLoading(false);
         return;
       }
@@ -44,13 +70,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // In real backend mode, attempt to refresh session via HttpOnly cookie
       try {
         const refreshRes = await authService.refresh();
-        if (refreshRes?.accessToken) {
+        if (refreshRes?.accessToken && refreshRes?.user) {
           apiClient.setAccessToken(refreshRes.accessToken);
           setUser(refreshRes.user);
+        } else {
+          setUser(null);
+          apiClient.setAccessToken(null);
         }
       } catch {
-        // Unauthenticated session, no action needed
+        // Unauthenticated or expired session, cleanly clear without throwing or looping
         setUser(null);
+        apiClient.setAccessToken(null);
       }
     } catch (err) {
       console.warn('Session initialization:', err);
@@ -79,7 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await authService.register(payload);
-      // Auto login after successful registration
+      // Auto login through the actual backend after successful registration
       await login({ email: payload.email, password: payload.password });
     } finally {
       setIsLoading(false);
@@ -93,6 +123,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setUser(null);
       apiClient.setAccessToken(null);
+      try {
+        localStorage.removeItem('cirs_demo_role');
+      } catch {
+        // Storage access fallback
+      }
       setIsLoading(false);
     }
   };
@@ -105,15 +140,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       console.error('Error refreshing profile:', err);
     }
-  };
-
-  const switchDemoRole = (role: Role) => {
-    apiClient.setDemoMode(true);
-    setIsDemoMode(true);
-    localStorage.setItem('cirs_demo_role', role);
-    if (role === Role.ADMIN) setUser(DEMO_USERS.admin);
-    else if (role === Role.FACULTY) setUser(DEMO_USERS.faculty);
-    else setUser(DEMO_USERS.student);
   };
 
   const toggleDemoMode = (enabled?: boolean) => {
@@ -148,7 +174,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         logout,
         refreshProfile,
-        switchDemoRole,
         toggleDemoMode,
       }}
     >

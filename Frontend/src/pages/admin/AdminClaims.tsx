@@ -10,11 +10,14 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
+import { resolveImageUrl } from '../../services/apiClient';
 import { Claim, Appeal } from '../../types/claim';
 import { ClaimStatus, VerificationLevel, AppealStatus } from '../../types/enums';
 import { ClaimStatusBadge, VerificationLevelBadge, CategoryBadge } from '../../components/common/Badge';
 import { TableRowSkeleton } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
+import { PageTransition } from '../../components/common/AnimatedTransitions';
+import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
 
 export const AdminClaims: React.FC = () => {
@@ -142,7 +145,7 @@ export const AdminClaims: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <PageTransition className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Claim Verifications</h1>
@@ -156,7 +159,7 @@ export const AdminClaims: React.FC = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value as ClaimStatus | '')}
-            className="py-1.5 px-3 text-xs border border-slate-300 rounded-lg bg-white font-medium"
+            className="py-1.5 px-3 text-xs border border-slate-300 rounded-lg bg-white font-medium focus:ring-2 focus:ring-brand-500"
           >
             <option value="">All Review Statuses</option>
             <option value={ClaimStatus.PENDING}>Pending Review</option>
@@ -218,37 +221,45 @@ export const AdminClaims: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1.5">
-                        <button
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => setInspectClaim(claim)}
-                          className="px-2.5 py-1 text-[11px] font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded"
+                          className="px-2.5 py-1 text-[11px] h-auto font-semibold"
                         >
                           Inspect Evidence
-                        </button>
+                        </Button>
 
                         {claim.status === ClaimStatus.PENDING && (
                           <>
-                            <button
+                            <Button
+                              size="sm"
+                              variant="success"
                               onClick={() => handleApprove(claim.id)}
-                              className="px-2.5 py-1 text-[11px] font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded shadow-sm"
+                              className="px-2.5 py-1 text-[11px] h-auto font-semibold"
                             >
                               Approve
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="danger"
                               onClick={() => setRejectTargetId(claim.id)}
-                              className="px-2.5 py-1 text-[11px] font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded border border-rose-200"
+                              className="px-2.5 py-1 text-[11px] h-auto font-semibold"
                             >
                               Reject
-                            </button>
+                            </Button>
                           </>
                         )}
 
                         {claim.appeals && claim.appeals.length > 0 && claim.appeals[0].status === AppealStatus.PENDING && (
-                          <button
+                          <Button
+                            size="sm"
+                            variant="secondary"
                             onClick={() => setAppealTarget(claim.appeals[0])}
-                            className="px-2.5 py-1 text-[11px] font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded border border-purple-200 flex items-center"
+                            className="px-2.5 py-1 text-[11px] h-auto font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border-purple-200 flex items-center"
                           >
                             <RotateCcw className="w-3 h-3 mr-1" /> Decide Appeal
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </td>
@@ -329,7 +340,7 @@ export const AdminClaims: React.FC = () => {
                   {inspectClaim.documents.map((doc) => (
                     <div key={doc.id} className="p-2.5 rounded bg-slate-50 border border-slate-200 flex justify-between items-center">
                       <span className="truncate font-medium">{doc.docType}</span>
-                      <a href={doc.url} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline ml-2 font-semibold">
+                      <a href={resolveImageUrl(doc.url)} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline ml-2 font-semibold">
                         View
                       </a>
                     </div>
@@ -340,33 +351,37 @@ export const AdminClaims: React.FC = () => {
 
             {/* Action buttons inside inspection */}
             <div className="flex items-center justify-end space-x-2 pt-4 border-t border-slate-100">
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   setRequestInfoTargetId(inspectClaim.id);
                   setInspectClaim(null);
                 }}
-                className="px-3.5 py-2 font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200"
+                className="text-purple-700 bg-purple-50/80 hover:bg-purple-100 border-purple-200"
               >
                 Request More Info
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="danger"
+                size="sm"
                 onClick={() => {
                   setRejectTargetId(inspectClaim.id);
                   setInspectClaim(null);
                 }}
-                className="px-3.5 py-2 font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200"
               >
                 Reject Claim
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="success"
+                size="sm"
                 onClick={() => handleApprove(inspectClaim.id)}
-                className="px-4 py-2 font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm"
               >
                 Approve & Issue Token
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -395,20 +410,22 @@ export const AdminClaims: React.FC = () => {
           </div>
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setRejectTargetId(null)}
-              className="px-4 py-2 text-xs font-medium text-slate-600"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isRejecting}
-              className="px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg disabled:opacity-50"
+              variant="danger"
+              size="sm"
+              isLoading={isRejecting}
             >
-              {isRejecting ? 'Rejecting...' : 'Reject Claim'}
-            </button>
+              Reject Claim
+            </Button>
           </div>
         </form>
       </Modal>
@@ -449,20 +466,22 @@ export const AdminClaims: React.FC = () => {
           </div>
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setRequestInfoTargetId(null)}
-              className="px-4 py-2 text-xs font-medium text-slate-600"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isRequestingInfo}
-              className="px-5 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              isLoading={isRequestingInfo}
             >
-              {isRequestingInfo ? 'Sending...' : 'Send Request'}
-            </button>
+              Send Request
+            </Button>
           </div>
         </form>
       </Modal>
@@ -487,7 +506,7 @@ export const AdminClaims: React.FC = () => {
             <select
               value={appealDecision}
               onChange={(e) => setAppealDecision(e.target.value as AppealStatus)}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-brand-500"
             >
               <option value={AppealStatus.ACCEPTED}>Accept Appeal (Reopen to PENDING)</option>
               <option value={AppealStatus.REJECTED}>Deny Appeal (Terminal Rejection)</option>
@@ -503,28 +522,30 @@ export const AdminClaims: React.FC = () => {
               value={appealDecisionReason}
               onChange={(e) => setAppealDecisionReason(e.target.value)}
               placeholder="Comments on appeal determination..."
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
             />
           </div>
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setAppealTarget(null)}
-              className="px-4 py-2 text-xs font-medium text-slate-600"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isDecidingAppeal}
-              className="px-5 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              isLoading={isDecidingAppeal}
             >
-              {isDecidingAppeal ? 'Saving...' : 'Submit Determination'}
-            </button>
+              Submit Determination
+            </Button>
           </div>
         </form>
       </Modal>
-    </div>
+    </PageTransition>
   );
 };

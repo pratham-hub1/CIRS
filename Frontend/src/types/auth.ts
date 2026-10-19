@@ -1,5 +1,21 @@
 import { Role } from './enums';
 
+export interface Department {
+  id: string;
+  campusId: string;
+  name: string;
+  code: string;
+  createdAt?: string;
+}
+
+export interface Campus {
+  id: string;
+  name: string;
+  code: string;
+  createdAt?: string;
+  departments?: Department[];
+}
+
 export interface User {
   id: string;
   name: string;

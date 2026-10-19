@@ -4,6 +4,8 @@ import { adminService } from '../../services/adminService';
 import { StorageLocation } from '../../types/admin';
 import { StorageLocationName, STORAGE_LOCATION_LABELS } from '../../types/enums';
 import { Modal } from '../../components/common/Modal';
+import { PageTransition, StaggerContainer, StaggerItem } from '../../components/common/AnimatedTransitions';
+import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
 
 export const AdminStorageLocations: React.FC = () => {
@@ -66,7 +68,7 @@ export const AdminStorageLocations: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <PageTransition className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Storage Locations</h1>
@@ -75,32 +77,34 @@ export const AdminStorageLocations: React.FC = () => {
           </p>
         </div>
 
-        <button
+        <Button
           onClick={handleOpenAdd}
-          className="inline-flex items-center px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors self-start sm:self-auto"
+          variant="primary"
+          size="sm"
+          className="self-start sm:self-auto inline-flex items-center"
         >
-          <Plus className="w-3.5 h-3.5 mr-1.5" />
+          <Plus className="w-4 h-4 mr-1.5" />
           Add Storage Desk
-        </button>
+        </Button>
       </div>
 
       {isLoading ? (
         <div className="p-8 text-center text-xs text-slate-400">Loading locations...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {locations.map((loc) => (
-            <div
+            <StaggerItem
               key={loc.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 shadow-subtle flex flex-col justify-between"
+              className="bg-white rounded-xl border border-slate-200 p-5 shadow-subtle hover:shadow-elevated transition-all flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center border border-brand-100 group-hover:scale-105 transition-transform">
                     <Building2 className="w-5 h-5" />
                   </div>
                   <button
                     onClick={() => handleOpenEdit(loc)}
-                    className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                    className="p-1.5 text-slate-400 hover:text-brand-600 rounded-lg hover:bg-slate-100 transition-colors"
                     title="Edit Location"
                   >
                     <Edit3 className="w-4 h-4" />
@@ -122,9 +126,9 @@ export const AdminStorageLocations: React.FC = () => {
                   </span>
                 </div>
               </div>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       )}
 
       {/* Modal */}
@@ -142,7 +146,7 @@ export const AdminStorageLocations: React.FC = () => {
             <select
               value={selectedName}
               onChange={(e) => setSelectedName(e.target.value as StorageLocationName)}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-brand-500"
             >
               {Object.values(StorageLocationName).map((n) => (
                 <option key={n} value={n}>
@@ -153,23 +157,25 @@ export const AdminStorageLocations: React.FC = () => {
           </div>
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setShowModal(false)}
-              className="px-4 py-2 text-xs font-medium text-slate-600"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              isLoading={isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : editingLocation ? 'Update Desk' : 'Register Desk'}
-            </button>
+              {editingLocation ? 'Update Desk' : 'Register Desk'}
+            </Button>
           </div>
         </form>
       </Modal>
-    </div>
+    </PageTransition>
   );
 };

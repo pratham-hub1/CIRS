@@ -108,7 +108,7 @@ cp .env.example .env.local
 Configuration parameters:
 ```env
 # Backend Base URL (targets the live remote Cloudflare tunnel backend)
-VITE_API_BASE_URL=https://ireland-auditor-investigate-eugene.trycloudflare.com/api/v1
+VITE_API_BASE_URL=https://misc-cholesterol-till-benefits.trycloudflare.com/api/v1
 
 # University domain restriction hint
 VITE_UNIVERSITY_DOMAIN=gsfcuniversity.ac.in
@@ -124,7 +124,7 @@ VITE_DEMO_MODE=false
 ```bash
 npm run dev
 ```
-The application will launch on `http://localhost:5173`. Requests are forwarded to the live remote backend at `https://ireland-auditor-investigate-eugene.trycloudflare.com` directly or via the Vite development proxy (`/api`, `/uploads`, `/health`), ensuring same-origin cookie transport and full CORS compatibility.
+The application will launch on `http://localhost:5173`. Requests are forwarded to the live remote backend at `https://misc-cholesterol-till-benefits.trycloudflare.com` directly or via the Vite development proxy (`/api`, `/uploads`, `/health`), ensuring same-origin cookie transport and full CORS compatibility.
 
 ### Production Build & Typecheck
 ```bash
@@ -140,9 +140,9 @@ npm run preview
 ---
 
 ## 🔗 Remote Backend Integration Details
-- **Backend Origin**: `https://ireland-auditor-investigate-eugene.trycloudflare.com`
-- **API Base**: `https://ireland-auditor-investigate-eugene.trycloudflare.com/api/v1`
-- **Health Check**: `https://ireland-auditor-investigate-eugene.trycloudflare.com/health` (verified HTTP 200 OK)
-- **OpenAPI / Swagger Spec**: `https://ireland-auditor-investigate-eugene.trycloudflare.com/api/docs-json` (verified HTTP 200 OK)
+- **Backend Origin**: `https://misc-cholesterol-till-benefits.trycloudflare.com`
+- **API Base**: `https://misc-cholesterol-till-benefits.trycloudflare.com/api/v1`
+- **Health Check**: `https://misc-cholesterol-till-benefits.trycloudflare.com/health` (verified HTTP 200 OK)
+- **OpenAPI / Swagger Spec**: `https://misc-cholesterol-till-benefits.trycloudflare.com/api/docs-json` (verified HTTP 200 OK)
 - **Real-Data Guarantee**: Automatic silent mock-data fallback has been removed. Live server responses and genuine error envelopes (`{ error: { code, message, details } }`) are rendered. Demo fixtures are strictly opt-in via `VITE_DEMO_MODE=true`.
 

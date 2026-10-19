@@ -4,7 +4,7 @@ import path from 'path';
 
 const BACKEND_TARGET =
   process.env.VITE_BACKEND_TARGET ||
-  'https://ireland-auditor-investigate-eugene.trycloudflare.com';
+  'https://misc-cholesterol-till-benefits.trycloudflare.com';
 
 // https://vitejs.dev/config/
 export default defineConfig({

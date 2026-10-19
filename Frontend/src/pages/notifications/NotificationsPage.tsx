@@ -3,6 +3,8 @@ import { Bell, CheckCheck, Check, AlertCircle, Sparkles, KeyRound, ArrowRight } 
 import { useNotifications } from '../../context/NotificationContext';
 import { NotificationType } from '../../types/enums';
 import { EmptyState } from '../../components/common/EmptyState';
+import { PageTransition, StaggerContainer, StaggerItem } from '../../components/common/AnimatedTransitions';
+import { Button } from '../../components/common/Button';
 
 export const NotificationsPage: React.FC = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead, isLoading } = useNotifications();
@@ -28,7 +30,7 @@ export const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <PageTransition className="space-y-6 max-w-4xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Notification Center</h1>
@@ -38,13 +40,15 @@ export const NotificationsPage: React.FC = () => {
         </div>
 
         {unreadCount > 0 && (
-          <button
+          <Button
             onClick={markAllAsRead}
-            className="inline-flex items-center px-3.5 py-2 text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition-colors self-start sm:self-auto"
+            variant="outline"
+            size="sm"
+            className="text-brand-700 bg-brand-50/80 border-brand-200 hover:bg-brand-100 self-start sm:self-auto"
           >
             <CheckCheck className="w-4 h-4 mr-1.5" />
             Mark all as read
-          </button>
+          </Button>
         )}
       </div>
 
@@ -82,18 +86,18 @@ export const NotificationsPage: React.FC = () => {
           }
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden divide-y divide-slate-100 shadow-subtle">
+        <StaggerContainer className="bg-white rounded-2xl border border-slate-200 overflow-hidden divide-y divide-slate-100 shadow-subtle">
           {filtered.map((n) => {
             const isUnread = !n.readAt;
             return (
-              <div
+              <StaggerItem
                 key={n.id}
                 className={`p-4 sm:p-5 flex items-start justify-between gap-4 transition-colors ${
-                  isUnread ? 'bg-brand-50/20 hover:bg-brand-50/40' : 'hover:bg-slate-50/60'
+                  isUnread ? 'bg-brand-50/25 hover:bg-brand-50/45' : 'hover:bg-slate-50/70'
                 }`}
               >
                 <div className="flex items-start space-x-3.5 flex-1">
-                  <div className="p-2 rounded-xl bg-slate-100 flex-shrink-0 mt-0.5">
+                  <div className="p-2.5 rounded-xl bg-slate-100 flex-shrink-0 mt-0.5 border border-slate-200/60">
                     {getNotificationIcon(n.type)}
                   </div>
                   <div>
@@ -102,13 +106,13 @@ export const NotificationsPage: React.FC = () => {
                         {n.type.replace(/_/g, ' ')}
                       </span>
                       {isUnread && (
-                        <span className="w-2 h-2 rounded-full bg-brand-600" />
+                        <span className="w-2 h-2 rounded-full bg-brand-600 animate-pulse" />
                       )}
                     </div>
                     <p className={`text-sm leading-relaxed ${isUnread ? 'font-semibold text-slate-900' : 'text-slate-700'}`}>
                       {n.message}
                     </p>
-                    <span className="text-[11px] text-slate-400 mt-1 block">
+                    <span className="text-[11px] text-slate-400 mt-1 block font-mono">
                       {new Date(n.createdAt).toLocaleString([], {
                         dateStyle: 'medium',
                         timeStyle: 'short',
@@ -126,11 +130,11 @@ export const NotificationsPage: React.FC = () => {
                     <Check className="w-4 h-4" />
                   </button>
                 )}
-              </div>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerContainer>
       )}
-    </div>
+    </PageTransition>
   );
 };

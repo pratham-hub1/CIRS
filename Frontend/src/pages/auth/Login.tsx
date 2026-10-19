@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Role } from '../../types/enums';
+import { Button } from '../../components/common/Button';
+import { FadeIn } from '../../components/common/AnimatedTransitions';
 
 export const Login: React.FC = () => {
-  const { login, switchDemoRole } = useAuth();
+  const { login } = useAuth();
   const { success, error } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,7 +32,7 @@ export const Login: React.FC = () => {
     setIsSubmitting(true);
     try {
       await login({ email: email.trim(), password });
-      success('Logged in successfully');
+      success('Authenticated successfully. Welcome back!');
       navigate(from, { replace: true });
     } catch (err: any) {
       const msg = err.message || 'Invalid email or password.';
@@ -42,41 +43,39 @@ export const Login: React.FC = () => {
     }
   };
 
-  const handleQuickDemo = (role: Role) => {
-    switchDemoRole(role);
-    success(`Switched to demo ${role.toLowerCase()} account`);
-    navigate('/dashboard', { replace: true });
-  };
-
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="w-12 h-12 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold mx-auto mb-3 shadow-md">
-          <span className="text-xl">CI</span>
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-brand-500 selection:text-white">
+      <FadeIn className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-700 via-brand-600 to-accent-600 flex items-center justify-center text-white font-extrabold mx-auto mb-4 shadow-elevated ring-4 ring-white">
+          <span className="text-xl font-mono tracking-wider">CI</span>
         </div>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-          Sign in to CIRS
-        </h2>
-        <p className="mt-1.5 text-sm text-slate-600">
-          Campus Item Recovery System — GSFC University
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          Sign In to CIRS
+        </h1>
+        <p className="mt-1.5 text-xs sm:text-sm text-slate-500 font-normal">
+          Campus Item Recovery System — GSFC University Central Desk
         </p>
-      </div>
+      </FadeIn>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow-elevated rounded-2xl border border-slate-200 sm:px-10">
+      <FadeIn delay={0.1} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-6 sm:px-10 shadow-elevated rounded-3xl border border-slate-200/90">
           {errorMessage && (
-            <div className="mb-5 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
-              {errorMessage}
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+              <span>{errorMessage}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+              <label
+                htmlFor="email"
+                className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
+              >
                 University Email Address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
@@ -86,20 +85,23 @@ export const Login: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="student@gsfcuniversity.ac.in"
-                  className="block w-full pl-9 pr-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white"
+                  className="block w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
                 />
               </div>
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="mt-1.5 text-[11px] text-slate-400 font-normal">
                 Restricted to authorized university domains (@gsfcuniversity.ac.in)
               </p>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+              <label
+                htmlFor="password"
+                className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
+              >
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -109,77 +111,42 @@ export const Login: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="block w-full pl-9 pr-10 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white"
+                  className="block w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors disabled:opacity-50"
+              variant="primary"
+              isLoading={isSubmitting}
+              className="w-full py-2.5 text-sm"
             >
-              {isSubmitting ? (
-                'Signing in...'
-              ) : (
-                <>
-                  Sign in <ArrowRight className="w-4 h-4 ml-1.5" />
-                </>
-              )}
-            </button>
+              <span>Sign In to CIRS</span>
+              <ArrowRight className="w-4 h-4 ml-1.5" />
+            </Button>
           </form>
 
-          {/* Quick Demo Preview Access */}
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-2.5">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center">
-                <Sparkles className="w-3.5 h-3.5 mr-1 text-amber-500" /> Quick Preview Login
-              </span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickDemo(Role.STUDENT)}
-                className="py-1.5 px-2 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-center"
-              >
-                Student
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo(Role.FACULTY)}
-                className="py-1.5 px-2 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-center"
-              >
-                Faculty
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo(Role.ADMIN)}
-                className="py-1.5 px-2 text-xs font-medium bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 rounded-lg transition-colors text-center font-semibold"
-              >
-                Security
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-6 text-center text-xs text-slate-500">
-            Don't have an account yet?{' '}
-            <Link to="/register" className="font-semibold text-brand-600 hover:text-brand-700">
-              Register now
+          <div className="mt-6 text-center text-xs text-slate-500 font-medium">
+            New to CIRS?{' '}
+            <Link to="/register" className="font-bold text-brand-600 hover:text-brand-700 underline">
+              Create an account
             </Link>
           </div>
         </div>
 
-        <div className="mt-6 text-center text-xs text-slate-400">
-          <p>Protected by University Access Control & Argon2id Token Encryption</p>
+        <div className="mt-6 text-center text-[11px] text-slate-400 font-medium flex items-center justify-center space-x-1.5">
+          <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+          <span>GSFC University SSO Protocol & Argon2id Encrypted</span>
         </div>
-      </div>
+      </FadeIn>
     </div>
   );
 };

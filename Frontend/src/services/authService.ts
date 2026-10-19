@@ -4,6 +4,8 @@ import {
   LoginPayload,
   RegisterPayload,
   User,
+  Campus,
+  Department,
   UpdateUserPayload,
   NotificationPreference,
   UpdateNotificationPreferencePayload,
@@ -11,6 +13,12 @@ import {
 import { DEMO_USERS } from './demoFixtures';
 
 export const authService = {
+  async getCampuses(): Promise<Campus[]> {
+    const res = await apiClient.get<Campus[] | { data: Campus[] }>('/campuses', { skipAuth: true });
+    if (Array.isArray(res)) return res;
+    if (Array.isArray((res as any)?.data)) return (res as any).data;
+    return [];
+  },
   async login(payload: LoginPayload): Promise<AuthResponse> {
     if (apiClient.isDemoMode()) {
       const email = payload.email.toLowerCase();

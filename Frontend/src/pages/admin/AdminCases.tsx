@@ -20,6 +20,8 @@ import { ItemStatusBadge, ItemTypeBadge, CategoryBadge } from '../../components/
 import { TableRowSkeleton } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { PageTransition } from '../../components/common/AnimatedTransitions';
+import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
 
 export const AdminCases: React.FC = () => {
@@ -163,12 +165,14 @@ export const AdminCases: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Campus Case Management</h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Review, advance lifecycle state, and execute physical handovers for all reported items across campus.
-        </p>
+    <PageTransition className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Campus Case Management</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Review, advance lifecycle state, and execute physical handovers for all reported items across campus.
+          </p>
+        </div>
       </div>
 
       {/* Filter Bar */}
@@ -281,42 +285,50 @@ export const AdminCases: React.FC = () => {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1.5">
                         {item.status === ItemStatus.FOUND && (
-                          <button
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => handleMarkReady(item.caseId)}
-                            className="px-2.5 py-1 text-[11px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200"
+                            className="px-2.5 py-1 text-[11px] h-auto font-semibold text-blue-700 bg-blue-50/80 hover:bg-blue-100 border-blue-200"
                             title="Mark Ready for Collection"
                           >
                             Mark Ready
-                          </button>
+                          </Button>
                         )}
 
                         {item.status === ItemStatus.READY_FOR_COLLECTION && (
-                          <button
+                          <Button
+                            size="sm"
+                            variant="success"
                             onClick={() => setHandoverTarget(item)}
-                            className="px-2.5 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded border border-emerald-200"
+                            className="px-2.5 py-1 text-[11px] h-auto font-semibold"
                             title="Record Staff Handover"
                           >
                             Handover
-                          </button>
+                          </Button>
                         )}
 
-                        <button
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => {
                             setAdvanceTarget(item);
                             setNewStatus(item.status);
                           }}
-                          className="px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100 rounded border border-slate-200"
+                          className="px-2 py-1 text-[11px] h-auto font-medium text-slate-700"
                         >
                           Status
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
+                          size="sm"
+                          variant="ghost"
                           onClick={() => setArchiveTargetCaseId(item.caseId)}
-                          className="px-2 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-100 rounded"
+                          className="px-2 py-1 text-[11px] h-auto font-medium text-slate-500 hover:text-rose-600"
                           title="Archive Case"
                         >
                           Archive
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -370,20 +382,22 @@ export const AdminCases: React.FC = () => {
           )}
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setHandoverTarget(null)}
-              className="px-4 py-2 text-xs font-medium text-slate-600"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isHandingOver}
-              className="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg disabled:opacity-50"
+              variant="success"
+              size="sm"
+              isLoading={isHandingOver}
             >
-              {isHandingOver ? 'Recording...' : 'Confirm Handover'}
-            </button>
+              Confirm Handover
+            </Button>
           </div>
         </form>
       </Modal>
@@ -414,20 +428,22 @@ export const AdminCases: React.FC = () => {
           </div>
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setAdvanceTarget(null)}
-              className="px-4 py-2 text-xs font-medium text-slate-600"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isAdvancing}
-              className="px-5 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              isLoading={isAdvancing}
             >
-              {isAdvancing ? 'Updating...' : 'Update Status'}
-            </button>
+              Update Status
+            </Button>
           </div>
         </form>
       </Modal>
@@ -443,6 +459,6 @@ export const AdminCases: React.FC = () => {
         isDestructive={false}
         isLoading={isProcessingAction}
       />
-    </div>
+    </PageTransition>
   );
 };

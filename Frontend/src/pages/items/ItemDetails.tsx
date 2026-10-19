@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin,
   Calendar,
@@ -16,10 +17,16 @@ import {
   Send,
   ArrowLeft,
   AlertCircle,
+  Check,
+  ChevronRight,
+  Clock,
+  Eye,
+  X,
 } from 'lucide-react';
 import { itemsService } from '../../services/itemsService';
 import { matchingService } from '../../services/matchingService';
 import { claimsService } from '../../services/claimsService';
+import { resolveImageUrl } from '../../services/apiClient';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Item, CaseMessage } from '../../types/item';
@@ -29,7 +36,10 @@ import { ItemStatusBadge, ItemTypeBadge, CategoryBadge } from '../../components/
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { Button } from '../../components/common/Button';
+import { FadeIn } from '../../components/common/AnimatedTransitions';
 import { SubmitClaimModal } from '../claims/SubmitClaimModal';
+import { formatRelativeTime } from '../../lib/utils';
 
 export const ItemDetails: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
@@ -46,6 +56,7 @@ export const ItemDetails: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isCanceling, setIsCanceling] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
@@ -88,8 +99,14 @@ export const ItemDetails: React.FC = () => {
   }, [loadCase]);
 
   const isOwner = user && item && item.reporterId === user.id;
-  const isEditable = isOwner && (item?.status === ItemStatus.LOST_REPORTED || item?.status === ItemStatus.FOUND);
-  const canClaim = !isOwner && item?.type === ItemType.FOUND && item?.status !== ItemStatus.RETURNED && item?.status !== ItemStatus.ARCHIVED;
+  const isEditable =
+    isOwner && (item?.status === ItemStatus.LOST_REPORTED || item?.status === ItemStatus.FOUND);
+  const canClaim =
+    !isOwner &&
+    item?.type === ItemType.FOUND &&
+    item?.status !== ItemStatus.RETURNED &&
+    item?.status !== ItemStatus.ARCHIVED &&
+    item?.status !== ItemStatus.UNCLAIMED;
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,7 +136,7 @@ export const ItemDetails: React.FC = () => {
       const updated = await itemsService.cancelItem(caseId);
       setItem(updated);
       setShowCancelDialog(false);
-      success('Case has been cancelled');
+      success('Case has been cancelled and archived');
     } catch (err: any) {
       error(err.message || 'Failed to cancel case');
     } finally {
@@ -135,7 +152,7 @@ export const ItemDetails: React.FC = () => {
       const sent = await itemsService.addCaseMessage(caseId, newMessage.trim());
       setMessages((prev) => [...prev, sent]);
       setNewMessage('');
-      success('Message sent to staff');
+      success('Message delivered to campus security desk');
     } catch (err: any) {
       error(err.message || 'Failed to send message');
     } finally {
@@ -181,121 +198,212 @@ export const ItemDetails: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
-        <LoadingSpinner size="lg" label="Loading case details..." />
+        <LoadingSpinner size="lg" label="Retrieving secure case dossier..." />
       </div>
     );
   }
 
   if (!item) {
     return (
-      <div className="p-8 text-center bg-white rounded-xl border border-slate-200">
-        <h3 className="text-lg font-semibold text-slate-800">Case Not Found</h3>
-        <p className="text-sm text-slate-500 mt-1">The requested case could not be located.</p>
+      <div className="p-10 text-center bg-white rounded-3xl border border-slate-200/90 shadow-subtle max-w-md mx-auto">
+        <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-3" />
+        <h3 className="text-lg font-bold text-slate-800">Case Record Not Found</h3>
+        <p className="text-xs text-slate-500 mt-1">
+          The requested case ID could not be located in the university repository.
+        </p>
         <button
           onClick={() => navigate('/feed')}
-          className="mt-4 px-4 py-2 text-sm font-medium text-brand-600 hover:underline"
+          className="mt-5 px-4 py-2 text-xs font-bold text-brand-600 hover:text-brand-700 bg-brand-50 rounded-xl"
         >
-          ← Return to Community Feed
+          Return to Community Feed
         </button>
       </div>
     );
   }
 
-  const imagesList = (item.images || []).map((img) => (typeof img === 'string' ? img : img.url));
+  const imagesList = (item.images || [])
+    .map((img) => resolveImageUrl(typeof img === 'string' ? img : img.url))
+    .filter(Boolean);
+
+  // Determine active step index for lifecycle tracker
+  const getLifecycleStep = (status: ItemStatus) => {
+    switch (status) {
+      case ItemStatus.LOST_REPORTED:
+        return 1;
+      case ItemStatus.FOUND:
+        return 2;
+      case ItemStatus.READY_FOR_COLLECTION:
+        return 3;
+      case ItemStatus.RETURNED:
+      case ItemStatus.ARCHIVED:
+      case ItemStatus.UNCLAIMED:
+        return 4;
+      default:
+        return 1;
+    }
+  };
+
+  const currentStep = getLifecycleStep(item.status);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Top back bar */}
-      <div className="flex items-center justify-between">
+    <FadeIn className="space-y-6 sm:space-y-8 max-w-5xl mx-auto">
+      {/* Top back bar and actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors self-start"
         >
-          <ArrowLeft className="w-4 h-4 mr-1.5" /> Back
+          <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to listings
         </button>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           {isEditable && (
             <>
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setShowEditModal(true)}
-                className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
               >
                 <Edit3 className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
-                Edit Case
-              </button>
-              <button
+                Edit Specifications
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={() => setShowCancelDialog(true)}
-                className="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors"
               >
                 <XCircle className="w-3.5 h-3.5 mr-1.5" />
                 Cancel Case
-              </button>
+              </Button>
             </>
           )}
 
           {canClaim && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => setShowClaimModal(true)}
-              className="inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-sm transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              Claim Ownership
-            </button>
+              Claim This Item
+            </Button>
           )}
 
-          {isOwner && (item.status === ItemStatus.READY_FOR_COLLECTION) && (
-            <button
+          {isOwner && item.status === ItemStatus.READY_FOR_COLLECTION && (
+            <Button
+              variant="success"
+              size="sm"
               onClick={handleConfirmReceipt}
-              className="inline-flex items-center px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-colors"
             >
               <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
               Confirm Receipt
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
+      {/* Case Lifecycle Progress Tracker */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-subtle">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            Case Lifecycle Status
+          </span>
+          <ItemStatusBadge status={item.status} size="sm" />
+        </div>
+        <div className="grid grid-cols-4 gap-2 text-center text-xs">
+          {[
+            { step: 1, label: 'Reported' },
+            { step: 2, label: 'In Custody / Matching' },
+            { step: 3, label: 'Ready for Collection' },
+            { step: 4, label: 'Resolved / Handed Over' },
+          ].map((st) => (
+            <div key={st.step} className="flex flex-col items-center">
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs mb-1.5 transition-all ${
+                  currentStep >= st.step
+                    ? 'bg-brand-600 text-white shadow-subtle ring-4 ring-brand-50'
+                    : 'bg-slate-100 text-slate-400'
+                }`}
+              >
+                {currentStep > st.step ? <Check className="w-4 h-4" /> : st.step}
+              </div>
+              <span
+                className={`text-[10px] sm:text-xs font-semibold leading-tight ${
+                  currentStep >= st.step ? 'text-slate-800' : 'text-slate-400'
+                }`}
+              >
+                {st.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Main Case Overview Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-subtle">
+      <div className="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-subtle">
         {/* Banner with tags & status */}
-        <div className="p-6 bg-slate-50/70 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
+        <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-50/90 to-white border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center space-x-2.5">
             <ItemTypeBadge type={item.type} />
-            <span className="font-mono text-xs font-bold text-slate-500 bg-white px-2.5 py-1 rounded-md border border-slate-200">
+            <span className="font-mono text-xs font-bold text-slate-600 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-sm">
               {item.caseId}
             </span>
             <CategoryBadge category={item.category} />
           </div>
-          <ItemStatusBadge status={item.status} size="md" />
+          <div className="text-xs text-slate-400 font-medium">
+            Reported {formatRelativeTime(item.createdAt)}
+          </div>
         </div>
 
         <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Photos / Gallery */}
           <div className="md:col-span-1 space-y-3">
             {imagesList.length > 0 ? (
-              <div className="space-y-2">
-                <div className="h-64 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+              <div className="space-y-2.5">
+                <div
+                  onClick={() => setPreviewImage(imagesList[0])}
+                  className="h-64 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 cursor-pointer relative group"
+                >
                   <img
                     src={imagesList[0]}
                     alt={item.itemName}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
+                    }}
                   />
+                  <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
+                    <Eye className="w-4 h-4 mr-1.5" /> Click to enlarge
+                  </div>
                 </div>
                 {imagesList.length > 1 && (
                   <div className="grid grid-cols-3 gap-2">
                     {imagesList.slice(1).map((img, idx) => (
-                      <div key={idx} className="h-16 rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
-                        <img src={img} alt="" className="w-full h-full object-cover" />
+                      <div
+                        key={idx}
+                        onClick={() => setPreviewImage(img)}
+                        className="h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 cursor-pointer hover:opacity-80 transition-opacity"
+                      >
+                        <img
+                          src={img}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
+                          }}
+                        />
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="h-64 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-slate-400 p-4 text-center">
-                <Package className="w-12 h-12 mb-2 stroke-1" />
-                <span className="text-xs">No photograph provided</span>
+              <div className="h-64 rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 flex flex-col items-center justify-center text-slate-400 p-4 text-center">
+                <Package className="w-12 h-12 mb-2 stroke-1 text-slate-300" />
+                <span className="text-xs font-medium">No photograph attached</span>
+                <span className="text-[10px] text-slate-400 mt-0.5">
+                  Specification-based match
+                </span>
               </div>
             )}
           </div>
@@ -303,46 +411,50 @@ export const ItemDetails: React.FC = () => {
           {/* Details Column */}
           <div className="md:col-span-2 space-y-6">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">{item.itemName}</h1>
-              <p className="mt-2 text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                {item.itemName}
+              </h1>
+              <p className="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line font-normal">
                 {item.description}
               </p>
             </div>
 
             {/* Specifications Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-slate-50/80 border border-slate-200/60 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/70 text-xs">
               <div>
-                <span className="text-slate-400 block uppercase tracking-wider font-semibold text-[10px]">
-                  Brand
+                <span className="text-slate-400 block uppercase tracking-wider font-bold text-[10px]">
+                  Brand / Make
                 </span>
-                <span className="font-semibold text-slate-800 mt-0.5 block">{item.brand || 'Unbranded'}</span>
+                <span className="font-bold text-slate-800 mt-1 block">
+                  {item.brand || 'Unbranded'}
+                </span>
               </div>
               <div>
-                <span className="text-slate-400 block uppercase tracking-wider font-semibold text-[10px]">
+                <span className="text-slate-400 block uppercase tracking-wider font-bold text-[10px]">
                   Colour
                 </span>
-                <span className="font-semibold text-slate-800 mt-0.5 block">{item.colour}</span>
+                <span className="font-bold text-slate-800 mt-1 block">{item.colour}</span>
               </div>
               <div>
-                <span className="text-slate-400 block uppercase tracking-wider font-semibold text-[10px]">
+                <span className="text-slate-400 block uppercase tracking-wider font-bold text-[10px]">
                   Serial Number
                 </span>
-                <span className="font-mono font-semibold text-slate-800 mt-0.5 block">
+                <span className="font-mono font-bold text-slate-800 mt-1 block">
                   {item.serialNumber || 'N/A'}
                 </span>
               </div>
-              <div className="col-span-2 sm:col-span-3 pt-2 border-t border-slate-200/60">
-                <span className="text-slate-400 block uppercase tracking-wider font-semibold text-[10px]">
+              <div className="col-span-2 sm:col-span-3 pt-3 border-t border-slate-200/60">
+                <span className="text-slate-400 block uppercase tracking-wider font-bold text-[10px]">
                   Identifying Marks & Features
                 </span>
-                <span className="text-slate-800 mt-0.5 block leading-relaxed">
+                <span className="text-slate-800 mt-1 block leading-relaxed font-medium">
                   {item.identifyingMarks || 'None stated'}
                 </span>
               </div>
             </div>
 
-            {/* Date & Location Specifics */}
-            <div className="space-y-2 text-xs text-slate-600">
+            {/* Location & Custody details */}
+            <div className="space-y-2.5 text-xs text-slate-600 font-medium">
               <div className="flex items-center">
                 <MapPin className="w-4 h-4 mr-2 text-slate-400 flex-shrink-0" />
                 <span>
@@ -353,7 +465,7 @@ export const ItemDetails: React.FC = () => {
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-2 text-slate-400 flex-shrink-0" />
                 <span>
-                  <strong>Reported on:</strong>{' '}
+                  <strong>Report Date:</strong>{' '}
                   {new Date(item.createdAt).toLocaleString([], {
                     dateStyle: 'medium',
                     timeStyle: 'short',
@@ -362,10 +474,10 @@ export const ItemDetails: React.FC = () => {
               </div>
 
               {item.storageLocation && (
-                <div className="flex items-center text-brand-700 bg-brand-50/80 px-3 py-2 rounded-lg border border-brand-100 font-medium">
+                <div className="flex items-center text-brand-800 bg-brand-50/80 px-3.5 py-2.5 rounded-xl border border-brand-200/60 font-semibold shadow-subtle">
                   <Building2 className="w-4 h-4 mr-2 text-brand-600 flex-shrink-0" />
                   <span>
-                    Secured Custody Desk: <strong>{item.storageLocation.name}</strong>
+                    Secured Custody Vault: <strong>{item.storageLocation.name}</strong>
                   </span>
                 </div>
               )}
@@ -376,12 +488,13 @@ export const ItemDetails: React.FC = () => {
 
       {/* Candidate Matches Section */}
       {matches.length > 0 && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-subtle space-y-4">
+        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900 flex items-center">
               <Layers className="w-4 h-4 mr-2 text-brand-600" />
-              Potential Matches Detected ({matches.length})
+              Automated Candidate Matches ({matches.length})
             </h2>
+            <span className="text-xs text-slate-400">Ranked by attribute similarity</span>
           </div>
 
           <div className="space-y-3">
@@ -390,18 +503,18 @@ export const ItemDetails: React.FC = () => {
               return (
                 <div
                   key={m.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 gap-4"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50 transition-colors gap-4"
                 >
                   <div>
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-800">
-                        {(m.score * 100).toFixed(0)}% Match Score
+                    <div className="flex items-center space-x-2 mb-1.5">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-100 text-brand-800 border border-brand-200/60">
+                        {(m.score * 100).toFixed(0)}% Similarity
                       </span>
-                      <span className="text-xs font-semibold text-slate-500 font-mono">
+                      <span className="text-xs font-mono font-bold text-slate-500">
                         {matchedItem?.caseId}
                       </span>
                     </div>
-                    <h4 className="text-sm font-semibold text-slate-900">
+                    <h4 className="text-sm font-bold text-slate-900">
                       {matchedItem?.itemName || 'Opposite Item'}
                     </h4>
                     <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
@@ -410,27 +523,28 @@ export const ItemDetails: React.FC = () => {
                   </div>
 
                   <div className="flex items-center space-x-2 flex-shrink-0">
-                    <Link
-                      to={`/items/${matchedItem?.caseId}`}
-                      className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
-                    >
-                      Inspect Match
+                    <Link to={`/items/${matchedItem?.caseId}`}>
+                      <Button variant="outline" size="sm">
+                        Inspect
+                      </Button>
                     </Link>
 
                     {isAdmin && m.status === MatchStatus.SUGGESTED && (
                       <>
-                        <button
+                        <Button
+                          variant="success"
+                          size="sm"
                           onClick={() => handleConfirmMatch(m.id)}
-                          className="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg"
                         >
                           Confirm
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleDismissMatch(m.id)}
-                          className="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-200 hover:bg-slate-300 rounded-lg"
                         >
                           Dismiss
-                        </button>
+                        </Button>
                       </>
                     )}
                   </div>
@@ -442,65 +556,128 @@ export const ItemDetails: React.FC = () => {
       )}
 
       {/* Staff-mediated Case Messages Thread */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-subtle space-y-4">
-        <h2 className="text-base font-bold text-slate-900 flex items-center">
-          <MessageSquare className="w-4 h-4 mr-2 text-brand-600" />
-          Staff-Mediated Case Communication
-        </h2>
-        <p className="text-xs text-slate-500">
-          Messages sent here are securely mediated by campus security officers to coordinate safe recovery without public contact disclosure.
-        </p>
+      <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle space-y-4">
+        <div>
+          <h2 className="text-base font-bold text-slate-900 flex items-center">
+            <MessageSquare className="w-4 h-4 mr-2 text-brand-600" />
+            Official Security Communications
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5 font-normal">
+            Encrypted staff channel for this case. Direct handover coordination is mediated by campus security officers.
+          </p>
+        </div>
 
         {/* Messages List */}
-        <div className="space-y-3 max-h-80 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-100 divide-y divide-slate-100">
+        <div className="space-y-3 max-h-80 overflow-y-auto p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 scrollbar-thin">
           {messages.length === 0 ? (
-            <p className="text-center text-xs text-slate-400 py-4">
-              No messages posted yet for this case.
-            </p>
+            <div className="text-center py-6 text-slate-400">
+              <MessageSquare className="w-8 h-8 mx-auto mb-1 opacity-40" />
+              <p className="text-xs font-medium">No messages posted yet for this case.</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                Post an inquiry or update below to alert security staff.
+              </p>
+            </div>
           ) : (
-            messages.map((msg) => (
-              <div key={msg.id} className="pt-3 first:pt-0">
-                <div className="flex items-center justify-between text-[11px] mb-1">
-                  <span className="font-semibold text-slate-800">
-                    {msg.sender?.name || 'Authorized Member'}
-                    {msg.sender?.role === Role.ADMIN && (
-                      <span className="ml-1.5 px-1.5 py-0.5 rounded text-[9px] bg-brand-100 text-brand-700 font-bold uppercase">
+            messages.map((msg) => {
+              const isStaff = msg.sender?.role === Role.ADMIN;
+              const isCurrentUser = user && msg.senderId === user.id;
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}
+                >
+                  <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mb-1 px-1">
+                    <span className="font-bold text-slate-700">
+                      {isCurrentUser ? 'You' : msg.sender?.name || 'Member'}
+                    </span>
+                    {isStaff && (
+                      <span className="px-1.5 py-0.2 rounded text-[9px] bg-brand-100 text-brand-700 font-bold uppercase">
                         Staff
                       </span>
                     )}
-                  </span>
-                  <span className="text-slate-400">
-                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                    <span>•</span>
+                    <span>
+                      {new Date(msg.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                  <div
+                    className={`max-w-md p-3 rounded-2xl text-xs leading-relaxed ${
+                      isCurrentUser
+                        ? 'bg-brand-600 text-white rounded-tr-none shadow-subtle'
+                        : isStaff
+                        ? 'bg-brand-50 text-brand-950 border border-brand-200 rounded-tl-none font-medium'
+                        : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none shadow-subtle'
+                    }`}
+                  >
+                    {msg.body}
+                  </div>
                 </div>
-                <p className="text-xs text-slate-700 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-200">
-                  {msg.body}
-                </p>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
         {/* Message Input */}
-        <form onSubmit={handleSendMessage} className="flex gap-2 pt-2">
+        <form onSubmit={handleSendMessage} className="flex gap-2.5 pt-1">
           <input
             type="text"
             required
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message to campus security..."
-            className="flex-1 px-3.5 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+            placeholder="Type a message or inquiry to campus security officers..."
+            className="flex-1 px-4 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
           />
-          <button
+          <Button
             type="submit"
-            disabled={isSendingMessage}
-            className="px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg flex items-center disabled:opacity-50"
+            variant="primary"
+            size="sm"
+            isLoading={isSendingMessage}
+            className="px-5"
           >
             <Send className="w-3.5 h-3.5 mr-1.5" />
             Send
-          </button>
+          </Button>
         </form>
       </div>
+
+      {/* Image Preview Modal */}
+      <AnimatePresence>
+        {previewImage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md"
+              onClick={() => setPreviewImage(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative z-10 max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl"
+            >
+              <img
+                src={resolveImageUrl(previewImage)}
+                alt="Enlarged preview"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
+                }}
+              />
+              <button
+                onClick={() => setPreviewImage(null)}
+                className="absolute top-3 right-3 p-2 rounded-full bg-black/60 text-white hover:bg-black/90 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Edit Modal */}
       <Modal
@@ -511,21 +688,21 @@ export const ItemDetails: React.FC = () => {
       >
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
-              Item Name
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              Item Title
             </label>
             <input
               type="text"
               required
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                 Brand
               </label>
               <input
@@ -533,11 +710,11 @@ export const ItemDetails: React.FC = () => {
                 required
                 value={editBrand}
                 onChange={(e) => setEditBrand(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                 Colour
               </label>
               <input
@@ -545,13 +722,13 @@ export const ItemDetails: React.FC = () => {
                 required
                 value={editColour}
                 onChange={(e) => setEditColour(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               Description
             </label>
             <textarea
@@ -559,25 +736,27 @@ export const ItemDetails: React.FC = () => {
               rows={3}
               value={editDesc}
               onChange={(e) => setEditDesc(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
             />
           </div>
 
           <div className="flex justify-end space-x-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setShowEditModal(false)}
-              className="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-800"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSavingEdit}
-              className="px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg disabled:opacity-50"
+              variant="primary"
+              size="sm"
+              isLoading={isSavingEdit}
             >
-              {isSavingEdit ? 'Saving...' : 'Save Changes'}
-            </button>
+              Save Changes
+            </Button>
           </div>
         </form>
       </Modal>
@@ -588,7 +767,7 @@ export const ItemDetails: React.FC = () => {
         onClose={() => setShowCancelDialog(false)}
         onConfirm={handleCancelCase}
         title="Cancel This Case?"
-        message="Are you sure you want to cancel and close this case? This action will archive the case and prevent further match notifications."
+        message="Are you sure you want to cancel and close this case? This action will archive the case and stop further automated match alerts."
         confirmLabel="Yes, Cancel Case"
         isDestructive={true}
         isLoading={isCanceling}
@@ -608,6 +787,6 @@ export const ItemDetails: React.FC = () => {
           }}
         />
       )}
-    </div>
+    </FadeIn>
   );
 };

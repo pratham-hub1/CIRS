@@ -28,7 +28,52 @@ export function getApiConfig() {
     }
   }
 
+  // In local browser development (Vite dev server at localhost / 127.0.0.1),
+  // routing through the Vite proxy (/api/v1) ensures that HttpOnly SameSite=Strict
+  // cookies set by the backend (cirs_refresh_token) are correctly stored and sent by the browser.
+  const isLocalDev =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  if (isLocalDev) {
+    apiBase = '/api/v1';
+  }
+
   return { backendOrigin, apiBase };
+}
+
+/**
+ * Resolves item and document image URLs.
+ * - Preserves already valid absolute URLs (http://, https://, data:, blob:)
+ * - Fixes relative paths such as 'uploads/example.jpg' or '/uploads/example.jpg'
+ *   to point to the configured backend origin or existing Vite proxy.
+ */
+export function resolveImageUrl(url?: string | null): string {
+  if (!url || typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+
+  if (
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('blob:')
+  ) {
+    return trimmed;
+  }
+
+  const cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  const { backendOrigin } = getApiConfig();
+
+  // In local dev with Vite proxy, relative /uploads is routed via server.proxy
+  if (
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ) {
+    return cleanPath;
+  }
+
+  return backendOrigin ? `${backendOrigin}${cleanPath}` : cleanPath;
 }
 
 export interface RequestOptions extends RequestInit {
@@ -39,14 +84,18 @@ export interface RequestOptions extends RequestInit {
 
 class ApiClient {
   private accessToken: string | null = null;
-  private isRefreshing: boolean = false;
-  private refreshSubscribers: Array<(token: string) => void> = [];
+  private refreshPromise: Promise<boolean> | null = null;
+  private onAuthFailure?: () => void;
   // Demo mode is strictly opt-in via VITE_DEMO_MODE=true, never automatic
   private demoMode: boolean = import.meta.env.VITE_DEMO_MODE === 'true';
 
   constructor() {
     // Retain opt-in only if explicitly set in environment
     this.demoMode = import.meta.env.VITE_DEMO_MODE === 'true';
+  }
+
+  public setOnAuthFailure(callback: () => void) {
+    this.onAuthFailure = callback;
   }
 
   public setAccessToken(token: string | null) {
@@ -118,8 +167,9 @@ class ApiClient {
       headers['Idempotency-Key'] = options.idempotencyKey;
     }
 
-    // Set JSON header if not sending FormData
-    if (!(options.body instanceof FormData) && !headers['Content-Type']) {
+    // Set JSON header only if sending a non-FormData body.
+    // Fastify rejects Content-Type: application/json with 400 when body is empty.
+    if (options.body && !(options.body instanceof FormData) && !headers['Content-Type']) {
       headers['Content-Type'] = 'application/json';
     }
 
@@ -131,15 +181,17 @@ class ApiClient {
       });
 
       // Handle 401 Unauthorized with token refresh attempt (prevent infinite refresh loops)
+      // Only attempt refresh if there was an active access token session
       if (
         response.status === 401 &&
         !options.skipAuth &&
+        Boolean(this.accessToken) &&
         path !== '/auth/login' &&
         path !== '/auth/refresh' &&
         path !== '/auth/register'
       ) {
         const refreshed = await this.handleTokenRefresh();
-        if (refreshed) {
+        if (refreshed && this.accessToken) {
           headers['Authorization'] = `Bearer ${this.accessToken}`;
           const retryResponse = await fetch(url, {
             ...options,
@@ -196,68 +248,84 @@ class ApiClient {
   }
 
   private async handleTokenRefresh(): Promise<boolean> {
-    if (this.isRefreshing) {
-      return new Promise<boolean>((resolve) => {
-        this.refreshSubscribers.push((newToken: string) => {
-          resolve(!!newToken);
+    // Share a single refresh request among all concurrent 401 responses
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    // Do not attempt refresh if no token was active
+    if (!this.accessToken) {
+      return false;
+    }
+
+    this.refreshPromise = (async () => {
+      try {
+        const refreshUrl = this.buildUrl('/auth/refresh');
+        const response = await fetch(refreshUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({}),
         });
-      });
-    }
 
-    this.isRefreshing = true;
-    try {
-      const refreshUrl = this.buildUrl('/auth/refresh');
-      const response = await fetch(refreshUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({}),
-      });
+        if (!response.ok) {
+          this.setAccessToken(null);
+          this.onAuthFailure?.();
+          return false;
+        }
 
-      if (!response.ok) {
+        const data = await response.json();
+        if (data?.accessToken) {
+          this.setAccessToken(data.accessToken);
+          return true;
+        }
+
         this.setAccessToken(null);
-        this.notifyRefreshSubscribers('');
+        this.onAuthFailure?.();
         return false;
+      } catch {
+        this.setAccessToken(null);
+        this.onAuthFailure?.();
+        return false;
+      } finally {
+        this.refreshPromise = null;
       }
+    })();
 
-      const data = await response.json();
-      if (data?.accessToken) {
-        this.setAccessToken(data.accessToken);
-        this.notifyRefreshSubscribers(data.accessToken);
-        return true;
-      }
-      return false;
-    } catch {
-      this.setAccessToken(null);
-      this.notifyRefreshSubscribers('');
-      return false;
-    } finally {
-      this.isRefreshing = false;
-    }
-  }
-
-  private notifyRefreshSubscribers(newToken: string) {
-    this.refreshSubscribers.forEach((cb) => cb(newToken));
-    this.refreshSubscribers = [];
+    return this.refreshPromise;
   }
 
   public get<T>(path: string, options: RequestOptions = {}): Promise<T> {
     return this.request<T>(path, { ...options, method: 'GET' });
   }
 
-  public post<T>(path: string, body?: any, options: RequestOptions = {}): Promise<T> {
+  public post<T>(path: string, body: any = {}, options: RequestOptions = {}): Promise<T> {
+    const serializedBody =
+      body instanceof FormData
+        ? body
+        : body !== undefined
+        ? JSON.stringify(body)
+        : '{}';
+
     return this.request<T>(path, {
       ...options,
       method: 'POST',
-      body: body instanceof FormData ? body : JSON.stringify(body),
+      body: serializedBody,
     });
   }
 
-  public patch<T>(path: string, body?: any, options: RequestOptions = {}): Promise<T> {
+  public patch<T>(path: string, body: any = {}, options: RequestOptions = {}): Promise<T> {
+    const serializedBody =
+      body instanceof FormData
+        ? body
+        : body !== undefined
+        ? JSON.stringify(body)
+        : '{}';
+
     return this.request<T>(path, {
       ...options,
       method: 'PATCH',
-      body: JSON.stringify(body),
+      body: serializedBody,
     });
   }
 

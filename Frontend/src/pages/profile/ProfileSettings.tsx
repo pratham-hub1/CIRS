@@ -8,18 +8,19 @@ import {
   Save,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
   Info,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
 import { RoleBadge } from '../../components/common/Badge';
+import { Button } from '../../components/common/Button';
+import { FadeIn } from '../../components/common/AnimatedTransitions';
 import { useToast } from '../../context/ToastContext';
 import { NotificationPreference } from '../../types/auth';
 import { Role } from '../../types/enums';
 
 export const ProfileSettings: React.FC = () => {
-  const { user, refreshProfile, isDemoMode, switchDemoRole } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const { success, error } = useToast();
 
   // Profile form
@@ -95,21 +96,28 @@ export const ProfileSettings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <FadeIn className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
       {/* Top Header */}
-      <div className="border-b border-gray-200 pb-5">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Account &amp; Preferences</h1>
-        <p className="mt-1 text-sm text-gray-500">
+      <div className="border-b border-slate-200/90 pb-5">
+        <div className="flex items-center space-x-2 mb-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200/60">
+            Account Preferences
+          </span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Profile &amp; Settings
+        </h1>
+        <p className="mt-1 text-xs sm:text-sm text-slate-500 font-normal">
           Manage your GSFC University identity, department affiliations, and alert dispatch channels.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8">
         {/* Left Column: Personal Profile */}
         <div className="md:col-span-7 space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
-              <div className="w-16 h-16 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xl ring-4 ring-primary-50">
+          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle">
+            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-700 via-brand-600 to-accent-600 text-white flex items-center justify-center font-extrabold text-xl shadow-subtle ring-4 ring-brand-50">
                 {user?.name
                   ? user.name
                       .split(' ')
@@ -120,8 +128,8 @@ export const ProfileSettings: React.FC = () => {
                   : 'U'}
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">{user?.name || 'GSFC User'}</h2>
-                <p className="text-xs text-gray-500 font-mono">{user?.email}</p>
+                <h2 className="text-lg font-extrabold text-slate-900">{user?.name || 'GSFC User'}</h2>
+                <p className="text-xs text-slate-400 font-mono mt-0.5">{user?.email}</p>
                 <div className="mt-2">
                   <RoleBadge role={user?.role} />
                 </div>
@@ -130,7 +138,10 @@ export const ProfileSettings: React.FC = () => {
 
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div>
-                <label htmlFor="user-name" className="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label
+                  htmlFor="user-name"
+                  className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
+                >
                   Full Name
                 </label>
                 <input
@@ -138,120 +149,96 @@ export const ProfileSettings: React.FC = () => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-gray-800"
+                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium text-slate-800"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   University Email (Read-Only)
                 </label>
-                <div className="flex items-center gap-2 px-3.5 py-2 text-sm bg-gray-100 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed">
-                  <Mail className="w-4 h-4 text-gray-400" />
+                <div className="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm bg-slate-100/70 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed">
+                  <Mail className="w-4 h-4 text-slate-400" />
                   <span className="font-mono text-xs">{user?.email || 'student@gsfcuniversity.ac.in'}</span>
                 </div>
-                <p className="text-[11px] text-gray-400 mt-1">
+                <p className="text-[11px] text-slate-400 mt-1 font-normal">
                   Email addresses are permanently tied to university directory credentials.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-gray-600 mb-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   Campus Organization
                 </label>
-                <div className="flex items-center gap-2 px-3.5 py-2 text-sm bg-gray-100 border border-gray-200 rounded-lg text-gray-600">
-                  <Building className="w-4 h-4 text-gray-400" />
+                <div className="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm bg-slate-100/70 border border-slate-200 rounded-xl text-slate-700 font-medium">
+                  <Building className="w-4 h-4 text-slate-400" />
                   <span>{user?.campus?.name || 'GSFC University — Vigyan Bhavan Main Campus'}</span>
                 </div>
               </div>
 
               <div className="pt-2">
-                <button
+                <Button
                   type="submit"
-                  disabled={isSavingProfile}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors disabled:opacity-50"
+                  variant="primary"
+                  size="sm"
+                  isLoading={isSavingProfile}
                 >
-                  <Save className="w-4 h-4" />
-                  {isSavingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
-                </button>
+                  <Save className="w-3.5 h-3.5 mr-1.5" />
+                  Save Profile Changes
+                </Button>
               </div>
             </form>
           </div>
 
-          {/* Role Preview Switcher for evaluation */}
-          <div className="bg-gradient-to-br from-indigo-50/70 to-blue-50/70 rounded-xl border border-indigo-100 p-5">
+          {/* Account Role Information */}
+          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-subtle">
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-indigo-600" />
-              <h3 className="text-sm font-bold text-indigo-950">Quick Role Switcher (Evaluation &amp; Preview)</h3>
+              <Shield className="w-4 h-4 text-brand-600" />
+              <h3 className="text-sm font-bold text-slate-900">Access &amp; Permissions</h3>
             </div>
-            <p className="text-xs text-indigo-800 mb-3">
-              Switch roles to evaluate student report forms, staff moderation desks, and admin chain-of-custody logs:
+            <p className="text-xs text-slate-500 mb-3 font-normal">
+              Your account privileges are verified via your institutional credentials:
             </p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => switchDemoRole(Role.STUDENT)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
-                  user?.role === Role.STUDENT
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                Student View
-              </button>
-              <button
-                type="button"
-                onClick={() => switchDemoRole(Role.FACULTY)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
-                  user?.role === Role.FACULTY
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                Faculty View
-              </button>
-              <button
-                type="button"
-                onClick={() => switchDemoRole(Role.ADMIN)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
-                  user?.role === Role.ADMIN
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                Admin / Staff View
-              </button>
+            <div className="flex items-center gap-2.5">
+              <RoleBadge role={user?.role} />
+              <span className="text-xs text-slate-600 font-medium">
+                {user?.role === Role.ADMIN
+                  ? 'Authorized campus security & item custodian privileges.'
+                  : user?.role === Role.FACULTY
+                  ? 'University faculty member access.'
+                  : 'Student recovery access.'}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Right Column: Notification Preferences */}
         <div className="md:col-span-5 space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
-              <Bell className="w-5 h-5 text-primary-600" />
-              <h2 className="text-lg font-bold text-gray-900">Notifications</h2>
+          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+              <Bell className="w-5 h-5 text-brand-600" />
+              <h2 className="text-base font-extrabold text-slate-900">Notification Settings</h2>
             </div>
 
             {/* Email dispatch notice */}
-            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 mb-5 flex items-start gap-2.5">
-              <Info className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+            <div className="p-4 bg-brand-50/70 border border-brand-200/80 rounded-2xl text-xs text-brand-950 mb-5 flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-brand-600 mt-0.5 shrink-0" />
               <div>
-                <span className="font-semibold block mb-0.5">Notification Channels:</span>
-                <p className="text-amber-800 leading-relaxed">
-                  In-app notifications appear instantly in your bell menu. Email delivery uses the university mail service.
+                <span className="font-bold block mb-0.5 text-brand-900">Notification Channels:</span>
+                <p className="text-brand-800 leading-relaxed font-normal">
+                  In-app notifications appear instantly in your top bar and Notification Center.
                 </p>
               </div>
             </div>
 
-            <form onSubmit={handleSavePreferences} className="space-y-5">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <form onSubmit={handleSavePreferences} className="space-y-4">
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
                 <div>
-                  <span className="text-sm font-semibold text-gray-800 block">
-                    Instant Email Notifications
+                  <span className="text-xs font-bold text-slate-800 block">
+                    Instant Notifications
                   </span>
-                  <p className="text-xs text-gray-500">
-                    Receive immediate emails when your item matches or claim status updates.
+                  <p className="text-[11px] text-slate-400 font-normal">
+                    Receive alerts when cases match or claim status updates.
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -261,17 +248,17 @@ export const ProfileSettings: React.FC = () => {
                     onChange={(e) => setPrefs({ ...prefs, emailEnabled: e.target.checked })}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
                 </label>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
                 <div>
-                  <span className="text-sm font-semibold text-gray-800 block">
-                    Daily Campus Recovery Digest
+                  <span className="text-xs font-bold text-slate-800 block">
+                    Campus Recovery Digest
                   </span>
-                  <p className="text-xs text-gray-500">
-                    A consolidated morning summary of newly handed-in items matching your department.
+                  <p className="text-[11px] text-slate-400 font-normal">
+                    Daily summary of items handed into security.
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -281,33 +268,35 @@ export const ProfileSettings: React.FC = () => {
                     onChange={(e) => setPrefs({ ...prefs, digestEnabled: e.target.checked })}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
                 </label>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                disabled={isSavingPrefs}
-                className="w-full py-2.5 px-4 bg-gray-900 hover:bg-black text-white rounded-lg text-sm font-medium shadow-sm transition-colors disabled:opacity-50"
+                variant="outline"
+                size="sm"
+                isLoading={isSavingPrefs}
+                className="w-full"
               >
-                {isSavingPrefs ? 'Saving Preferences...' : 'Update Notification Settings'}
-              </button>
+                Update Preferences
+              </Button>
             </form>
           </div>
 
           {/* Security & Access Info */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm space-y-3 text-xs">
-            <div className="flex items-center gap-2 text-gray-900 font-semibold">
+          <div className="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-subtle space-y-2 text-xs">
+            <div className="flex items-center gap-2 text-slate-900 font-bold">
               <Shield className="w-4 h-4 text-emerald-600" />
               <span>Identity &amp; Security Protocol</span>
             </div>
-            <p className="text-gray-500 leading-relaxed">
-              Sessions are maintained using encrypted, short-lived JWT tokens with rotating HttpOnly refresh cookies.
+            <p className="text-slate-500 leading-relaxed font-normal text-[11px]">
+              Sessions are maintained using short-lived JWT tokens with rotating refresh cookies.
               Privacy-first data masking ensures student contact details remain confidential.
             </p>
           </div>
         </div>
       </div>
-    </div>
+    </FadeIn>
   );
 };
