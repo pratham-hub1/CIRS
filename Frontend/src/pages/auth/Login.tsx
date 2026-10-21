@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
 import { FadeIn } from '../../components/common/AnimatedTransitions';
+import { FormField } from '../../components/a11y/FormField';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
@@ -60,68 +61,66 @@ export const Login: React.FC = () => {
       <FadeIn delay={0.1} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-10 shadow-elevated rounded-3xl border border-slate-200/90">
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" aria-hidden="true" />
               <span>{errorMessage}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
-              >
-                University Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="student@gsfcuniversity.ac.in"
-                  className="block w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
-                />
-              </div>
-              <p className="mt-1.5 text-[11px] text-slate-400 font-normal">
-                Restricted to authorized university domains (@gsfcuniversity.ac.in)
-              </p>
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+            <FormField
+              id="email"
+              label="University Email Address"
+              required
+              leadingIcon={<Mail className="w-4 h-4" aria-hidden="true" />}
+              helpText="Restricted to authorized university domains (@gsfcuniversity.ac.in)"
+            >
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="student@gsfcuniversity.ac.in"
+                className="block w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
+              />
+            </FormField>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="block w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
-                />
+            <FormField
+              id="password"
+              label="Password"
+              required
+              leadingIcon={<Lock className="w-4 h-4" aria-hidden="true" />}
+              trailingAdornment={
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                  className="text-slate-400 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/30 rounded"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="w-4 h-4" aria-hidden="true" />
+                  )}
                 </button>
-              </div>
-            </div>
+              }
+            >
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="block w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
+              />
+            </FormField>
 
             <Button
               type="submit"
@@ -130,7 +129,7 @@ export const Login: React.FC = () => {
               className="w-full py-2.5 text-sm"
             >
               <span>Sign In to CIRS</span>
-              <ArrowRight className="w-4 h-4 ml-1.5" />
+              <ArrowRight className="w-4 h-4 ml-1.5" aria-hidden="true" />
             </Button>
           </form>
 
@@ -143,8 +142,8 @@ export const Login: React.FC = () => {
         </div>
 
         <div className="mt-6 text-center text-[11px] text-slate-400 font-medium flex items-center justify-center space-x-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-          <span>GSFC University SSO Protocol & Argon2id Encrypted</span>
+          <ShieldCheck className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
+          <span>GSFC University SSO Protocol &amp; Argon2id Encrypted</span>
         </div>
       </FadeIn>
     </div>

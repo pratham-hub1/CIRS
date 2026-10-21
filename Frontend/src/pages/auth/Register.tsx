@@ -19,6 +19,7 @@ import { Campus } from '../../types/auth';
 import { Role } from '../../types/enums';
 import { Button } from '../../components/common/Button';
 import { FadeIn } from '../../components/common/AnimatedTransitions';
+import { FormField } from '../../components/a11y/FormField';
 
 export const Register: React.FC = () => {
   const { register } = useAuth();
@@ -141,113 +142,109 @@ export const Register: React.FC = () => {
       <FadeIn delay={0.1} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-10 shadow-elevated rounded-3xl border border-slate-200/90">
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" aria-hidden="true" />
               <span>{errorMessage}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <UserIcon className="w-4 h-4" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Aarav Sharma"
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
-                />
-              </div>
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <FormField
+              id="name"
+              label="Full Name"
+              required
+              leadingIcon={<UserIcon className="w-4 h-4" aria-hidden="true" />}
+            >
+              <input
+                type="text"
+                required
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Aarav Sharma"
+                className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+              />
+            </FormField>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                University Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="rollnumber@gsfcuniversity.ac.in"
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
-                />
-              </div>
-              <p className="mt-1 text-[11px] text-slate-400 font-normal">
-                Must end with @gsfcuniversity.ac.in
-              </p>
-            </div>
+            <FormField
+              id="email"
+              label="University Email Address"
+              required
+              leadingIcon={<Mail className="w-4 h-4" aria-hidden="true" />}
+              helpText="Must end with @gsfcuniversity.ac.in"
+            >
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="rollnumber@gsfcuniversity.ac.in"
+                className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+              />
+            </FormField>
 
             {/* Campus Selection */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Campus <span className="text-rose-500">*</span>
-                </label>
-                {isLoadingCampuses && (
-                  <span className="text-[11px] text-brand-600 flex items-center font-medium">
-                    <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Fetching campuses...
+            <FormField
+              id="campus"
+              label="Campus"
+              required
+              leadingIcon={<Building className="w-4 h-4" aria-hidden="true" />}
+              helpText={
+                isLoadingCampuses ? (
+                  <span className="text-brand-600 flex items-center font-medium">
+                    <RefreshCw className="w-3 h-3 mr-1 animate-spin" aria-hidden="true" /> Fetching
+                    campuses...
                   </span>
-                )}
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Building className="w-4 h-4" />
-                </div>
-                <select
-                  required
-                  disabled={isLoadingCampuses || campuses.length === 0}
-                  value={campusId}
-                  onChange={(e) => handleCampusChange(e.target.value)}
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white disabled:bg-slate-100 disabled:text-slate-400 font-medium"
-                >
-                  <option value="">
-                    {isLoadingCampuses
-                      ? 'Loading campus directory...'
-                      : campuses.length === 0
-                      ? 'No campuses available'
-                      : '-- Select your campus --'}
+                ) : undefined
+              }
+            >
+              <select
+                required
+                disabled={isLoadingCampuses || campuses.length === 0}
+                value={campusId}
+                onChange={(e) => handleCampusChange(e.target.value)}
+                className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white disabled:bg-slate-100 disabled:text-slate-400 font-medium"
+              >
+                <option value="">
+                  {isLoadingCampuses
+                    ? 'Loading campus directory...'
+                    : campuses.length === 0
+                    ? 'No campuses available'
+                    : '-- Select your campus --'}
+                </option>
+                {campuses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.code})
                   </option>
-                  {campuses.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.code})
-                    </option>
-                  ))}
-                </select>
+                ))}
+              </select>
+            </FormField>
+            {campusLoadError && (
+              <div
+                role="alert"
+                className="p-2 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-700 flex items-center justify-between font-medium"
+              >
+                <span className="flex items-center">
+                  <AlertCircle className="w-3.5 h-3.5 mr-1 shrink-0 text-rose-500" aria-hidden="true" />
+                  {campusLoadError}
+                </span>
+                <button
+                  type="button"
+                  onClick={fetchCampuses}
+                  className="underline font-bold ml-2 text-rose-800 hover:text-rose-900"
+                >
+                  Retry
+                </button>
               </div>
-              {campusLoadError && (
-                <div className="mt-1.5 p-2 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-700 flex items-center justify-between font-medium">
-                  <span className="flex items-center">
-                    <AlertCircle className="w-3.5 h-3.5 mr-1 shrink-0 text-rose-500" />
-                    {campusLoadError}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={fetchCampuses}
-                    className="underline font-bold ml-2 text-rose-800 hover:text-rose-900"
-                  >
-                    Retry
-                  </button>
-                </div>
-              )}
-            </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  Role
-                </label>
+              <FormField id="role" label="Role">
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as Role)}
@@ -256,12 +253,9 @@ export const Register: React.FC = () => {
                   <option value={Role.STUDENT}>Student</option>
                   <option value={Role.FACULTY}>Faculty</option>
                 </select>
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  Department
-                </label>
+              <FormField id="department" label="Department">
                 <select
                   disabled={isLoadingCampuses || !campusId || availableDepartments.length === 0}
                   value={departmentId}
@@ -283,53 +277,57 @@ export const Register: React.FC = () => {
                     </>
                   )}
                 </select>
-              </div>
+              </FormField>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Password (Min 8 Characters)
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="block w-full pl-10 pr-10 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
-                />
+            <FormField
+              id="password"
+              label="Password (Min 8 Characters)"
+              required
+              leadingIcon={<Lock className="w-4 h-4" aria-hidden="true" />}
+              trailingAdornment={
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                  className="text-slate-400 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/30 rounded"
+                  aria-label={showPassword ? 'Hide passwords' : 'Show passwords'}
+                  aria-pressed={showPassword}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="w-4 h-4" aria-hidden="true" />
+                  )}
                 </button>
-              </div>
-            </div>
+              }
+            >
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="block w-full pl-10 pr-10 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+              />
+            </FormField>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
-                />
-              </div>
-            </div>
+            <FormField
+              id="confirm-password"
+              label="Confirm Password"
+              required
+              leadingIcon={<Lock className="w-4 h-4" aria-hidden="true" />}
+            >
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+              />
+            </FormField>
 
             <Button
               type="submit"
@@ -339,7 +337,7 @@ export const Register: React.FC = () => {
               className="w-full py-2.5 mt-2 text-sm"
             >
               <span>Complete Registration</span>
-              <ArrowRight className="w-4 h-4 ml-1.5" />
+              <ArrowRight className="w-4 h-4 ml-1.5" aria-hidden="true" />
             </Button>
           </form>
 
@@ -352,7 +350,7 @@ export const Register: React.FC = () => {
         </div>
 
         <div className="mt-6 text-center text-[11px] text-slate-400 font-medium flex items-center justify-center space-x-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+          <ShieldCheck className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
           <span>Restricted to GSFC University Students &amp; Faculty</span>
         </div>
       </FadeIn>
