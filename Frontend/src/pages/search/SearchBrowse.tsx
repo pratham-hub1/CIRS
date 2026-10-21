@@ -277,40 +277,65 @@ export const SearchBrowse: React.FC = () => {
             {search && (
               <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-brand-50 text-brand-700 font-semibold border border-brand-200/60">
                 Keyword: "{search}"
-                <button onClick={() => setSearch('')} className="ml-1.5 text-brand-400 hover:text-brand-700">
-                  <X className="w-3 h-3" />
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  aria-label="Remove keyword filter"
+                  className="ml-1.5 text-brand-400 hover:text-brand-700"
+                >
+                  <X className="w-3 h-3" aria-hidden="true" />
                 </button>
               </span>
             )}
             {type && (
               <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 font-semibold border border-slate-200">
                 Type: {type}
-                <button onClick={() => setType('')} className="ml-1.5 text-slate-400 hover:text-slate-700">
-                  <X className="w-3 h-3" />
+                <button
+                  type="button"
+                  onClick={() => setType('')}
+                  aria-label="Remove type filter"
+                  className="ml-1.5 text-slate-400 hover:text-slate-700"
+                >
+                  <X className="w-3 h-3" aria-hidden="true" />
                 </button>
               </span>
             )}
             {category && (
               <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 font-semibold border border-slate-200">
                 Category: {CATEGORY_LABELS[category] || category}
-                <button onClick={() => setCategory('')} className="ml-1.5 text-slate-400 hover:text-slate-700">
-                  <X className="w-3 h-3" />
+                <button
+                  type="button"
+                  onClick={() => setCategory('')}
+                  aria-label="Remove category filter"
+                  className="ml-1.5 text-slate-400 hover:text-slate-700"
+                >
+                  <X className="w-3 h-3" aria-hidden="true" />
                 </button>
               </span>
             )}
             {status && (
               <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 font-semibold border border-slate-200">
                 Status: {STATUS_LABELS[status] || status}
-                <button onClick={() => setStatus('')} className="ml-1.5 text-slate-400 hover:text-slate-700">
-                  <X className="w-3 h-3" />
+                <button
+                  type="button"
+                  onClick={() => setStatus('')}
+                  aria-label="Remove status filter"
+                  className="ml-1.5 text-slate-400 hover:text-slate-700"
+                >
+                  <X className="w-3 h-3" aria-hidden="true" />
                 </button>
               </span>
             )}
             {locationQuery && (
               <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 font-semibold border border-slate-200">
                 Location: "{locationQuery}"
-                <button onClick={() => setLocationQuery('')} className="ml-1.5 text-slate-400 hover:text-slate-700">
-                  <X className="w-3 h-3" />
+                <button
+                  type="button"
+                  onClick={() => setLocationQuery('')}
+                  aria-label="Remove location filter"
+                  className="ml-1.5 text-slate-400 hover:text-slate-700"
+                >
+                  <X className="w-3 h-3" aria-hidden="true" />
                 </button>
               </span>
             )}
