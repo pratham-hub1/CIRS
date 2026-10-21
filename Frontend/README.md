@@ -146,3 +146,25 @@ npm run preview
 - **OpenAPI / Swagger Spec**: `https://misc-cholesterol-till-benefits.trycloudflare.com/api/docs-json` (verified HTTP 200 OK)
 - **Real-Data Guarantee**: Automatic silent mock-data fallback has been removed. Live server responses and genuine error envelopes (`{ error: { code, message, details } }`) are rendered. Demo fixtures are strictly opt-in via `VITE_DEMO_MODE=true`.
 
+---
+
+## ♿ Accessibility & Testing
+
+A scoped accessibility pass covers form semantics, modal/drawer focus management, icon-button
+labelling, and a skip-to-content link. Reusable primitives live in `src/components/a11y/`
+(`FormField`, `LiveRegion`, `SkipToContent`, `VisuallyHidden`) and `src/hooks/`
+(`useFocusTrap`, `useEscapeKey`, `useBodyScrollLock`).
+
+A **Vitest + React Testing Library** harness (with **axe-core** assertions and a keyboard-focus
+test) verifies the behaviour.
+
+```bash
+cd Frontend
+npm install
+npm test          # vitest run — 22 tests incl. axe checks
+npm run lint      # tsc --noEmit
+npm run build     # tsc && vite build
+```
+
+See **[ACCESSIBILITY.md](./ACCESSIBILITY.md)** for the full change list, the primitive APIs,
+the verification commands, and the manual keyboard / screen-reader checklist.
