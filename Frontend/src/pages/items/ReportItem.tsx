@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileQuestion,
   CheckCircle2,
-  Calendar,
-  MapPin,
-  Tag,
-  Building2,
   ArrowRight,
   ShieldAlert,
   Copy,
   Check,
   X,
-  Sparkles,
   Info,
+  AlertCircle,
 } from 'lucide-react';
 import { itemsService } from '../../services/itemsService';
 import { adminService } from '../../services/adminService';
@@ -29,6 +24,8 @@ import { StorageLocation } from '../../types/admin';
 import { FileUpload } from '../../components/common/FileUpload';
 import { Button } from '../../components/common/Button';
 import { FadeIn } from '../../components/common/AnimatedTransitions';
+import { FormField } from '../../components/a11y/FormField';
+import { LiveRegion } from '../../components/a11y/LiveRegion';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { resolveImageUrl } from '../../services/apiClient';
@@ -70,6 +67,8 @@ export const ReportItem: React.FC = () => {
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdItem, setCreatedItem] = useState<Item | null>(null);
+  // Announced via a live region so validation errors reach screen-reader users.
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialType) {
@@ -98,6 +97,7 @@ export const ReportItem: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
 
     if (
       !itemName.trim() ||
@@ -106,12 +106,16 @@ export const ReportItem: React.FC = () => {
       !brand.trim() ||
       !identifyingMarks.trim()
     ) {
-      error('Please complete all required fields.');
+      const msg = 'Please complete all required fields.';
+      setFormError(msg);
+      error(msg);
       return;
     }
 
     if (isAdmin && type === ItemType.FOUND && !storageLocationId) {
-      error('Please select the campus storage location where this found item is deposited.');
+      const msg = 'Please select the campus storage location where this found item is deposited.';
+      setFormError(msg);
+      error(msg);
       return;
     }
 
@@ -145,7 +149,9 @@ export const ReportItem: React.FC = () => {
       success(`Report submitted successfully! Case ID: ${item.caseId}`);
     } catch (err: any) {
       console.error('Error creating report:', err);
-      error(err.message || 'Failed to submit report. Please check your information.');
+      const msg = err.message || 'Failed to submit report. Please check your information.';
+      setFormError(msg);
+      error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -167,7 +173,7 @@ export const ReportItem: React.FC = () => {
       <FadeIn className="max-w-xl mx-auto py-8">
         <div className="bg-white rounded-3xl border border-slate-200/90 p-8 sm:p-10 shadow-elevated text-center">
           <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-5 shadow-subtle ring-4 ring-emerald-50">
-            <CheckCircle2 className="w-8 h-8" />
+            <CheckCircle2 className="w-8 h-8" aria-hidden="true" />
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -190,13 +196,13 @@ export const ReportItem: React.FC = () => {
               </span>
               <button
                 onClick={() => handleCopyCaseId(createdItem.caseId)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-white transition-colors border border-transparent hover:border-slate-200"
-                title="Copy Case ID"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-white transition-colors border border-transparent hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                aria-label={`Copy case ID ${createdItem.caseId}`}
               >
                 {copiedId ? (
-                  <Check className="w-4 h-4 text-emerald-600" />
+                  <Check className="w-4 h-4 text-emerald-600" aria-hidden="true" />
                 ) : (
-                  <Copy className="w-4 h-4" />
+                  <Copy className="w-4 h-4" aria-hidden="true" />
                 )}
               </button>
             </div>
@@ -205,12 +211,17 @@ export const ReportItem: React.FC = () => {
               <span className="text-[11px] text-slate-400">{CATEGORY_LABELS[createdItem.category]}</span>
             </div>
           </div>
+          <LiveRegion
+            politeness="polite"
+            className="sr-only"
+            message={copiedId ? 'Case ID copied to clipboard' : ''}
+          />
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to={`/items/${createdItem.caseId}`} className="w-full sm:w-auto">
               <Button variant="primary" className="w-full">
                 <span>Open Case Details</span>
-                <ArrowRight className="w-4 h-4 ml-1.5" />
+                <ArrowRight className="w-4 h-4 ml-1.5" aria-hidden="true" />
               </Button>
             </Link>
             <Button
@@ -253,29 +264,35 @@ export const ReportItem: React.FC = () => {
       </div>
 
       {/* Type Toggle Tabs */}
-      <div className="bg-slate-200/60 p-1.5 rounded-2xl flex space-x-2 border border-slate-200">
+      <div
+        className="bg-slate-200/60 p-1.5 rounded-2xl flex space-x-2 border border-slate-200"
+        role="group"
+        aria-label="Report type"
+      >
         <button
           type="button"
           onClick={() => setType(ItemType.LOST)}
-          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center transition-all ${
+          aria-pressed={type === ItemType.LOST}
+          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/40 ${
             type === ItemType.LOST
               ? 'bg-white text-rose-700 shadow-subtle border border-rose-100'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <FileQuestion className="w-4 h-4 mr-2 text-rose-500" />
+          <FileQuestion className="w-4 h-4 mr-2 text-rose-500" aria-hidden="true" />
           I Lost An Item
         </button>
         <button
           type="button"
           onClick={() => setType(ItemType.FOUND)}
-          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center transition-all ${
+          aria-pressed={type === ItemType.FOUND}
+          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/40 ${
             type === ItemType.FOUND
               ? 'bg-white text-emerald-700 shadow-subtle border border-emerald-100'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" />
+          <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" aria-hidden="true" />
           I Found An Item
         </button>
       </div>
@@ -283,12 +300,25 @@ export const ReportItem: React.FC = () => {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
+        noValidate
         className="bg-white rounded-3xl border border-slate-200/90 shadow-subtle p-6 sm:p-9 space-y-7"
       >
+        {/* Form-level validation summary, announced to assistive tech. */}
+        {formError && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" aria-hidden="true" />
+            <span>{formError}</span>
+          </div>
+        )}
+
         {/* Core Specs */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3">
-            <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 font-bold text-xs flex items-center justify-center">
+            <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 font-bold text-xs flex items-center justify-center" aria-hidden="true">
               1
             </span>
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
@@ -297,10 +327,7 @@ export const ReportItem: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Item Title <span className="text-rose-500">*</span>
-              </label>
+            <FormField id="item-title" label="Item Title" required>
               <input
                 type="text"
                 required
@@ -309,12 +336,9 @@ export const ReportItem: React.FC = () => {
                 placeholder="e.g. Dell XPS 13 or Leather Wallet"
                 className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all font-medium"
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Category <span className="text-rose-500">*</span>
-              </label>
+            <FormField id="category" label="Category" required>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ItemCategory)}
@@ -326,14 +350,11 @@ export const ReportItem: React.FC = () => {
                   </option>
                 ))}
               </select>
-            </div>
+            </FormField>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Primary Colour <span className="text-rose-500">*</span>
-              </label>
+            <FormField id="colour" label="Primary Colour" required>
               <input
                 type="text"
                 required
@@ -342,12 +363,9 @@ export const ReportItem: React.FC = () => {
                 placeholder="e.g. Space Grey"
                 className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Brand / Make <span className="text-rose-500">*</span>
-              </label>
+            <FormField id="brand" label="Brand / Make" required>
               <input
                 type="text"
                 required
@@ -356,12 +374,9 @@ export const ReportItem: React.FC = () => {
                 placeholder="e.g. Apple, Dell, Titan"
                 className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Serial Number (Optional)
-              </label>
+            <FormField id="serial-number" label="Serial Number (Optional)">
               <input
                 type="text"
                 value={serialNumber}
@@ -369,13 +384,15 @@ export const ReportItem: React.FC = () => {
                 placeholder="e.g. SN-8849201"
                 className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
               />
-            </div>
+            </FormField>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-              Identifying Marks & Distinguishing Features <span className="text-rose-500">*</span>
-            </label>
+          <FormField
+            id="identifying-marks"
+            label="Identifying Marks & Distinguishing Features"
+            required
+            helpText="Security officers use these details to cross-examine claims."
+          >
             <textarea
               required
               rows={2}
@@ -384,15 +401,9 @@ export const ReportItem: React.FC = () => {
               placeholder="e.g. Stickers on lid, initials carved, scratch on bottom bezel, specific keychain..."
               className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
             />
-            <p className="mt-1 text-[11px] text-slate-400 font-normal">
-              Security officers use these details to cross-examine claims.
-            </p>
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-              Full Description & Context <span className="text-rose-500">*</span>
-            </label>
+          <FormField id="description" label="Full Description & Context" required>
             <textarea
               required
               rows={3}
@@ -401,13 +412,13 @@ export const ReportItem: React.FC = () => {
               placeholder="Provide a comprehensive description of the item and circumstances..."
               className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
             />
-          </div>
+          </FormField>
         </div>
 
         {/* Date and Location Specifics */}
         <div className="space-y-4 pt-4 border-t border-slate-100">
           <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3">
-            <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 font-bold text-xs flex items-center justify-center">
+            <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 font-bold text-xs flex items-center justify-center" aria-hidden="true">
               2
             </span>
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
@@ -417,10 +428,7 @@ export const ReportItem: React.FC = () => {
 
           {type === ItemType.LOST ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  Estimated Date & Time Lost <span className="text-rose-500">*</span>
-                </label>
+              <FormField id="date-lost" label="Estimated Date & Time Lost" required>
                 <input
                   type="datetime-local"
                   required
@@ -428,12 +436,9 @@ export const ReportItem: React.FC = () => {
                   onChange={(e) => setDateLost(e.target.value)}
                   className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
                 />
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  Last Known Location
-                </label>
+              <FormField id="last-known-location" label="Last Known Location">
                 <input
                   type="text"
                   value={lastKnownLocation}
@@ -441,15 +446,12 @@ export const ReportItem: React.FC = () => {
                   placeholder="e.g. Science Block Lab 2 or Cafeteria Ground"
                   className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
                 />
-              </div>
+              </FormField>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Date & Time Found <span className="text-rose-500">*</span>
-                  </label>
+                <FormField id="date-found" label="Date & Time Found" required>
                   <input
                     type="datetime-local"
                     required
@@ -457,12 +459,9 @@ export const ReportItem: React.FC = () => {
                     onChange={(e) => setDateFound(e.target.value)}
                     className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
                   />
-                </div>
+                </FormField>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Location Where Found
-                  </label>
+                <FormField id="found-location" label="Location Where Found">
                   <input
                     type="text"
                     value={foundLocation}
@@ -470,14 +469,21 @@ export const ReportItem: React.FC = () => {
                     placeholder="e.g. Library 2nd Floor Reading Room"
                     className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
                   />
-                </div>
+                </FormField>
               </div>
 
               {isAdmin ? (
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Campus Custody Storage Location <span className="text-rose-500">*</span>
-                  </label>
+                <FormField
+                  id="storage-location"
+                  label="Campus Custody Storage Location"
+                  required
+                  helpText={
+                    <span className="text-[11px] text-slate-500 flex items-center">
+                      <Info className="w-3.5 h-3.5 mr-1 text-slate-400" aria-hidden="true" />
+                      Select the official campus security locker where you physically deposited the item.
+                    </span>
+                  }
+                >
                   <select
                     required
                     value={storageLocationId}
@@ -490,15 +496,11 @@ export const ReportItem: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-1.5 text-[11px] text-slate-500 flex items-center">
-                    <Info className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                    Select the official campus security locker where you physically deposited the item.
-                  </p>
-                </div>
+                </FormField>
               ) : (
                 <div className="rounded-xl border border-amber-200/80 bg-amber-50/70 p-4">
                   <div className="flex items-start space-x-3">
-                    <Building2 className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <div className="space-y-1 text-xs text-amber-900">
                       <p className="font-semibold text-slate-900">Physical Custody Intake Protocol</p>
                       <p className="text-slate-600 leading-relaxed">
@@ -515,7 +517,7 @@ export const ReportItem: React.FC = () => {
         {/* Media / Images Upload */}
         <div className="space-y-4 pt-4 border-t border-slate-100">
           <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3">
-            <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 font-bold text-xs flex items-center justify-center">
+            <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 font-bold text-xs flex items-center justify-center" aria-hidden="true">
               3
             </span>
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
@@ -530,15 +532,15 @@ export const ReportItem: React.FC = () => {
           />
 
           {uploadedImages.length > 0 && (
-            <div className="flex flex-wrap gap-3 pt-2">
+            <ul className="flex flex-wrap gap-3 pt-2 list-none" aria-label="Uploaded photographs">
               {uploadedImages.map((img, idx) => (
-                <div
+                <li
                   key={idx}
                   className="relative w-20 h-20 rounded-xl border border-slate-200 overflow-hidden shadow-subtle group"
                 >
                   <img
                     src={resolveImageUrl(img)}
-                    alt={`Upload ${idx + 1}`}
+                    alt={`Uploaded photograph ${idx + 1}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
@@ -547,13 +549,14 @@ export const ReportItem: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => removeUploadedImage(idx)}
-                    className="absolute top-1 right-1 p-1 rounded-full bg-slate-900/70 text-white hover:bg-rose-600 transition-colors"
+                    className="absolute top-1 right-1 p-1 rounded-full bg-slate-900/70 text-white hover:bg-rose-600 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+                    aria-label={`Remove uploaded photograph ${idx + 1}`}
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-3 h-3" aria-hidden="true" />
                   </button>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
 
