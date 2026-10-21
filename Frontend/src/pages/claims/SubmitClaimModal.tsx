@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { Modal } from '../../components/common/Modal';
 import { Button } from '../../components/common/Button';
 import { claimsService } from '../../services/claimsService';
 import { ItemCategory, VerificationLevel } from '../../types/enums';
 import { VerificationLevelBadge } from '../../components/common/Badge';
 import { FileUpload } from '../../components/common/FileUpload';
+import { FormField } from '../../components/a11y/FormField';
 import { useToast } from '../../context/ToastContext';
 
 interface SubmitClaimModalProps {
@@ -90,6 +92,7 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [uploadedDocuments, setUploadedDocuments] = useState<{ url: string; docType: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleAnswerChange = (question: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [question]: value }));
@@ -97,9 +100,12 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
 
     if (!description.trim() || !placeLost.trim() || !identifyingMarks.trim()) {
-      error('Please fill out all required claim verification fields.');
+      const msg = 'Please fill out all required claim verification fields.';
+      setFormError(msg);
+      error(msg);
       return;
     }
 
@@ -122,7 +128,9 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
       success('Ownership claim submitted for review by campus security!');
       onSuccess();
     } catch (err: any) {
-      error(err.message || 'Failed to submit ownership claim');
+      const msg = err.message || 'Failed to submit ownership claim';
+      setFormError(msg);
+      error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -136,7 +144,7 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
       description={`Submit proof of ownership for "${itemName}" (Case: ${caseId})`}
       maxWidth="2xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {/* Verification Requirements Banner */}
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-subtle">
           <div>
@@ -150,22 +158,30 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
           <VerificationLevelBadge level={verificationLevel} />
         </div>
 
+        {formError && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" aria-hidden="true" />
+            <span>{formError}</span>
+          </div>
+        )}
+
         {/* Claim Basic Details */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2 border-b border-slate-100 pb-2">
-            <span className="w-5 h-5 rounded-md bg-brand-50 text-brand-700 text-xs font-bold flex items-center justify-center">
+            <span className="w-5 h-5 rounded-md bg-brand-50 text-brand-700 text-xs font-bold flex items-center justify-center" aria-hidden="true">
               1
             </span>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Loss Incident & Identifying Details
+              Loss Incident &amp; Identifying Details
             </h4>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Estimated Date & Time Lost <span className="text-rose-500">*</span>
-              </label>
+            <FormField id="claim-date-lost" label="Estimated Date & Time Lost" required>
               <input
                 type="datetime-local"
                 required
@@ -173,12 +189,9 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                 onChange={(e) => setDateLost(e.target.value)}
                 className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                Place Lost <span className="text-rose-500">*</span>
-              </label>
+            <FormField id="claim-place-lost" label="Place Lost" required>
               <input
                 type="text"
                 required
@@ -187,13 +200,10 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
                 placeholder="e.g. Science Block Lab 2 or Cafeteria"
                 className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
               />
-            </div>
+            </FormField>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-              Identifying Marks & Unique Features <span className="text-rose-500">*</span>
-            </label>
+          <FormField id="claim-identifying-marks" label="Identifying Marks & Unique Features" required>
             <textarea
               required
               rows={2}
@@ -202,12 +212,9 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
               placeholder="Provide exact details only the true owner would know (e.g. stickers, minor scratches, specific cards inside)..."
               className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-              Claim Description <span className="text-rose-500">*</span>
-            </label>
+          <FormField id="claim-description" label="Claim Description" required>
             <textarea
               required
               rows={2}
@@ -216,13 +223,13 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
               placeholder="Explain how you came to lose this item and when you noticed it missing..."
               className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
             />
-          </div>
+          </FormField>
         </div>
 
         {/* Verification Questions */}
         <div className="space-y-4 pt-2 border-t border-slate-100">
           <div className="flex items-center space-x-2 border-b border-slate-100 pb-2">
-            <span className="w-5 h-5 rounded-md bg-brand-50 text-brand-700 text-xs font-bold flex items-center justify-center">
+            <span className="w-5 h-5 rounded-md bg-brand-50 text-brand-700 text-xs font-bold flex items-center justify-center" aria-hidden="true">
               2
             </span>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
@@ -234,27 +241,31 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
           </p>
 
           <div className="space-y-3">
-            {questions.map((q, idx) => (
-              <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-1.5">
-                <label className="block text-xs font-bold text-slate-800">
-                  {idx + 1}. {q}
-                </label>
-                <input
-                  type="text"
-                  value={answers[q] || ''}
-                  onChange={(e) => handleAnswerChange(q, e.target.value)}
-                  placeholder="Your answer..."
-                  className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
-                />
-              </div>
-            ))}
+            {questions.map((q, idx) => {
+              const questionId = `claim-question-${idx}`;
+              return (
+                <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-1.5">
+                  <label htmlFor={questionId} className="block text-xs font-bold text-slate-800">
+                    {idx + 1}. {q}
+                  </label>
+                  <input
+                    id={questionId}
+                    type="text"
+                    value={answers[q] || ''}
+                    onChange={(e) => handleAnswerChange(q, e.target.value)}
+                    placeholder="Your answer..."
+                    className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* Supporting Proof Upload */}
         <div className="space-y-3 pt-2 border-t border-slate-100">
           <div className="flex items-center space-x-2 border-b border-slate-100 pb-2">
-            <span className="w-5 h-5 rounded-md bg-brand-50 text-brand-700 text-xs font-bold flex items-center justify-center">
+            <span className="w-5 h-5 rounded-md bg-brand-50 text-brand-700 text-xs font-bold flex items-center justify-center" aria-hidden="true">
               3
             </span>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">

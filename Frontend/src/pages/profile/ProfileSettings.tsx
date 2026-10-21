@@ -15,6 +15,7 @@ import { authService } from '../../services/authService';
 import { RoleBadge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { FadeIn } from '../../components/common/AnimatedTransitions';
+import { FormField } from '../../components/a11y/FormField';
 import { useToast } from '../../context/ToastContext';
 import { NotificationPreference } from '../../types/auth';
 import { Role } from '../../types/enums';
@@ -27,6 +28,7 @@ export const ProfileSettings: React.FC = () => {
   const [name, setName] = useState(user?.name || '');
   const [departmentId, setDepartmentId] = useState(user?.departmentId || '');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   // Notification Preferences
   const [prefs, setPrefs] = useState<NotificationPreference>({
@@ -59,7 +61,9 @@ export const ProfileSettings: React.FC = () => {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    setNameError(null);
     if (!name.trim()) {
+      setNameError('Name cannot be empty');
       error('Name cannot be empty');
       return;
     }
@@ -137,21 +141,14 @@ export const ProfileSettings: React.FC = () => {
             </div>
 
             <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="user-name"
-                  className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
-                >
-                  Full Name
-                </label>
+              <FormField id="user-name" label="Full Name" error={nameError}>
                 <input
-                  id="user-name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium text-slate-800"
                 />
-              </div>
+              </FormField>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
@@ -244,6 +241,9 @@ export const ProfileSettings: React.FC = () => {
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
                   <input
                     type="checkbox"
+                    role="switch"
+                    aria-label="Instant notifications"
+                    aria-checked={prefs.emailEnabled}
                     checked={prefs.emailEnabled}
                     onChange={(e) => setPrefs({ ...prefs, emailEnabled: e.target.checked })}
                     className="sr-only peer"
@@ -264,6 +264,9 @@ export const ProfileSettings: React.FC = () => {
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
                   <input
                     type="checkbox"
+                    role="switch"
+                    aria-label="Campus recovery digest"
+                    aria-checked={prefs.digestEnabled}
                     checked={prefs.digestEnabled}
                     onChange={(e) => setPrefs({ ...prefs, digestEnabled: e.target.checked })}
                     className="sr-only peer"
