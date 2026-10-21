@@ -18,15 +18,18 @@ import {
   FolderOpen,
 } from 'lucide-react';
 import { RoleBadge } from '../common/Badge';
+import { VisuallyHidden } from '../a11y/VisuallyHidden';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { Role } from '../../types/enums';
 
 interface HeaderProps {
   onToggleMobileMenu: () => void;
+  /** Whether the mobile drawer is currently open — drives `aria-expanded`. */
+  isMobileMenuOpen?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
+export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenuOpen = false }) => {
   const { user, role, logout } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -67,8 +70,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
           onClick={onToggleMobileMenu}
           className="p-2 -ml-2 text-slate-500 rounded-xl lg:hidden hover:text-slate-800 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/20"
           aria-label="Open navigation menu"
+          aria-haspopup="dialog"
+          aria-controls="mobile-nav"
+          aria-expanded={isMobileMenuOpen}
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="w-5 h-5" aria-hidden="true" />
         </button>
 
         <Link to={role === Role.ADMIN ? '/admin' : '/dashboard'} className="flex items-center space-x-3 group">
@@ -83,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
               </span>
             </div>
             <span className="text-[11px] text-slate-500 block -mt-0.5 font-medium tracking-tight">
-              GSFC University Lost & Found
+              GSFC University Lost &amp; Found
             </span>
           </div>
         </Link>
@@ -93,10 +99,18 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
       <form
         onSubmit={handleSearchSubmit}
         className="hidden md:flex items-center flex-1 max-w-md mx-6"
+        role="search"
       >
         <div className="relative w-full">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <VisuallyHidden>
+            <label htmlFor="global-search">Search campus items</label>
+          </VisuallyHidden>
+          <Search
+            className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            aria-hidden="true"
+          />
           <input
+            id="global-search"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -110,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               aria-label="Clear search"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -129,11 +143,16 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
           <button
             onClick={() => setShowNotifMenu(!showNotifMenu)}
             className="relative p-2 text-slate-500 rounded-xl hover:text-slate-800 hover:bg-slate-100/80 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            aria-label="View notifications"
+            aria-label={unreadCount > 0 ? `View notifications, ${unreadCount} unread` : 'View notifications'}
+            aria-haspopup="menu"
+            aria-expanded={showNotifMenu}
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-5 h-5" aria-hidden="true" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white shadow-sm animate-pulseSubtle">
+              <span
+                aria-hidden="true"
+                className="absolute top-1.5 right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white shadow-sm animate-pulseSubtle"
+              >
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -147,6 +166,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                 exit={{ opacity: 0, y: 8, scale: 0.96 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 className="absolute right-0 mt-2.5 w-80 sm:w-96 bg-white rounded-2xl shadow-elevated border border-slate-200/90 overflow-hidden z-50 origin-top-right"
+                role="menu"
+                aria-label="Notifications"
               >
                 <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50/90 to-white">
                   <div className="flex items-center space-x-2">
@@ -162,7 +183,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                       onClick={markAllAsRead}
                       className="text-xs text-brand-600 hover:text-brand-700 font-semibold flex items-center space-x-1"
                     >
-                      <CheckCheck className="w-3.5 h-3.5" />
+                      <CheckCheck className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Mark all read</span>
                     </button>
                   )}
@@ -172,22 +193,24 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                   {notifications.length === 0 ? (
                     <div className="py-10 px-4 text-center">
                       <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-2 text-slate-400">
-                        <Sparkles className="w-5 h-5" />
+                        <Sparkles className="w-5 h-5" aria-hidden="true" />
                       </div>
                       <p className="text-sm font-semibold text-slate-800">You're all caught up</p>
                       <p className="text-xs text-slate-400 mt-0.5">No new alerts right now.</p>
                     </div>
                   ) : (
                     notifications.slice(0, 6).map((n) => (
-                      <div
+                      <button
+                        type="button"
                         key={n.id}
                         onClick={() => markAsRead(n.id)}
-                        className={`p-3.5 text-xs flex items-start space-x-3 hover:bg-slate-50/80 transition-colors cursor-pointer ${
+                        aria-label={`${n.readAt ? '' : 'Unread notification: '}${n.message}`}
+                        className={`w-full text-left p-3.5 text-xs flex items-start space-x-3 hover:bg-slate-50/80 transition-colors cursor-pointer focus:outline-none focus:bg-slate-50 focus:ring-2 focus:ring-inset focus:ring-brand-500/30 ${
                           !n.readAt ? 'bg-brand-50/40' : ''
                         }`}
                       >
                         <div className="mt-0.5 flex-shrink-0 text-brand-600">
-                          <AlertCircle className="w-4 h-4" />
+                          <AlertCircle className="w-4 h-4" aria-hidden="true" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p
@@ -205,9 +228,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                           </span>
                         </div>
                         {!n.readAt && (
-                          <div className="w-2 h-2 rounded-full bg-brand-600 mt-1.5 flex-shrink-0" />
+                          <div className="w-2 h-2 rounded-full bg-brand-600 mt-1.5 flex-shrink-0" aria-hidden="true" />
                         )}
-                      </div>
+                      </button>
                     ))
                   )}
                 </div>
@@ -218,7 +241,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                     onClick={() => setShowNotifMenu(false)}
                     className="text-xs text-brand-600 hover:text-brand-700 font-semibold inline-flex items-center justify-center"
                   >
-                    View all notifications <ExternalLink className="w-3 h-3 ml-1" />
+                    View all notifications <ExternalLink className="w-3 h-3 ml-1" aria-hidden="true" />
                   </Link>
                 </div>
               </motion.div>
@@ -231,8 +254,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center space-x-2.5 p-1.5 rounded-xl hover:bg-slate-100/80 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+            aria-label="Account menu"
+            aria-haspopup="menu"
+            aria-expanded={showUserMenu}
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-700 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-white">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-700 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-white" aria-hidden="true">
               {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
             <div className="hidden sm:block text-left">
@@ -243,7 +269,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                 {user?.email || 'Authenticated'}
               </span>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" aria-hidden="true" />
           </button>
 
           <AnimatePresence>
@@ -254,6 +280,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                 exit={{ opacity: 0, y: 8, scale: 0.96 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 className="absolute right-0 mt-2.5 w-60 bg-white rounded-2xl shadow-elevated border border-slate-200/90 py-2 z-50 origin-top-right"
+                role="menu"
+                aria-label="Account"
               >
                 <div className="px-4 py-2.5 border-b border-slate-100 mb-1">
                   <p className="text-xs font-bold text-slate-900 truncate">{user?.name}</p>
@@ -271,7 +299,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                   onClick={() => setShowUserMenu(false)}
                   className="flex items-center px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-700 transition-colors"
                 >
-                  <User className="w-4 h-4 mr-2.5 text-slate-400" />
+                  <User className="w-4 h-4 mr-2.5 text-slate-400" aria-hidden="true" />
                   Profile Details
                 </Link>
 
@@ -280,7 +308,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                   onClick={() => setShowUserMenu(false)}
                   className="flex items-center px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-700 transition-colors"
                 >
-                  <Bell className="w-4 h-4 mr-2.5 text-slate-400" />
+                  <Bell className="w-4 h-4 mr-2.5 text-slate-400" aria-hidden="true" />
                   Notification Preferences
                 </Link>
 
@@ -290,7 +318,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                     onClick={() => setShowUserMenu(false)}
                     className="flex items-center px-4 py-2 text-xs font-bold text-brand-700 hover:bg-brand-50/70 transition-colors"
                   >
-                    <Shield className="w-4 h-4 mr-2.5 text-brand-600" />
+                    <Shield className="w-4 h-4 mr-2.5 text-brand-600" aria-hidden="true" />
                     Security Operations Desk
                   </Link>
                 ) : (
@@ -299,7 +327,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                     onClick={() => setShowUserMenu(false)}
                     className="flex items-center px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-700 transition-colors"
                   >
-                    <FolderOpen className="w-4 h-4 mr-2.5 text-slate-400" />
+                    <FolderOpen className="w-4 h-4 mr-2.5 text-slate-400" aria-hidden="true" />
                     My Active Cases
                   </Link>
                 )}
@@ -310,7 +338,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                   onClick={handleLogout}
                   className="w-full flex items-center px-4 py-2.5 text-xs font-semibold text-rose-600 hover:bg-rose-50/70 transition-colors text-left"
                 >
-                  <LogOut className="w-4 h-4 mr-2.5 text-rose-500" />
+                  <LogOut className="w-4 h-4 mr-2.5 text-rose-500" aria-hidden="true" />
                   Sign Out
                 </button>
               </motion.div>
