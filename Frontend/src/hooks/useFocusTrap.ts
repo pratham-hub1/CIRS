@@ -30,7 +30,7 @@ export const FOCUSABLE_SELECTOR = [
  *
  * Usage:
  *   const ref = useFocusTrap<HTMLDivElement>(isOpen);
- *   <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true">...</div>
+ *   <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true">…</div>
  */
 export function useFocusTrap<T extends HTMLElement>(active: boolean) {
   const containerRef = useRef<T>(null);
