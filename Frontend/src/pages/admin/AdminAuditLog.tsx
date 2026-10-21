@@ -213,9 +213,12 @@ export const AdminAuditLog: React.FC = () => {
                         <td className="py-3.5 px-4 text-center">
                           {hasDiff ? (
                             <button
+                              type="button"
                               onClick={() => toggleExpand(entry.id)}
                               className="text-slate-400 hover:text-slate-600 focus:outline-none"
                               title="Toggle Details"
+                              aria-label="Toggle change details"
+                              aria-expanded={isExpanded}
                             >
                               {isExpanded ? (
                                 <ChevronDown className="w-4 h-4 text-brand-600" />

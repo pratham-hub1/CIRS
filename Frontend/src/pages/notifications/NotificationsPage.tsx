@@ -123,11 +123,13 @@ export const NotificationsPage: React.FC = () => {
 
                 {isUnread && (
                   <button
+                    type="button"
                     onClick={() => markAsRead(n.id)}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors flex-shrink-0"
                     title="Mark as read"
+                    aria-label="Mark notification as read"
                   >
-                    <Check className="w-4 h-4" />
+                    <Check className="w-4 h-4" aria-hidden="true" />
                   </button>
                 )}
               </StaggerItem>

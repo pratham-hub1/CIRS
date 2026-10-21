@@ -131,11 +131,13 @@ export const SavedSearches: React.FC = () => {
                     Active Watch
                   </span>
                   <button
+                    type="button"
                     onClick={() => setDeleteTargetId(s.id)}
                     className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors"
                     title="Delete watch"
+                    aria-label={`Delete saved search ${s.name}`}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
 
