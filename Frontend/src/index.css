@@ -12,6 +12,17 @@
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
+  /*
+   * Consistent, high-contrast keyboard focus indicator.
+   * Applies to keyboard focus only (:focus-visible), so pointer users are not
+   * shown focus rings. Components that opt into a custom ring with
+   * `focus:outline-none` + `focus:ring-*` still win by specificity.
+   */
+  :focus-visible {
+    outline: 2px solid #0c8de9;
+    outline-offset: 2px;
+  }
+
   /* Custom subtle scrollbars */
   ::-webkit-scrollbar {
     width: 6px;
