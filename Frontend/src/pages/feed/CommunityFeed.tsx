@@ -162,10 +162,12 @@ export const CommunityFeed: React.FC = () => {
           />
           {searchQuery && (
             <button
+              type="button"
               onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
               className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-lg"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -175,7 +177,9 @@ export const CommunityFeed: React.FC = () => {
           {/* Segmented Type Switch */}
           <div className="inline-flex rounded-xl border border-slate-200/90 p-0.5 bg-slate-100/70">
             <button
+              type="button"
               onClick={() => setSelectedType('')}
+              aria-pressed={selectedType === ''}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 selectedType === ''
                   ? 'bg-white text-slate-900 shadow-sm'
@@ -185,7 +189,9 @@ export const CommunityFeed: React.FC = () => {
               All Types
             </button>
             <button
+              type="button"
               onClick={() => setSelectedType(ItemType.LOST)}
+              aria-pressed={selectedType === ItemType.LOST}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 selectedType === ItemType.LOST
                   ? 'bg-rose-50 text-rose-700 shadow-sm'
@@ -195,7 +201,9 @@ export const CommunityFeed: React.FC = () => {
               Lost
             </button>
             <button
+              type="button"
               onClick={() => setSelectedType(ItemType.FOUND)}
+              aria-pressed={selectedType === ItemType.FOUND}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 selectedType === ItemType.FOUND
                   ? 'bg-emerald-50 text-emerald-700 shadow-sm'

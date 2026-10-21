@@ -152,7 +152,9 @@ export const MyCases: React.FC = () => {
       {/* Segmented Filter Tabs */}
       <div className="inline-flex rounded-xl border border-slate-200/90 dark:border-slate-800 p-1 bg-slate-100/70 dark:bg-slate-800/60 text-xs">
         <button
+          type="button"
           onClick={() => setActiveTab('ALL')}
+          aria-pressed={activeTab === 'ALL'}
           className={`px-4 py-2 rounded-lg font-bold transition-all ${
             activeTab === 'ALL'
               ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
@@ -162,7 +164,9 @@ export const MyCases: React.FC = () => {
           All Cases ({items.length})
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('LOST')}
+          aria-pressed={activeTab === 'LOST'}
           className={`px-4 py-2 rounded-lg font-bold transition-all ${
             activeTab === 'LOST'
               ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 shadow-sm'
@@ -172,7 +176,9 @@ export const MyCases: React.FC = () => {
           Lost Reports ({items.filter((i) => i.type === ItemType.LOST).length})
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('FOUND')}
+          aria-pressed={activeTab === 'FOUND'}
           className={`px-4 py-2 rounded-lg font-bold transition-all ${
             activeTab === 'FOUND'
               ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 shadow-sm'
