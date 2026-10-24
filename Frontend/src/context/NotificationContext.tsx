@@ -14,6 +14,28 @@ interface NotificationContextValue {
 
 const NotificationContext = createContext<NotificationContextValue | undefined>(undefined);
 
+const STORAGE_KEY = 'cirs_read_notification_ids';
+
+const getStoredReadIds = (): Set<string> => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      return new Set(JSON.parse(raw));
+    }
+  } catch (e) {
+    console.warn('Failed to parse stored read notifications:', e);
+  }
+  return new Set();
+};
+
+const saveStoredReadIds = (ids: Set<string>) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(ids)));
+  } catch (e) {
+    console.warn('Failed to save read notifications to localStorage:', e);
+  }
+};
+
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -24,7 +46,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setIsLoading(true);
     try {
       const data = await notificationsService.getNotifications();
-      setNotifications(data || []);
+      const readIds = getStoredReadIds();
+      const now = new Date().toISOString();
+
+      // Merge backend notifications with locally persisted read states
+      const merged = (data || []).map((n) => {
+        if (readIds.has(n.id)) {
+          return { ...n, readAt: n.readAt || now };
+        }
+        return n;
+      });
+
+      setNotifications(merged);
     } catch (err) {
       console.warn('Error fetching notifications:', err);
     } finally {
@@ -35,7 +68,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   useEffect(() => {
     if (isAuthenticated) {
       fetchNotifications();
-      // Periodically refresh notifications
       const interval = setInterval(fetchNotifications, 60000);
       return () => clearInterval(interval);
     } else {
@@ -44,24 +76,44 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [isAuthenticated, fetchNotifications]);
 
   const markAsRead = async (id: string) => {
+    const readTimestamp = new Date().toISOString();
+
+    // 1. Update localStorage cache so it permanently stays marked as read
+    const readIds = getStoredReadIds();
+    readIds.add(id);
+    saveStoredReadIds(readIds);
+
+    // 2. Instant optimistic state update
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, readAt: n.readAt || readTimestamp } : n)),
+    );
+
+    // 3. Sync to backend API
     try {
       await notificationsService.markAsRead(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, readAt: new Date().toISOString() } : n)),
-      );
     } catch (err) {
-      console.error('Error marking notification as read:', err);
+      console.warn('Backend markAsRead sync status:', err);
     }
   };
 
   const markAllAsRead = async () => {
+    const readTimestamp = new Date().toISOString();
+
+    // 1. Persist all notification IDs to localStorage
+    const readIds = getStoredReadIds();
+    notifications.forEach((n) => readIds.add(n.id));
+    saveStoredReadIds(readIds);
+
+    // 2. Instant optimistic state update
+    setNotifications((prev) =>
+      prev.map((n) => ({ ...n, readAt: n.readAt || readTimestamp })),
+    );
+
+    // 3. Sync to backend API
     try {
       await notificationsService.markAllAsRead();
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, readAt: n.readAt || new Date().toISOString() })),
-      );
     } catch (err) {
-      console.error('Error marking all notifications as read:', err);
+      console.warn('Backend markAllAsRead sync status:', err);
     }
   };
 
