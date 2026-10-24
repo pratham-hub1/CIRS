@@ -6,40 +6,42 @@ import { FadeIn } from '../components/common/AnimatedTransitions';
 
 export const NotFound: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center px-4 py-16 text-center selection:bg-brand-500 selection:text-white">
-      <FadeIn className="max-w-md mx-auto">
-        <div className="w-16 h-16 bg-brand-50 text-brand-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-subtle border border-brand-100">
-          <Compass className="w-8 h-8 animate-pulse" />
+    <div className="min-h-screen bg-[#0A0C10] flex flex-col justify-center items-center px-4 py-16 text-center text-white selection:bg-white selection:text-black relative">
+      <FadeIn className="max-w-md mx-auto relative z-10 space-y-6">
+        <div className="w-14 h-14 bg-[#12151D] text-neutral-300 rounded-2xl flex items-center justify-center mx-auto border border-white/[0.08]">
+          <Compass className="w-7 h-7 text-neutral-400" />
         </div>
 
-        <span className="text-xs font-mono font-extrabold tracking-widest text-brand-700 uppercase bg-brand-50 px-3 py-1 rounded-full mb-3 inline-block border border-brand-200/60">
-          Error 404 • Lost on Campus
-        </span>
+        <div className="space-y-2">
+          <span className="text-[11px] font-mono tracking-wider text-neutral-400 uppercase bg-white/[0.04] px-2.5 py-1 rounded-md inline-block border border-white/[0.06]">
+            Error 404 • Not Found
+          </span>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          This page seems to be lost.
-        </h1>
+          <h1 className="text-3xl sm:text-4xl font-display font-semibold text-white tracking-tight">
+            Page Not Found
+          </h1>
 
-        <p className="mt-3 text-xs sm:text-sm text-slate-500 max-w-sm mx-auto leading-relaxed font-normal">
-          We checked every campus building, lost &amp; found locker, and security log, but couldn't locate this URL.
-        </p>
+          <p className="text-sm text-neutral-400 max-w-sm mx-auto leading-relaxed">
+            The page or record you requested does not exist or has been relocated within the registry.
+          </p>
+        </div>
 
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <Link to="/dashboard" className="w-full sm:w-auto">
             <Button variant="primary" className="w-full">
               <Home className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              Return to Dashboard
             </Button>
           </Link>
           <Link to="/feed" className="w-full sm:w-auto">
             <Button variant="outline" className="w-full">
               <Search className="w-4 h-4 mr-2" />
-              Explore Campus Feed
+              Community Feed
             </Button>
           </Link>
         </div>
 
-        <div className="mt-12 text-[11px] text-slate-400 font-medium">
+        <div className="pt-8 text-xs text-neutral-500 font-mono">
           GSFC University • Campus Item Recovery System (CIRS)
         </div>
       </FadeIn>

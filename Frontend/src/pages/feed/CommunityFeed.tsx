@@ -12,6 +12,7 @@ import {
   SlidersHorizontal,
   ChevronRight,
   Camera,
+  Radio,
 } from 'lucide-react';
 import { searchService, FeedQueryParams } from '../../services/searchService';
 import { resolveImageUrl } from '../../services/apiClient';
@@ -25,6 +26,7 @@ import { Button } from '../../components/common/Button';
 import { StaggerContainer, StaggerItem, FadeIn } from '../../components/common/AnimatedTransitions';
 import { useToast } from '../../context/ToastContext';
 import { formatRelativeTime } from '../../lib/utils';
+import { celebrateConfetti } from '../../lib/confetti';
 
 export const CommunityFeed: React.FC = () => {
   const { success, error } = useToast();
@@ -103,6 +105,7 @@ export const CommunityFeed: React.FC = () => {
           type: selectedType || undefined,
         },
       });
+      celebrateConfetti();
       success(`Watch '${watchName}' created. You will receive alerts for new matches!`);
       setShowSaveModal(false);
       setWatchName('');
@@ -118,21 +121,25 @@ export const CommunityFeed: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-8 max-w-7xl mx-auto text-white">
       {/* Header */}
       <FadeIn>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-white/[0.06]">
           <div>
-            <div className="flex items-center space-x-2 mb-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full border border-brand-200/60">
-                Campus Registry
+            <div className="flex items-center space-x-2.5 mb-2">
+              <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+                PUBLIC INVENTORY
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-[11px] font-mono text-neutral-400">
+                LIVE BULLETIN
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-white">
               Community Discovery Feed
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl font-normal">
-              Live bulletin of all reported lost items and secured campus recoveries at GSFC University.
+            <p className="text-sm text-neutral-400 mt-1 max-w-2xl">
+              Live bulletin of all reported lost items and secured campus recoveries. Search by title, keywords, or location.
             </p>
           </div>
 
@@ -140,30 +147,30 @@ export const CommunityFeed: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={() => setShowSaveModal(true)}
-            className="self-start sm:self-auto border-brand-200 text-brand-700 bg-brand-50/50 hover:bg-brand-50"
+            className="self-start sm:self-auto"
           >
-            <Bookmark className="w-3.5 h-3.5 mr-1.5 text-brand-600" />
-            Create Search Watch
+            <Bookmark className="w-3.5 h-3.5 mr-1.5 text-neutral-400" />
+            <span>Create Search Watch</span>
           </Button>
         </div>
       </FadeIn>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-subtle space-y-4">
+      <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-5 space-y-4">
         {/* Search input */}
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by keywords, model, serial hint, color, or location..."
-            className="w-full pl-11 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-slate-50/60 font-medium placeholder:text-slate-400 transition-all"
+            className="w-full pl-11 pr-10 py-3 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white focus:border-white/40 bg-neutral-900 text-white placeholder:text-neutral-500 transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-white rounded-lg"
             >
               <X className="w-4 h-4" />
             </button>
@@ -171,35 +178,35 @@ export const CommunityFeed: React.FC = () => {
         </div>
 
         {/* Filter controls row */}
-        <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-slate-100 text-xs">
+        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-white/[0.06] text-xs">
           {/* Segmented Type Switch */}
-          <div className="inline-flex rounded-xl border border-slate-200/90 p-0.5 bg-slate-100/70">
+          <div className="inline-flex rounded-xl border border-white/[0.08] p-1 bg-neutral-900">
             <button
               onClick={() => setSelectedType('')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 selectedType === ''
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white/10 text-white font-semibold shadow-sm'
+                  : 'text-neutral-400 hover:text-white'
               }`}
             >
               All Types
             </button>
             <button
               onClick={() => setSelectedType(ItemType.LOST)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 selectedType === ItemType.LOST
-                  ? 'bg-rose-50 text-rose-700 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                  : 'text-neutral-400 hover:text-white'
               }`}
             >
               Lost
             </button>
             <button
               onClick={() => setSelectedType(ItemType.FOUND)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 selectedType === ItemType.FOUND
-                  ? 'bg-emerald-50 text-emerald-700 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  : 'text-neutral-400 hover:text-white'
               }`}
             >
               Found
@@ -210,7 +217,7 @@ export const CommunityFeed: React.FC = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value as ItemCategory | '')}
-            className="py-1.5 px-3 text-xs font-semibold border border-slate-200/90 rounded-xl bg-white text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-sm"
+            className="py-2 px-3 text-xs font-medium border border-white/[0.08] rounded-xl bg-neutral-900 text-white focus:outline-none focus:border-white/40 shadow-sm"
           >
             <option value="">All Categories</option>
             {Object.values(ItemCategory).map((cat) => (
@@ -224,7 +231,7 @@ export const CommunityFeed: React.FC = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value as ItemStatus | '')}
-            className="py-1.5 px-3 text-xs font-semibold border border-slate-200/90 rounded-xl bg-white text-slate-700 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-sm"
+            className="py-2 px-3 text-xs font-medium border border-white/[0.08] rounded-xl bg-neutral-900 text-white focus:outline-none focus:border-white/40 shadow-sm"
           >
             <option value="">All Statuses</option>
             <option value={ItemStatus.LOST_REPORTED}>Lost Reported</option>
@@ -235,7 +242,7 @@ export const CommunityFeed: React.FC = () => {
           {hasActiveFilters && (
             <button
               onClick={handleClearFilters}
-              className="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50/80 rounded-xl transition-colors ml-auto"
+              className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-colors ml-auto"
             >
               <X className="w-3.5 h-3.5 mr-1" /> Reset Filters
             </button>
@@ -245,7 +252,7 @@ export const CommunityFeed: React.FC = () => {
 
       {/* Feed Cards Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <CardSkeleton />
           <CardSkeleton />
           <CardSkeleton />
@@ -264,21 +271,21 @@ export const CommunityFeed: React.FC = () => {
           }
           actionLabel={hasActiveFilters ? 'Clear Filters' : 'Report an Item'}
           onAction={
-            hasActiveFilters ? handleClearFilters : () => (window.location.href = '/report/lost')
+            hasActiveFilters ? handleClearFilters : () => (window.location.href = '/report')
           }
         />
       ) : (
-        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => {
             const rawImage = item.images && item.images.length > 0 ? item.images[0] : null;
             const displayImage = resolveImageUrl(rawImage);
             return (
               <StaggerItem key={item.caseId}>
-                <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-subtle hover:shadow-elevated transition-all duration-200 flex flex-col justify-between group h-full">
+                <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] overflow-hidden hover:border-white/[0.16] hover:bg-[#151923] transition-all flex flex-col justify-between group h-full">
                   <div>
                     {/* Photo or Category Placeholder Banner */}
                     {displayImage ? (
-                      <div className="h-44 w-full bg-slate-100 overflow-hidden relative">
+                      <div className="h-48 w-full bg-neutral-900 overflow-hidden relative">
                         <img
                           src={displayImage}
                           alt={item.itemName}
@@ -293,51 +300,51 @@ export const CommunityFeed: React.FC = () => {
                         />
                         <div
                           style={{ display: 'none' }}
-                          className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 items-center justify-center"
+                          className="absolute inset-0 w-full h-full bg-neutral-900 items-center justify-center"
                         >
-                          <Package className="w-10 h-10 text-slate-300" />
+                          <Package className="w-10 h-10 text-neutral-600" />
                         </div>
                         <div className="absolute top-3 left-3">
                           <ItemTypeBadge type={item.type} />
                         </div>
                         {item.images && item.images.length > 1 && (
-                          <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-[10px] font-bold text-white flex items-center space-x-1">
+                          <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm text-[10px] font-mono font-bold text-white flex items-center space-x-1 border border-white/10">
                             <Camera className="w-3 h-3" />
                             <span>{item.images.length}</span>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="h-32 w-full bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 flex items-center justify-center relative">
-                        <Package className="w-10 h-10 text-slate-300 group-hover:scale-110 transition-transform duration-200" />
+                      <div className="h-36 w-full bg-neutral-900 flex items-center justify-center relative border-b border-white/[0.06]">
+                        <Package className="w-10 h-10 text-neutral-600 group-hover:scale-105 transition-transform" />
                         <div className="absolute top-3 left-3">
                           <ItemTypeBadge type={item.type} />
                         </div>
                       </div>
                     )}
 
-                    <div className="p-4 sm:p-5">
-                      <div className="flex items-center justify-between mb-2.5">
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-3">
                         <CategoryBadge category={item.category} />
                         <ItemStatusBadge status={item.status} size="sm" />
                       </div>
 
-                      <h3 className="font-bold text-slate-900 text-base leading-snug line-clamp-1 group-hover:text-brand-600 transition-colors">
+                      <h3 className="font-semibold text-white text-base leading-snug line-clamp-1 group-hover:text-neutral-200 transition-colors">
                         {item.itemName}
                       </h3>
-                      <p className="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-neutral-400 mt-1.5 line-clamp-2 leading-relaxed">
                         {item.description}
                       </p>
 
-                      <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500">
-                        <div className="flex items-center text-slate-600">
-                          <MapPin className="w-3.5 h-3.5 mr-1.5 text-slate-400 flex-shrink-0" />
+                      <div className="mt-4 pt-3 border-t border-white/[0.06] space-y-1.5 text-xs text-neutral-400 font-mono">
+                        <div className="flex items-center text-neutral-300">
+                          <MapPin className="w-3.5 h-3.5 mr-1.5 text-neutral-400 flex-shrink-0" />
                           <span className="truncate font-medium text-[11px]">
                             {item.foundLocation || item.lastKnownLocation || 'Campus premises'}
                           </span>
                         </div>
-                        <div className="flex items-center text-slate-400 text-[11px]">
-                          <Calendar className="w-3.5 h-3.5 mr-1.5 flex-shrink-0 text-slate-400" />
+                        <div className="flex items-center text-neutral-500 text-[11px]">
+                          <Calendar className="w-3.5 h-3.5 mr-1.5 flex-shrink-0 text-neutral-500" />
                           <span>Reported {formatRelativeTime(item.createdAt)}</span>
                         </div>
                       </div>
@@ -347,10 +354,10 @@ export const CommunityFeed: React.FC = () => {
                   <div className="px-5 pb-5 pt-0">
                     <Link
                       to={`/items/${item.caseId}`}
-                      className="w-full flex items-center justify-center py-2 px-3 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 transition-all shadow-subtle group-hover:border-brand-300"
+                      className="w-full flex items-center justify-center py-2.5 px-3 text-xs font-semibold text-white bg-white/[0.06] border border-white/[0.08] rounded-xl hover:bg-white/[0.12] transition-all group-hover:border-white/20"
                     >
-                      <span>View Details & Claim</span>
-                      <ChevronRight className="w-3.5 h-3.5 ml-1 text-slate-400 group-hover:text-brand-600 group-hover:translate-x-0.5 transition-transform" />
+                      <span>View Dossier &amp; Claim</span>
+                      <ChevronRight className="w-3.5 h-3.5 ml-1 text-neutral-400 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                   </div>
                 </div>
@@ -367,7 +374,7 @@ export const CommunityFeed: React.FC = () => {
             variant="outline"
             onClick={() => fetchFeed(true)}
             isLoading={isLoadingMore}
-            className="px-6 py-2.5"
+            className="px-6 py-2.5 text-xs"
           >
             Load more items
           </Button>
@@ -384,7 +391,7 @@ export const CommunityFeed: React.FC = () => {
       >
         <form onSubmit={handleSaveWatch} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
               Watch Label
             </label>
             <input
@@ -393,12 +400,12 @@ export const CommunityFeed: React.FC = () => {
               value={watchName}
               onChange={(e) => setWatchName(e.target.value)}
               placeholder="e.g. My Blue Titan Rucksack or Calculator"
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-medium"
             />
           </div>
 
-          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1.5 font-medium">
-            <span className="font-bold block text-slate-800">Watch Query Parameters:</span>
+          <div className="p-3.5 bg-neutral-900 rounded-xl border border-white/[0.08] text-xs text-neutral-400 space-y-1.5 font-mono">
+            <span className="font-semibold block text-white">Watch Query Parameters:</span>
             <p>• Keyword: {searchQuery || 'Any keyword'}</p>
             <p>• Type: {selectedType || 'Lost or Found'}</p>
             <p>

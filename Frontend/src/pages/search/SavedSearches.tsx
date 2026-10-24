@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark, Plus, Trash2, ArrowRight, Search, Tag, MapPin } from 'lucide-react';
+import { Bookmark, Plus, Trash2, ArrowRight, Search, Tag, Radio } from 'lucide-react';
 import { searchService } from '../../services/searchService';
-import { SavedSearch, CreateSavedSearchPayload } from '../../types/savedSearch';
+import { SavedSearch } from '../../types/savedSearch';
 import { ItemCategory, ItemType, CATEGORY_LABELS } from '../../types/enums';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Modal } from '../../components/common/Modal';
@@ -10,6 +10,7 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { PageTransition, StaggerContainer, StaggerItem } from '../../components/common/AnimatedTransitions';
 import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
+import { celebrateConfetti } from '../../lib/confetti';
 
 export const SavedSearches: React.FC = () => {
   const { success, error } = useToast();
@@ -58,7 +59,8 @@ export const SavedSearches: React.FC = () => {
           type: type || undefined,
         },
       });
-      success(`Watch '${name}' created successfully`);
+      celebrateConfetti();
+      success(`Watch '${name}' activated successfully`);
       setShowCreateModal(false);
       setName('');
       setQuery('');
@@ -89,10 +91,19 @@ export const SavedSearches: React.FC = () => {
 
   return (
     <PageTransition className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-white/[0.06]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Saved Searches & Watches</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[11px] font-mono tracking-wider uppercase text-neutral-400 bg-white/[0.04] px-2.5 py-0.5 rounded-md border border-white/[0.06] flex items-center">
+              <Radio className="w-3 h-3 mr-1 text-neutral-400" />
+              Automated Monitors
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-display font-semibold text-white tracking-tight">
+            Saved Searches & Watches
+          </h1>
+          <p className="text-sm text-neutral-400 mt-1 max-w-xl">
             Automated watches monitor new community reports and alert you immediately upon matches.
           </p>
         </div>
@@ -109,7 +120,9 @@ export const SavedSearches: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="p-8 text-center text-xs text-slate-400">Loading your watches...</div>
+        <div className="p-16 text-center text-xs font-mono text-neutral-500">
+          Querying active radar watches...
+        </div>
       ) : searches.length === 0 ? (
         <EmptyState
           icon={Bookmark}
@@ -119,64 +132,64 @@ export const SavedSearches: React.FC = () => {
           onAction={() => setShowCreateModal(true)}
         />
       ) : (
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {searches.map((s) => (
             <StaggerItem
               key={s.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 shadow-subtle hover:shadow-elevated transition-all flex flex-col justify-between"
+              className="bg-[#12151D] rounded-2xl border border-white/[0.08] p-5 flex flex-col justify-between hover:border-white/[0.16] transition-all"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="text-[11px] font-mono font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                     Active Watch
                   </span>
                   <button
                     onClick={() => setDeleteTargetId(s.id)}
-                    className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors"
+                    className="p-1 text-neutral-500 hover:text-rose-400 rounded transition-colors"
                     title="Delete watch"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
 
-                <h3 className="font-bold text-slate-900 text-base">{s.name}</h3>
+                <h3 className="font-semibold text-white text-base">{s.name}</h3>
 
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs space-y-1 text-slate-600">
+                <div className="p-3.5 rounded-xl bg-black/30 border border-white/[0.06] text-xs space-y-1.5 text-neutral-300 font-mono">
                   {s.criteria.q && (
                     <div className="flex items-center">
-                      <Search className="w-3 h-3 mr-1.5 text-slate-400" />
+                      <Search className="w-3.5 h-3.5 mr-1.5 text-neutral-400" />
                       <span>
-                        Keyword: <strong>"{s.criteria.q}"</strong>
+                        Keyword: <strong className="text-white">"{s.criteria.q}"</strong>
                       </span>
                     </div>
                   )}
                   {s.criteria.category && (
                     <div className="flex items-center">
-                      <Tag className="w-3 h-3 mr-1.5 text-slate-400" />
+                      <Tag className="w-3.5 h-3.5 mr-1.5 text-neutral-400" />
                       <span>
-                        Category: <strong>{CATEGORY_LABELS[s.criteria.category]}</strong>
+                        Category: <strong className="text-white">{CATEGORY_LABELS[s.criteria.category]}</strong>
                       </span>
                     </div>
                   )}
                   {s.criteria.type && (
                     <div>
-                      Type: <strong>{s.criteria.type}</strong>
+                      Type: <strong className="text-white">{s.criteria.type}</strong>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-[11px] text-slate-400">
-                  Created {new Date(s.createdAt).toLocaleDateString()}
+              <div className="mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between font-mono">
+                <span className="text-xs text-neutral-500">
+                  {new Date(s.createdAt).toLocaleDateString()}
                 </span>
                 <Link
                   to={`/feed?${s.criteria.q ? `q=${encodeURIComponent(s.criteria.q)}&` : ''}${
                     s.criteria.category ? `category=${s.criteria.category}&` : ''
                   }${s.criteria.type ? `type=${s.criteria.type}` : ''}`}
-                  className="inline-flex items-center text-xs font-semibold text-brand-600 hover:text-brand-700 transition-colors"
+                  className="inline-flex items-center text-xs font-medium text-white hover:text-neutral-300 transition-colors"
                 >
-                  Run Search <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  View Feed Query <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
               </div>
             </StaggerItem>
@@ -193,7 +206,7 @@ export const SavedSearches: React.FC = () => {
       >
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
               Watch Label
             </label>
             <input
@@ -202,12 +215,12 @@ export const SavedSearches: React.FC = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. My Missing Wallet or Scientific Calculator"
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 bg-black/40 text-white placeholder-neutral-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
               Search Keywords (Optional)
             </label>
             <input
@@ -215,23 +228,23 @@ export const SavedSearches: React.FC = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="e.g. WildHorn, Casio, Silver, Blue"
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 bg-black/40 text-white placeholder-neutral-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ItemCategory | '')}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 bg-white"
+                className="w-full px-3 py-2 text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 bg-black/40 text-white"
               >
-                <option value="">Any Category</option>
+                <option value="" className="bg-[#12151D]">Any Category</option>
                 {Object.values(ItemCategory).map((c) => (
-                  <option key={c} value={c}>
+                  <option key={c} value={c} className="bg-[#12151D]">
                     {CATEGORY_LABELS[c]}
                   </option>
                 ))}
@@ -239,25 +252,25 @@ export const SavedSearches: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
                 Report Type
               </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as ItemType | '')}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 bg-white"
+                className="w-full px-3 py-2 text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 bg-black/40 text-white"
               >
-                <option value="">Lost or Found</option>
-                <option value={ItemType.LOST}>Lost Reports</option>
-                <option value={ItemType.FOUND}>Found Reports</option>
+                <option value="" className="bg-[#12151D]">Lost or Found</option>
+                <option value={ItemType.LOST} className="bg-[#12151D]">Lost Reports</option>
+                <option value={ItemType.FOUND} className="bg-[#12151D]">Found Reports</option>
               </select>
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-2">
+          <div className="flex justify-end space-x-2 pt-3 border-t border-white/[0.06]">
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => setShowCreateModal(false)}
             >
