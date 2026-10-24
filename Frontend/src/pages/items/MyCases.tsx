@@ -116,33 +116,31 @@ export const MyCases: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-8 max-w-7xl mx-auto text-white">
       <FadeIn>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-white/[0.06]">
           <div>
-            <div className="flex items-center space-x-2 mb-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 dark:bg-brand-950/40 px-2.5 py-0.5 rounded-full border border-brand-200/60 dark:border-brand-800">
-                Case Management
+            <div className="flex items-center space-x-2.5 mb-2">
+              <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+                PERSONAL REPORTS
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-[11px] font-mono text-neutral-400">
+                ACTIVE CASES
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              My Active Cases
+            <h1 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-white">
+              My Reported Cases
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl font-normal">
-              Manage your personal lost and found incident reports and track real-time recovery
-              progress with campus security.
+            <p className="text-sm text-neutral-400 mt-1 max-w-2xl">
+              Track the live recovery status of items you have reported lost or deposited at campus security.
             </p>
           </div>
 
           <div className="flex items-center space-x-2.5 self-start sm:self-auto">
-            <Link to="/report/lost">
-              <Button variant="danger" size="sm">
-                <Plus className="w-3.5 h-3.5 mr-1" /> Report Lost
-              </Button>
-            </Link>
-            <Link to="/report/found">
-              <Button variant="success" size="sm">
-                <Plus className="w-3.5 h-3.5 mr-1" /> Report Found
+            <Link to="/report">
+              <Button variant="primary" size="sm">
+                <Plus className="w-3.5 h-3.5 mr-1.5" /> Report Item
               </Button>
             </Link>
           </div>
@@ -150,33 +148,33 @@ export const MyCases: React.FC = () => {
       </FadeIn>
 
       {/* Segmented Filter Tabs */}
-      <div className="inline-flex rounded-xl border border-slate-200/90 dark:border-slate-800 p-1 bg-slate-100/70 dark:bg-slate-800/60 text-xs">
+      <div className="inline-flex rounded-xl border border-white/[0.08] p-1 bg-neutral-900 text-xs">
         <button
           onClick={() => setActiveTab('ALL')}
-          className={`px-4 py-2 rounded-lg font-bold transition-all ${
+          className={`px-4 py-2 rounded-lg font-medium transition-all ${
             activeTab === 'ALL'
-              ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              ? 'bg-white/10 text-white font-semibold shadow-sm'
+              : 'text-neutral-400 hover:text-white'
           }`}
         >
           All Cases ({items.length})
         </button>
         <button
           onClick={() => setActiveTab('LOST')}
-          className={`px-4 py-2 rounded-lg font-bold transition-all ${
+          className={`px-4 py-2 rounded-lg font-medium transition-all ${
             activeTab === 'LOST'
-              ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+              : 'text-neutral-400 hover:text-white'
           }`}
         >
           Lost Reports ({items.filter((i) => i.type === ItemType.LOST).length})
         </button>
         <button
           onClick={() => setActiveTab('FOUND')}
-          className={`px-4 py-2 rounded-lg font-bold transition-all ${
+          className={`px-4 py-2 rounded-lg font-medium transition-all ${
             activeTab === 'FOUND'
-              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+              : 'text-neutral-400 hover:text-white'
           }`}
         >
           Found Reports ({items.filter((i) => i.type === ItemType.FOUND).length})
@@ -185,32 +183,26 @@ export const MyCases: React.FC = () => {
 
       {/* Responsive Content: Table for Desktop, Cards for Mobile */}
       {isLoading ? (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+        <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 space-y-4">
           <TableRowSkeleton columns={6} />
           <TableRowSkeleton columns={6} />
           <TableRowSkeleton columns={6} />
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-10 text-center shadow-sm">
-          <div className="w-14 h-14 rounded-2xl bg-primary-50 dark:bg-primary-950/60 text-primary-600 dark:text-primary-400 flex items-center justify-center mx-auto mb-4">
-            <FolderOpen className="w-7 h-7" />
+        <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-12 text-center">
+          <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-white/[0.08] text-neutral-400 flex items-center justify-center mx-auto mb-4">
+            <FolderOpen className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">
-            No reports in this category
+          <h3 className="text-base font-semibold text-white">
+            No incident reports registered
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-sm mx-auto">
-            You haven't filed any cases in this section yet. If you have misplaced or found an item on
-            campus, report it below.
+          <p className="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
+            You currently have zero active reports logged in this filter bracket.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/report/lost">
-              <Button variant="danger" size="sm">
-                <FileQuestion className="w-4 h-4 mr-2" /> Report Lost Item
-              </Button>
-            </Link>
-            <Link to="/report/found">
-              <Button variant="success" size="sm">
-                <Package className="w-4 h-4 mr-2" /> Report Found Item
+            <Link to="/report">
+              <Button variant="primary" size="sm">
+                <Plus className="w-4 h-4 mr-1.5" /> Report Lost or Found Item
               </Button>
             </Link>
           </div>
@@ -218,28 +210,28 @@ export const MyCases: React.FC = () => {
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div className="hidden md:block bg-[#12151D] rounded-2xl border border-white/[0.07] overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse font-sans">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Case ID & Item</th>
+                  <tr className="border-b border-white/[0.06] bg-neutral-900 text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+                    <th className="py-3.5 px-5">Case ID & Item</th>
                     <th className="py-3.5 px-4">Type</th>
                     <th className="py-3.5 px-4">Category</th>
                     <th className="py-3.5 px-4">Status</th>
-                    <th className="py-3.5 px-4">Date Reported</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
+                    <th className="py-3.5 px-4">Report Date</th>
+                    <th className="py-3.5 px-5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                <tbody className="divide-y divide-white/[0.04] text-xs">
                   {filteredItems.map((item) => (
                     <tr
                       key={item.caseId}
-                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
+                      className="hover:bg-white/[0.03] transition-colors"
                     >
-                      <td className="py-3.5 px-4">
+                      <td className="py-4 px-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-neutral-900 flex-shrink-0 flex items-center justify-center border border-white/10">
                             {item.images && item.images.length > 0 ? (
                               <img
                                 src={resolveImageUrl(item.images[0])}
@@ -247,75 +239,58 @@ export const MyCases: React.FC = () => {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <FolderOpen className="w-5 h-5 text-slate-400" />
+                              <FolderOpen className="w-5 h-5 text-neutral-600" />
                             )}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-900 dark:text-white">
+                            <span className="font-semibold text-white block">
                               {item.itemName}
-                            </div>
-                            <span className="font-mono text-xs text-primary-600 dark:text-primary-400 font-bold">
-                              {item.caseId}
+                            </span>
+                            <span className="text-[10px] text-neutral-500 font-mono">
+                              #{item.caseId}
                             </span>
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-4 px-4">
                         <ItemTypeBadge type={item.type} />
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-4 px-4">
                         <CategoryBadge category={item.category} />
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-4 px-4">
                         <ItemStatusBadge status={item.status} size="sm" />
                       </td>
-                      <td className="py-3.5 px-4 text-xs text-slate-500 dark:text-slate-400">
+                      <td className="py-4 px-4 text-neutral-400 font-mono text-[11px]">
                         {formatRelativeTime(item.createdAt)}
                       </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* View */}
-                          <Link to={`/items/${item.caseId}`}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 px-2.5 text-xs text-slate-600 dark:text-slate-300"
-                              title="Inspect Case"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5 mr-1" />
-                              View
-                            </Button>
-                          </Link>
-
-                          {/* Edit: Available while active */}
-                          {item.status !== ItemStatus.RETURNED &&
-                            item.status !== ItemStatus.ARCHIVED && (
-                              <Button
-                                variant="secondary"
-                                size="sm"
+                      <td className="py-4 px-5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end space-x-2">
+                          {item.status === ItemStatus.LOST_REPORTED && (
+                            <>
+                              <button
                                 onClick={() => openEditModal(item)}
-                                className="h-8 px-2.5 text-xs"
-                                title="Edit Details"
+                                className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors"
+                                title="Edit Specifications"
                               >
-                                <Edit3 className="w-3.5 h-3.5 mr-1" />
-                                Edit
-                              </Button>
-                            )}
-
-                          {/* Cancel: Available while active */}
-                          {item.status !== ItemStatus.RETURNED &&
-                            item.status !== ItemStatus.ARCHIVED && (
-                              <Button
-                                variant="danger"
-                                size="sm"
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
                                 onClick={() => setCancelTargetCaseId(item.caseId)}
-                                className="h-8 px-2.5 text-xs"
-                                title="Cancel Report"
+                                className="p-1.5 text-neutral-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors"
+                                title="Cancel Case"
                               >
-                                <XCircle className="w-3.5 h-3.5 mr-1" />
-                                Cancel
-                              </Button>
-                            )}
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                          <Link
+                            to={`/items/${item.caseId}`}
+                            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-white/[0.06] hover:bg-white/[0.12] transition-colors"
+                          >
+                            <span>Dossier</span>
+                            <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                          </Link>
                         </div>
                       </td>
                     </tr>
@@ -330,81 +305,32 @@ export const MyCases: React.FC = () => {
             {filteredItems.map((item) => (
               <div
                 key={item.caseId}
-                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm space-y-3"
+                className="p-5 rounded-2xl bg-[#12151D] border border-white/[0.07] space-y-3"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                      {item.images && item.images.length > 0 ? (
-                        <img
-                          src={resolveImageUrl(item.images[0])}
-                          alt={item.itemName}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <FolderOpen className="w-6 h-6 text-slate-400" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-bold text-slate-900 dark:text-white text-sm">
-                        {item.itemName}
-                      </div>
-                      <span className="font-mono text-xs text-primary-600 font-semibold">
-                        {item.caseId}
-                      </span>
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <ItemTypeBadge type={item.type} />
+                    <span className="text-[10px] text-neutral-500 font-mono">#{item.caseId}</span>
                   </div>
                   <ItemStatusBadge status={item.status} size="sm" />
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <ItemTypeBadge type={item.type} />
-                  <CategoryBadge category={item.category} />
+                <div>
+                  <h4 className="text-sm font-semibold text-white">{item.itemName}</h4>
+                  <p className="text-xs text-neutral-400 line-clamp-2 mt-1">{item.description}</p>
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
-                  {item.description}
-                </p>
-
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5" />
-                    {item.foundLocation || item.lastKnownLocation || 'Campus premises'}
+                <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
+                  <span className="text-[11px] text-neutral-500 font-mono">
+                    {formatRelativeTime(item.createdAt)}
                   </span>
-                  <span>{formatRelativeTime(item.createdAt)}</span>
-                </div>
-
-                {/* Mobile Actions */}
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <Link to={`/items/${item.caseId}`}>
-                    <Button variant="ghost" size="sm" className="h-8 text-xs">
-                      <ExternalLink className="w-3.5 h-3.5 mr-1" />
-                      View
-                    </Button>
+                  <Link
+                    to={`/items/${item.caseId}`}
+                    className="text-xs font-semibold text-white flex items-center"
+                  >
+                    <span>View Dossier</span>
+                    <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                   </Link>
-
-                  {item.status !== ItemStatus.RETURNED && item.status !== ItemStatus.ARCHIVED && (
-                    <>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => openEditModal(item)}
-                        className="h-8 text-xs"
-                      >
-                        <Edit3 className="w-3.5 h-3.5 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => setCancelTargetCaseId(item.caseId)}
-                        className="h-8 text-xs"
-                      >
-                        <XCircle className="w-3.5 h-3.5 mr-1" />
-                        Cancel
-                      </Button>
-                    </>
-                  )}
                 </div>
               </div>
             ))}
@@ -412,82 +338,68 @@ export const MyCases: React.FC = () => {
         </>
       )}
 
-      {/* Edit Case Modal */}
+      {/* Edit Specifications Modal */}
       <Modal
-        isOpen={!!editItem}
+        isOpen={Boolean(editItem)}
         onClose={() => setEditItem(null)}
-        title={`Edit Case: ${editItem?.caseId}`}
+        title="Edit Case Specifications"
+        description="Update your item description and last known coordinates."
       >
-        {editItem && (
-          <form onSubmit={handleEditSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Item Name
-              </label>
-              <input
-                type="text"
-                disabled
-                value={editItem.itemName}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-not-allowed"
-              />
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Primary item classification cannot be changed after submission.
-              </p>
-            </div>
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
+              Description
+            </label>
+            <textarea
+              required
+              rows={3}
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-white/10 rounded-xl bg-neutral-900 text-white focus:outline-none focus:ring-1 focus:ring-white"
+            />
+          </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Description & Notes
-              </label>
-              <textarea
-                required
-                rows={3}
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
+              Campus Zone / Location
+            </label>
+            <input
+              type="text"
+              value={editLocation}
+              onChange={(e) => setEditLocation(e.target.value)}
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-white/10 rounded-xl bg-neutral-900 text-white focus:outline-none focus:ring-1 focus:ring-white"
+            />
+          </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                {editItem.type === ItemType.LOST ? 'Last Known Location' : 'Found Location'}
-              </label>
-              <input
-                type="text"
-                value={editLocation}
-                onChange={(e) => setEditLocation(e.target.value)}
-                placeholder="e.g. Library 2nd floor study area"
-                className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => setEditItem(null)}
-                disabled={isSavingEdit}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary" size="sm" isLoading={isSavingEdit}>
-                Save Changes
-              </Button>
-            </div>
-          </form>
-        )}
+          <div className="flex justify-end space-x-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setEditItem(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              isLoading={isSavingEdit}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </form>
       </Modal>
 
-      {/* Cancel Confirmation Dialog */}
+      {/* Cancel Case Dialog */}
       <ConfirmDialog
-        isOpen={!!cancelTargetCaseId}
+        isOpen={Boolean(cancelTargetCaseId)}
         onClose={() => setCancelTargetCaseId(null)}
         onConfirm={handleCancelCase}
-        title="Cancel Incident Report"
-        message={`Are you sure you want to cancel Case ${cancelTargetCaseId}? This will archive the report and cancel active automated matching against campus items.`}
+        title="Cancel This Case Report?"
+        message="Are you sure you want to cancel this report? This will discontinue radar scanning and close the case."
         confirmLabel="Yes, Cancel Report"
-        cancelLabel="Keep Active"
         isDestructive={true}
         isLoading={isCanceling}
       />

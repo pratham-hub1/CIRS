@@ -30,18 +30,22 @@ export const MyClaims: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-8 max-w-7xl mx-auto text-white">
       <FadeIn>
-        <div>
-          <div className="flex items-center space-x-2 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200/60">
-              Verification Portfolio
+        <div className="pb-6 border-b border-white/[0.06]">
+          <div className="flex items-center space-x-2.5 mb-2">
+            <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+              OWNERSHIP VERIFICATION
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[11px] font-mono text-neutral-400">
+              CLAIMS REGISTRY
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            My Ownership Claims
+          <h1 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-white">
+            My Claims Portfolio
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl font-normal">
+          <p className="text-sm text-neutral-400 mt-1 max-w-2xl">
             Track verification progress, provide supplemental evidence requested by security staff, and retrieve authorized collection tokens.
           </p>
         </div>
@@ -55,8 +59,8 @@ export const MyClaims: React.FC = () => {
       ) : claims.length === 0 ? (
         <EmptyState
           icon={ClipboardCheck}
-          title="No claims submitted yet"
-          description="When you spot an item in the community feed that matches your lost belonging, submit a claim to start the verification process."
+          title="No claims registered"
+          description="When you spot an article in the directory that matches your lost belonging, submit a claim to start the ownership verification process."
           actionLabel="Explore Community Feed"
           onAction={() => (window.location.href = '/feed')}
         />
@@ -64,7 +68,7 @@ export const MyClaims: React.FC = () => {
         <StaggerContainer className="space-y-4">
           {claims.map((claim) => (
             <StaggerItem key={claim.id}>
-              <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-subtle hover:shadow-elevated transition-all flex flex-col md:flex-row md:items-center justify-between gap-5 group">
+              <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 hover:border-white/[0.14] hover:bg-[#151923] transition-all flex flex-col md:flex-row md:items-center justify-between gap-5 group">
                 <div className="space-y-3 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <ClaimStatusBadge status={claim.status} size="md" />
@@ -73,48 +77,48 @@ export const MyClaims: React.FC = () => {
                   </div>
 
                   <div>
-                    <h3 className="font-extrabold text-slate-900 text-base group-hover:text-brand-600 transition-colors">
+                    <h3 className="font-semibold text-white text-base group-hover:text-neutral-200 transition-colors">
                       {claim.item?.itemName || 'Claimed Belonging'}
                     </h3>
-                    <div className="flex items-center space-x-2 text-xs text-slate-400 mt-0.5 font-medium">
-                      <span className="font-mono">Case: {claim.item?.caseId || 'Pending ID'}</span>
+                    <div className="flex items-center space-x-2 text-xs text-neutral-400 mt-0.5 font-mono">
+                      <span>Case #{claim.item?.caseId || 'Pending ID'}</span>
                       <span>•</span>
-                      <span>Submitted {formatRelativeTime(claim.createdAt)}</span>
+                      <span>SUBMITTED {formatRelativeTime(claim.createdAt)}</span>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 line-clamp-2 max-w-2xl leading-relaxed font-normal">
+                  <p className="text-xs text-neutral-300 line-clamp-2 max-w-2xl leading-relaxed">
                     {claim.description}
                   </p>
 
                   {/* Status-specific alert banner */}
                   {claim.status === ClaimStatus.INFO_REQUESTED && (
-                    <div className="flex items-center text-xs font-bold text-purple-800 bg-purple-50 p-3 rounded-xl border border-purple-200 shadow-subtle">
-                      <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0 text-purple-600 animate-pulse" />
-                      <span>Security officers requested answers to verification questions. Click details to respond.</span>
+                    <div className="flex items-center text-xs text-amber-300 bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
+                      <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0 text-amber-400" />
+                      <span>Security officers requested answers to verification questions. Click inspect to respond.</span>
                     </div>
                   )}
 
                   {claim.status === ClaimStatus.APPROVED && claim.collectionToken && (
-                    <div className="flex items-center justify-between text-xs font-bold text-emerald-900 bg-gradient-to-r from-emerald-50 to-teal-50 p-3.5 rounded-xl border border-emerald-200 shadow-subtle">
+                    <div className="flex items-center justify-between text-xs text-emerald-300 bg-emerald-500/10 p-3.5 rounded-xl border border-emerald-500/20">
                       <div className="flex items-center">
-                        <KeyRound className="w-4 h-4 mr-2 text-emerald-600 flex-shrink-0" />
-                        <span>Ready For Collection — Voucher Code:</span>
+                        <KeyRound className="w-4 h-4 mr-2 text-emerald-400 flex-shrink-0" />
+                        <span className="font-medium">Ready For Collection — Voucher Pass Token:</span>
                       </div>
-                      <span className="font-mono font-extrabold text-sm tracking-widest text-emerald-950 bg-white px-2.5 py-0.5 rounded-lg border border-emerald-200 shadow-sm ml-2">
+                      <span className="font-mono font-bold text-sm tracking-widest text-emerald-300 bg-black/40 px-3 py-1 rounded-lg border border-emerald-500/30 ml-2">
                         {claim.collectionToken.code}
                       </span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2 md:self-center pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 flex-shrink-0">
+                <div className="flex items-center space-x-2 md:self-center pt-3 md:pt-0 border-t md:border-t-0 border-white/[0.06] flex-shrink-0">
                   <Link
                     to={`/claims/${claim.id}`}
-                    className="w-full md:w-auto inline-flex items-center justify-center px-4 py-2.5 text-xs font-bold text-brand-700 bg-brand-50/80 border border-brand-200 rounded-xl hover:bg-brand-100 transition-colors shadow-subtle group-hover:border-brand-300"
+                    className="w-full md:w-auto inline-flex items-center justify-center px-4 py-2.5 text-xs font-semibold text-white bg-white/[0.06] border border-white/[0.08] rounded-xl hover:bg-white/[0.12] transition-all"
                   >
                     <span>Inspect Claim</span>
-                    <ChevronRight className="w-3.5 h-3.5 ml-1 text-slate-400 group-hover:text-brand-600 group-hover:translate-x-0.5 transition-transform" />
+                    <ChevronRight className="w-3.5 h-3.5 ml-1 text-neutral-400 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 </div>
               </div>

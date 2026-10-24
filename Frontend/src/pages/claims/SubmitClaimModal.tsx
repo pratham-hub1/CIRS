@@ -6,6 +6,7 @@ import { ItemCategory, VerificationLevel } from '../../types/enums';
 import { VerificationLevelBadge } from '../../components/common/Badge';
 import { FileUpload } from '../../components/common/FileUpload';
 import { useToast } from '../../context/ToastContext';
+import { celebrateConfetti } from '../../lib/confetti';
 
 interface SubmitClaimModalProps {
   isOpen: boolean;
@@ -119,6 +120,7 @@ export const SubmitClaimModal: React.FC<SubmitClaimModalProps> = ({
         documents: uploadedDocuments.length > 0 ? uploadedDocuments : undefined,
       });
 
+      celebrateConfetti();
       success('Ownership claim submitted for review by campus security!');
       onSuccess();
     } catch (err: any) {

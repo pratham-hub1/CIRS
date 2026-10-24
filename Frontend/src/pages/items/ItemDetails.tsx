@@ -22,6 +22,7 @@ import {
   Clock,
   Eye,
   X,
+  Archive,
 } from 'lucide-react';
 import { itemsService } from '../../services/itemsService';
 import { matchingService } from '../../services/matchingService';
@@ -40,6 +41,7 @@ import { Button } from '../../components/common/Button';
 import { FadeIn } from '../../components/common/AnimatedTransitions';
 import { SubmitClaimModal } from '../claims/SubmitClaimModal';
 import { formatRelativeTime } from '../../lib/utils';
+import { celebrateConfetti } from '../../lib/confetti';
 
 export const ItemDetails: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
@@ -79,7 +81,6 @@ export const ItemDetails: React.FC = () => {
       setEditBrand(data.brand);
       setEditColour(data.colour);
 
-      // Load case messages and matches in parallel only if user is owner or admin
       const hasPrivilegedAccess = Boolean(
         (user && (data as Item).reporterId === user.id) || isAdmin,
       );
@@ -97,23 +98,21 @@ export const ItemDetails: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [caseId, error, user, isAdmin]);
+  }, [caseId, user, isAdmin, error]);
 
   useEffect(() => {
     loadCase();
   }, [loadCase]);
 
   const isOwner = Boolean(user && item && item.reporterId === user.id);
-  const canViewPrivateDetails = Boolean(isOwner || isAdmin);
-  const isEditable =
-    isOwner && (item?.status === ItemStatus.LOST_REPORTED || item?.status === ItemStatus.FOUND);
-  const canClaim =
-    !isOwner &&
-    !isAdmin &&
+  const isEditable = Boolean(isOwner && item?.status === ItemStatus.LOST_REPORTED);
+  const canClaim = Boolean(
     item?.type === ItemType.FOUND &&
-    item?.status !== ItemStatus.RETURNED &&
-    item?.status !== ItemStatus.ARCHIVED &&
-    item?.status !== ItemStatus.UNCLAIMED;
+      !isOwner &&
+      item.status !== ItemStatus.RETURNED &&
+      item.status !== ItemStatus.ARCHIVED,
+  );
+  const canViewPrivateDetails = Boolean(isOwner || isAdmin);
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,16 +120,16 @@ export const ItemDetails: React.FC = () => {
     setIsSavingEdit(true);
     try {
       const updated = await itemsService.editItem(caseId, {
-        itemName: editName.trim(),
-        description: editDesc.trim(),
-        brand: editBrand.trim(),
-        colour: editColour.trim(),
+        itemName: editName,
+        description: editDesc,
+        brand: editBrand,
+        colour: editColour,
       });
-      setItem(updated);
+      setItem(updated as Item);
+      success('Specifications updated successfully');
       setShowEditModal(false);
-      success('Case details updated successfully');
     } catch (err: any) {
-      error(err.message || 'Failed to update case');
+      error(err.message || 'Failed to update item specifications');
     } finally {
       setIsSavingEdit(false);
     }
@@ -140,10 +139,10 @@ export const ItemDetails: React.FC = () => {
     if (!caseId) return;
     setIsCanceling(true);
     try {
-      const updated = await itemsService.cancelItem(caseId);
-      setItem(updated);
+      await itemsService.cancelItem(caseId);
+      success('Case cancelled successfully');
       setShowCancelDialog(false);
-      success('Case has been cancelled and archived');
+      loadCase();
     } catch (err: any) {
       error(err.message || 'Failed to cancel case');
     } finally {
@@ -195,6 +194,7 @@ export const ItemDetails: React.FC = () => {
     if (!caseId) return;
     try {
       await claimsService.confirmReceipt(caseId);
+      celebrateConfetti();
       success('Item receipt confirmed! The case is now successfully completed.');
       loadCase();
     } catch (err: any) {
@@ -212,15 +212,15 @@ export const ItemDetails: React.FC = () => {
 
   if (!item) {
     return (
-      <div className="p-10 text-center bg-white rounded-3xl border border-slate-200/90 shadow-subtle max-w-md mx-auto">
-        <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-3" />
-        <h3 className="text-lg font-bold text-slate-800">Case Record Not Found</h3>
-        <p className="text-xs text-slate-500 mt-1">
+      <div className="p-10 text-center bg-[#12151D] rounded-2xl border border-white/[0.07] max-w-md mx-auto">
+        <AlertCircle className="w-10 h-10 text-neutral-400 mx-auto mb-3" />
+        <h3 className="text-base font-bold text-white">Case Record Not Found</h3>
+        <p className="text-xs text-neutral-400 mt-1">
           The requested case ID could not be located in the university repository.
         </p>
         <button
           onClick={() => navigate('/feed')}
-          className="mt-5 px-4 py-2 text-xs font-bold text-brand-600 hover:text-brand-700 bg-brand-50 rounded-xl"
+          className="mt-5 px-4 py-2 text-xs font-semibold text-white bg-white/[0.08] hover:bg-white/[0.12] rounded-xl transition-colors"
         >
           Return to Community Feed
         </button>
@@ -232,7 +232,6 @@ export const ItemDetails: React.FC = () => {
     .map((img) => resolveImageUrl(typeof img === 'string' ? img : img.url))
     .filter(Boolean);
 
-  // Determine active step index for lifecycle tracker
   const getLifecycleStep = (status: ItemStatus) => {
     switch (status) {
       case ItemStatus.LOST_REPORTED:
@@ -253,17 +252,17 @@ export const ItemDetails: React.FC = () => {
   const currentStep = getLifecycleStep(item.status);
 
   return (
-    <FadeIn className="space-y-6 sm:space-y-8 max-w-5xl mx-auto">
+    <FadeIn className="space-y-8 max-w-6xl mx-auto text-white">
       {/* Top back bar and actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-white/[0.06]">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors self-start"
+          className="inline-flex items-center text-xs font-medium text-neutral-400 hover:text-white transition-colors self-start"
         >
-          <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to listings
+          <ArrowLeft className="w-4 h-4 mr-1.5 text-neutral-400" /> Back to directory
         </button>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           {isEditable && (
             <>
               <Button
@@ -271,7 +270,7 @@ export const ItemDetails: React.FC = () => {
                 size="sm"
                 onClick={() => setShowEditModal(true)}
               >
-                <Edit3 className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
+                <Edit3 className="w-3.5 h-3.5 mr-1.5 text-neutral-400" />
                 Edit Specifications
               </Button>
               <Button
@@ -310,10 +309,10 @@ export const ItemDetails: React.FC = () => {
       </div>
 
       {/* Case Lifecycle Progress Tracker */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-subtle">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Case Lifecycle Status
+      <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-5 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-400">
+            LIFECYCLE STATUS
           </span>
           <ItemStatusBadge status={item.status} size="sm" />
         </div>
@@ -322,21 +321,21 @@ export const ItemDetails: React.FC = () => {
             { step: 1, label: 'Reported' },
             { step: 2, label: 'In Custody / Matching' },
             { step: 3, label: 'Ready for Collection' },
-            { step: 4, label: 'Resolved / Handed Over' },
+            { step: 4, label: 'Resolved & Returned' },
           ].map((st) => (
             <div key={st.step} className="flex flex-col items-center">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs mb-1.5 transition-all ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center font-mono font-bold text-xs mb-2 transition-all ${
                   currentStep >= st.step
-                    ? 'bg-brand-600 text-white shadow-subtle ring-4 ring-brand-50'
-                    : 'bg-slate-100 text-slate-400'
+                    ? 'bg-white text-black shadow-sm'
+                    : 'bg-neutral-800 text-neutral-500 border border-white/[0.06]'
                 }`}
               >
                 {currentStep > st.step ? <Check className="w-4 h-4" /> : st.step}
               </div>
               <span
-                className={`text-[10px] sm:text-xs font-semibold leading-tight ${
-                  currentStep >= st.step ? 'text-slate-800' : 'text-slate-400'
+                className={`text-[11px] font-medium leading-tight ${
+                  currentStep >= st.step ? 'text-white' : 'text-neutral-500'
                 }`}
               >
                 {st.label}
@@ -346,41 +345,28 @@ export const ItemDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Case Overview Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-subtle">
-        {/* Banner with tags & status */}
-        <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-50/90 to-white border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center space-x-2.5">
-            <ItemTypeBadge type={item.type} />
-            <span className="font-mono text-xs font-bold text-slate-600 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-sm">
-              {item.caseId}
-            </span>
-            <CategoryBadge category={item.category} />
-          </div>
-          <div className="text-xs text-slate-400 font-medium">
-            Reported {formatRelativeTime(item.createdAt)}
-          </div>
-        </div>
-
-        <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Photos / Gallery */}
-          <div className="md:col-span-1 space-y-3">
+      {/* Main Case Overview Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Photos & Custody info */}
+        <div className="space-y-6">
+          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-4 overflow-hidden">
             {imagesList.length > 0 ? (
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 <div
                   onClick={() => setPreviewImage(imagesList[0])}
-                  className="h-64 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 cursor-pointer relative group"
+                  className="h-72 rounded-xl overflow-hidden bg-neutral-900 border border-white/[0.06] cursor-pointer relative group"
                 >
                   <img
                     src={imagesList[0]}
                     alt={item.itemName}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
+                      (e.currentTarget as HTMLImageElement).src =
+                        'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
                     }}
                   />
-                  <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold">
-                    <Eye className="w-4 h-4 mr-1.5" /> Click to enlarge
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium">
+                    <Eye className="w-4 h-4 mr-1.5" /> Enlarge image
                   </div>
                 </div>
                 {imagesList.length > 1 && (
@@ -389,92 +375,104 @@ export const ItemDetails: React.FC = () => {
                       <div
                         key={idx}
                         onClick={() => setPreviewImage(img)}
-                        className="h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 cursor-pointer hover:opacity-80 transition-opacity"
+                        className="h-18 rounded-lg overflow-hidden border border-white/[0.06] bg-neutral-900 cursor-pointer hover:border-white/30 transition-all"
                       >
-                        <img
-                          src={img}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
-                          }}
-                        />
+                        <img src={img} alt="" className="w-full h-full object-cover" />
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="h-64 rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 flex flex-col items-center justify-center text-slate-400 p-4 text-center">
-                <Package className="w-12 h-12 mb-2 stroke-1 text-slate-300" />
-                <span className="text-xs font-medium">No photograph attached</span>
-                <span className="text-[10px] text-slate-400 mt-0.5">
-                  Specification-based match
-                </span>
+              <div className="h-64 rounded-xl border border-dashed border-white/10 bg-neutral-900/50 flex flex-col items-center justify-center text-neutral-500 p-4 text-center">
+                <Package className="w-10 h-10 mb-2 stroke-1 text-neutral-600" />
+                <span className="text-xs">No photographic evidence attached</span>
               </div>
             )}
           </div>
 
-          {/* Details Column */}
-          <div className="md:col-span-2 space-y-6">
+          {/* Custody Vault Card */}
+          {item.storageLocation && (
+            <div className="p-5 rounded-2xl bg-[#12151D] border border-white/[0.07] space-y-2">
+              <div className="flex items-center space-x-2 text-xs font-semibold text-white">
+                <Archive className="w-4 h-4 text-neutral-400" />
+                <span>Secured Custody Vault</span>
+              </div>
+              <p className="text-sm font-bold text-white">{item.storageLocation.name}</p>
+              <p className="text-xs text-neutral-400">
+                Official campus item custody repository
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Right Column (2 Cols): Specifications, Details, Messages & Matches */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Main Info Card */}
+          <div className="p-6 sm:p-7 rounded-2xl bg-[#12151D] border border-white/[0.07] space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/[0.06]">
+              <div className="flex items-center space-x-2.5">
+                <ItemTypeBadge type={item.type} />
+                <span className="font-mono text-xs text-neutral-400">#{item.caseId}</span>
+                <CategoryBadge category={item.category} />
+              </div>
+              <span className="text-xs text-neutral-500 font-mono">
+                LOGGED {formatRelativeTime(item.createdAt)}
+              </span>
+            </div>
+
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">
                 {item.itemName}
               </h1>
-              <p className="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line font-normal">
+              <p className="mt-2 text-sm text-neutral-300 leading-relaxed whitespace-pre-line">
                 {item.description}
               </p>
             </div>
 
             {/* Specifications Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/70 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-neutral-900 border border-white/[0.06] text-xs font-mono">
               <div>
-                <span className="text-slate-400 block uppercase tracking-wider font-bold text-[10px]">
-                  Brand / Make
-                </span>
-                <span className="font-bold text-slate-800 mt-1 block">
+                <span className="text-neutral-500 block uppercase text-[10px]">Brand / Make</span>
+                <span className="font-semibold text-white mt-0.5 block">
                   {item.brand || 'Unbranded'}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block uppercase tracking-wider font-bold text-[10px]">
-                  Colour
-                </span>
-                <span className="font-bold text-slate-800 mt-1 block">{item.colour}</span>
+                <span className="text-neutral-500 block uppercase text-[10px]">Colour</span>
+                <span className="font-semibold text-white mt-0.5 block">{item.colour}</span>
               </div>
               <div>
-                <span className="text-slate-400 block uppercase tracking-wider font-bold text-[10px]">
-                  Serial Number
-                </span>
-                <span className="font-mono font-bold text-slate-800 mt-1 block">
+                <span className="text-neutral-500 block uppercase text-[10px]">Serial Number</span>
+                <span className="font-semibold text-white mt-0.5 block">
                   {canViewPrivateDetails
                     ? item.serialNumber || 'N/A'
                     : '•••••••• (Verification required)'}
                 </span>
               </div>
-              <div className="col-span-2 sm:col-span-3 pt-3 border-t border-slate-200/60">
-                <span className="text-slate-400 block uppercase tracking-wider font-bold text-[10px]">
+              <div className="col-span-2 sm:col-span-3 pt-3 border-t border-white/[0.06]">
+                <span className="text-neutral-500 block uppercase text-[10px]">
                   Identifying Marks & Features
                 </span>
-                <span className="text-slate-800 mt-1 block leading-relaxed font-medium">
+                <span className="text-neutral-300 mt-1 block font-sans text-xs">
                   {canViewPrivateDetails
                     ? item.identifyingMarks || 'None stated'
-                    : '•••••••• (Hidden for anti-fraud security. You will be asked about distinguishing features during ownership verification.)'}
+                    : '•••••••• (Protected under anti-fraud protocol. Distinguishing marks verified upon claim)'}
                 </span>
               </div>
             </div>
 
-            {/* Location & Custody details */}
-            <div className="space-y-2.5 text-xs text-slate-600 font-medium">
+            {/* Location & Timestamp details */}
+            <div className="space-y-2 text-xs text-neutral-300">
               <div className="flex items-center">
-                <MapPin className="w-4 h-4 mr-2 text-slate-400 flex-shrink-0" />
+                <MapPin className="w-4 h-4 mr-2 text-neutral-400 flex-shrink-0" />
                 <span>
                   <strong>Location:</strong>{' '}
                   {item.foundLocation || item.lastKnownLocation || 'Campus premises'}
                 </span>
               </div>
               <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-2 text-slate-400 flex-shrink-0" />
+                <Calendar className="w-4 h-4 mr-2 text-neutral-400 flex-shrink-0" />
                 <span>
                   <strong>Report Date:</strong>{' '}
                   {new Date(item.createdAt).toLocaleString([], {
@@ -483,178 +481,165 @@ export const ItemDetails: React.FC = () => {
                   })}
                 </span>
               </div>
-
-              {item.storageLocation && (
-                <div className="flex items-center text-brand-800 bg-brand-50/80 px-3.5 py-2.5 rounded-xl border border-brand-200/60 font-semibold shadow-subtle">
-                  <Building2 className="w-4 h-4 mr-2 text-brand-600 flex-shrink-0" />
-                  <span>
-                    Secured Custody Vault: <strong>{item.storageLocation.name}</strong>
-                  </span>
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Candidate Matches Section (Private to owner & staff) */}
-      {canViewPrivateDetails && matches.length > 0 && (
-        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900 flex items-center">
-              <Layers className="w-4 h-4 mr-2 text-brand-600" />
-              Automated Candidate Matches ({matches.length})
-            </h2>
-            <span className="text-xs text-slate-400">Ranked by attribute similarity</span>
-          </div>
+          {/* Candidate Matches Section (Private to owner & staff) */}
+          {canViewPrivateDetails && matches.length > 0 && (
+            <div className="p-6 rounded-2xl bg-[#12151D] border border-white/[0.07] space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-display font-bold text-white flex items-center">
+                  <Sparkles className="w-4 h-4 mr-2 text-amber-400" />
+                  Automated Candidate Matches ({matches.length})
+                </h3>
+                <span className="text-[11px] text-neutral-400 font-mono">Ranked by similarity</span>
+              </div>
 
-          <div className="space-y-3">
-            {matches.map((m) => {
-              const matchedItem = item.type === ItemType.LOST ? m.foundItem : m.lostItem;
-              return (
-                <div
-                  key={m.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-slate-200/80 bg-slate-50/60 hover:bg-slate-50 transition-colors gap-4"
-                >
-                  <div>
-                    <div className="flex items-center space-x-2 mb-1.5">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-100 text-brand-800 border border-brand-200/60">
-                        {(m.score * 100).toFixed(0)}% Similarity
-                      </span>
-                      <span className="text-xs font-mono font-bold text-slate-500">
-                        {matchedItem?.caseId}
-                      </span>
+              <div className="space-y-3">
+                {matches.map((m) => {
+                  const matchedItem = item.type === ItemType.LOST ? m.foundItem : m.lostItem;
+                  return (
+                    <div
+                      key={m.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-white/[0.06] bg-neutral-900 gap-3"
+                    >
+                      <div>
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                            {(m.score * 100).toFixed(0)}% Similarity
+                          </span>
+                          <span className="text-xs font-mono text-neutral-400">
+                            #{matchedItem?.caseId}
+                          </span>
+                        </div>
+                        <h4 className="text-xs font-semibold text-white">
+                          {matchedItem?.itemName || 'Opposite Item'}
+                        </h4>
+                        <p className="text-[11px] text-neutral-400 line-clamp-1 mt-0.5">
+                          {matchedItem?.description}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-2 flex-shrink-0">
+                        <Link to={`/items/${matchedItem?.caseId}`}>
+                          <Button variant="outline" size="sm">
+                            Inspect
+                          </Button>
+                        </Link>
+
+                        {isAdmin && m.status === MatchStatus.SUGGESTED && (
+                          <>
+                            <Button
+                              variant="success"
+                              size="sm"
+                              onClick={() => handleConfirmMatch(m.id)}
+                            >
+                              Confirm
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDismissMatch(m.id)}
+                              className="text-neutral-400 hover:text-white"
+                            >
+                              Dismiss
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <h4 className="text-sm font-bold text-slate-900">
-                      {matchedItem?.itemName || 'Opposite Item'}
-                    </h4>
-                    <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
-                      {matchedItem?.description}
-                    </p>
-                  </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-                  <div className="flex items-center space-x-2 flex-shrink-0">
-                    <Link to={`/items/${matchedItem?.caseId}`}>
-                      <Button variant="outline" size="sm">
-                        Inspect
-                      </Button>
-                    </Link>
-
-                    {isAdmin && m.status === MatchStatus.SUGGESTED && (
-                      <>
-                        <Button
-                          variant="success"
-                          size="sm"
-                          onClick={() => handleConfirmMatch(m.id)}
-                        >
-                          Confirm
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDismissMatch(m.id)}
-                        >
-                          Dismiss
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Staff-mediated Case Messages Thread (Private to owner & staff) */}
-      {canViewPrivateDetails && (
-        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle space-y-4">
-          <div>
-            <h2 className="text-base font-bold text-slate-900 flex items-center">
-              <MessageSquare className="w-4 h-4 mr-2 text-brand-600" />
-              Official Security Communications
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5 font-normal">
-              Encrypted staff channel for this case. Direct handover coordination is mediated by campus security officers.
-            </p>
-          </div>
-
-          {/* Messages List */}
-          <div className="space-y-3 max-h-80 overflow-y-auto p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 scrollbar-thin">
-            {messages.length === 0 ? (
-              <div className="text-center py-6 text-slate-400">
-                <MessageSquare className="w-8 h-8 mx-auto mb-1 opacity-40" />
-                <p className="text-xs font-medium">No messages posted yet for this case.</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">
-                  Post an inquiry or update below to alert security staff.
+          {/* Security Communications Thread (Private to owner & staff) */}
+          {canViewPrivateDetails && (
+            <div className="p-6 rounded-2xl bg-[#12151D] border border-white/[0.07] space-y-4">
+              <div>
+                <h3 className="text-sm font-display font-bold text-white flex items-center">
+                  <MessageSquare className="w-4 h-4 mr-2 text-neutral-400" />
+                  Official Security Communications
+                </h3>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  Direct encrypted coordination channel with campus security desk.
                 </p>
               </div>
-            ) : (
-              messages.map((msg) => {
-                const isStaff = msg.sender?.role === Role.ADMIN;
-                const isCurrentUser = user && msg.senderId === user.id;
-                return (
-                  <div
-                    key={msg.id}
-                    className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}
-                  >
-                    <div className="flex items-center space-x-1.5 text-[10px] text-slate-400 mb-1 px-1">
-                      <span className="font-bold text-slate-700">
-                        {isCurrentUser ? 'You' : msg.sender?.name || 'Member'}
-                      </span>
-                      {isStaff && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-brand-100 text-brand-700 font-bold uppercase">
-                          Staff
-                        </span>
-                      )}
-                      <span>•</span>
-                      <span>
-                        {new Date(msg.createdAt).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                    </div>
-                    <div
-                      className={`max-w-md p-3 rounded-2xl text-xs leading-relaxed ${
-                        isCurrentUser
-                          ? 'bg-brand-600 text-white rounded-tr-none shadow-subtle'
-                          : isStaff
-                          ? 'bg-brand-50 text-brand-950 border border-brand-200 rounded-tl-none font-medium'
-                          : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none shadow-subtle'
-                      }`}
-                    >
-                      {msg.body}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
 
-          {/* Message Input */}
-          <form onSubmit={handleSendMessage} className="flex gap-2.5 pt-1">
-            <input
-              type="text"
-              required
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type a message or inquiry to campus security officers..."
-              className="flex-1 px-4 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
-            />
-            <Button
-              type="submit"
-              variant="primary"
-              size="sm"
-              isLoading={isSendingMessage}
-              className="px-5"
-            >
-              <Send className="w-3.5 h-3.5 mr-1.5" />
-              Send
-            </Button>
-          </form>
+              {/* Messages List */}
+              <div className="space-y-3 max-h-72 overflow-y-auto p-4 bg-neutral-900 rounded-xl border border-white/[0.06] scrollbar-thin">
+                {messages.length === 0 ? (
+                  <div className="text-center py-6 text-neutral-500">
+                    <p className="text-xs">No communications posted yet for this case.</p>
+                  </div>
+                ) : (
+                  messages.map((msg) => {
+                    const isStaff = msg.sender?.role === Role.ADMIN;
+                    const isCurrentUser = user && msg.senderId === user.id;
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}
+                      >
+                        <div className="flex items-center space-x-1.5 text-[10px] text-neutral-400 mb-1 px-1 font-mono">
+                          <span className="font-semibold text-white">
+                            {isCurrentUser ? 'You' : msg.sender?.name || 'Member'}
+                          </span>
+                          {isStaff && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] bg-neutral-800 text-neutral-300 font-bold uppercase">
+                              Staff
+                            </span>
+                          )}
+                          <span>•</span>
+                          <span>
+                            {new Date(msg.createdAt).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </div>
+                        <div
+                          className={`max-w-md p-3 rounded-2xl text-xs leading-relaxed ${
+                            isCurrentUser
+                              ? 'bg-white text-black rounded-tr-none font-medium'
+                              : isStaff
+                              ? 'bg-neutral-800 text-white rounded-tl-none font-medium'
+                              : 'bg-neutral-800/80 text-neutral-200 border border-white/[0.08] rounded-tl-none'
+                          }`}
+                        >
+                          {msg.body}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Message Input */}
+              <form onSubmit={handleSendMessage} className="flex gap-2 pt-1">
+                <input
+                  type="text"
+                  required
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type an official query or update to officers..."
+                  className="flex-1 px-4 py-2.5 text-xs bg-neutral-900 border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white text-white placeholder-neutral-500"
+                />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  isLoading={isSendingMessage}
+                >
+                  <Send className="w-3.5 h-3.5 mr-1.5" />
+                  Send
+                </Button>
+              </form>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Image Preview Modal */}
       <AnimatePresence>
@@ -668,17 +653,18 @@ export const ItemDetails: React.FC = () => {
               onClick={() => setPreviewImage(null)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="relative z-10 max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl"
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative z-10 max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
             >
               <img
                 src={resolveImageUrl(previewImage)}
                 alt="Enlarged preview"
                 className="w-full h-full object-contain"
                 onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
+                  (e.currentTarget as HTMLImageElement).src =
+                    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
                 }}
               />
               <button
@@ -701,7 +687,7 @@ export const ItemDetails: React.FC = () => {
       >
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
               Item Title
             </label>
             <input
@@ -709,13 +695,13 @@ export const ItemDetails: React.FC = () => {
               required
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-white/10 rounded-xl bg-neutral-900 text-white focus:outline-none focus:ring-1 focus:ring-white"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                 Brand
               </label>
               <input
@@ -723,11 +709,11 @@ export const ItemDetails: React.FC = () => {
                 required
                 value={editBrand}
                 onChange={(e) => setEditBrand(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-white/10 rounded-xl bg-neutral-900 text-white focus:outline-none focus:ring-1 focus:ring-white"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                 Colour
               </label>
               <input
@@ -735,13 +721,13 @@ export const ItemDetails: React.FC = () => {
                 required
                 value={editColour}
                 onChange={(e) => setEditColour(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+                className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-white/10 rounded-xl bg-neutral-900 text-white focus:outline-none focus:ring-1 focus:ring-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
               Description
             </label>
             <textarea
@@ -749,7 +735,7 @@ export const ItemDetails: React.FC = () => {
               rows={3}
               value={editDesc}
               onChange={(e) => setEditDesc(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-white/10 rounded-xl bg-neutral-900 text-white focus:outline-none focus:ring-1 focus:ring-white"
             />
           </div>
 
