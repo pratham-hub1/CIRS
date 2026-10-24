@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Layers, CheckCircle, XCircle, ArrowRight, ExternalLink, Search, RefreshCw } from 'lucide-react';
+import { Layers, CheckCircle, XCircle, ExternalLink, Search, RefreshCw, Sparkles } from 'lucide-react';
 import { matchingService } from '../../services/matchingService';
 import { adminService } from '../../services/adminService';
 import { Match } from '../../types/matching';
@@ -11,6 +11,7 @@ import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
 import { apiClient } from '../../services/apiClient';
 import { DEMO_MATCHES } from '../../services/demoFixtures';
+import { celebrateConfetti } from '../../lib/confetti';
 
 export const AdminMatches: React.FC = () => {
   const { success, error } = useToast();
@@ -71,6 +72,7 @@ export const AdminMatches: React.FC = () => {
   const handleConfirm = async (id: string) => {
     try {
       await matchingService.confirmMatch(id);
+      celebrateConfetti();
       setMatches((prev) =>
         prev.map((m) => (m.id === id ? { ...m, status: MatchStatus.CONFIRMED } : m)),
       );
@@ -94,33 +96,42 @@ export const AdminMatches: React.FC = () => {
 
   return (
     <PageTransition className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-white/[0.06]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Candidate Match Reviews</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Review automated multi-attribute matches between lost and found items computed by the matching engine.
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[11px] font-mono tracking-wider uppercase text-neutral-400 bg-white/[0.04] px-2.5 py-0.5 rounded-md border border-white/[0.06] flex items-center">
+              <Sparkles className="w-3 h-3 mr-1 text-neutral-400" />
+              Automated Match Radar
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-display font-semibold text-white tracking-tight">
+            Candidate Match Reviews
+          </h1>
+          <p className="text-sm text-neutral-400 mt-1 max-w-xl">
+            Review multi-attribute correlation matches between lost and found items computed by the matching engine.
           </p>
         </div>
 
         {/* Quick Case ID Lookup */}
         <form onSubmit={handleSearch} className="flex items-center gap-2">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Look up Case ID (e.g. CIRS-2026-0001)"
+              placeholder="Case ID (e.g. CIRS-2026-0001)"
               value={searchCaseId}
               onChange={(e) => setSearchCaseId(e.target.value)}
-              className="pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 w-64"
+              className="pl-9 pr-3 py-2 text-xs bg-[#12151D] border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 text-white placeholder-neutral-500 font-mono w-60"
             />
           </div>
           <Button
             type="submit"
             variant="primary"
             size="sm"
-            className="py-1.5 px-3 text-xs font-semibold h-auto"
+            className="py-2 px-3 text-xs"
           >
-            Find
+            Scan
           </Button>
           <button
             type="button"
@@ -129,7 +140,7 @@ export const AdminMatches: React.FC = () => {
               fetchMatches('');
             }}
             title="Refresh All"
-            className="p-1.5 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors"
+            className="p-2 border border-white/[0.08] bg-[#12151D] rounded-xl hover:bg-white/[0.06] text-neutral-300 hover:text-white transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
@@ -137,76 +148,82 @@ export const AdminMatches: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="p-8 text-center text-xs text-slate-400">Evaluating candidate matches from CIRS engine...</div>
+        <div className="p-16 text-center text-xs font-mono text-neutral-500">
+          Evaluating candidate matches from matching engine...
+        </div>
       ) : matches.length === 0 ? (
         <EmptyState
           icon={Layers}
           title="No candidate matches found"
-          description="The matching engine will surface high-confidence match candidates here when corresponding lost and found items are detected."
+          description="The matching engine surfaces candidate correlations here when high similarity between lost and found reports is detected."
         />
       ) : (
         <div className="space-y-4">
           {matches.map((m) => (
             <div
               key={m.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 shadow-subtle hover:shadow-elevated transition-shadow space-y-4"
+              className="bg-[#12151D] rounded-2xl border border-white/[0.08] p-5 sm:p-6 space-y-4"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
                 <div className="flex items-center space-x-2">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
-                    {(m.score * 100).toFixed(0)}% Similarity Score
+                  <span className="px-3 py-0.5 rounded-full text-xs font-mono font-medium bg-white/[0.06] text-white border border-white/[0.1]">
+                    {(m.score * 100).toFixed(0)}% Match Score
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium uppercase tracking-wider ${
                       m.status === MatchStatus.CONFIRMED
-                        ? 'bg-emerald-100 text-emerald-800'
+                        ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
                         : m.status === MatchStatus.DISMISSED
-                        ? 'bg-slate-100 text-slate-600'
-                        : 'bg-amber-100 text-amber-800'
+                        ? 'bg-white/[0.04] text-neutral-400 border border-white/[0.06]'
+                        : 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
                     }`}
                   >
                     {m.status}
                   </span>
                 </div>
-                <span className="text-[11px] text-slate-400">
-                  Detected on {new Date(m.createdAt).toLocaleDateString()}
+                <span className="text-xs text-neutral-400 font-mono">
+                  Detected {new Date(m.createdAt).toLocaleDateString()}
                 </span>
               </div>
 
               {/* Items Side-by-Side Comparison */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 {/* Lost Item */}
-                <div className="p-4 rounded-xl bg-rose-50/50 border border-rose-100 space-y-2">
-                  <span className="font-bold uppercase tracking-wider text-rose-700 text-[10px]">
-                    Reported Lost Item
-                  </span>
-                  <h4 className="font-bold text-slate-900 text-sm">{m.lostItem?.itemName}</h4>
-                  <p className="text-slate-600 line-clamp-2">{m.lostItem?.description}</p>
-                  <div className="pt-2 flex justify-between items-center text-slate-500 text-[11px]">
-                    <span className="font-mono">{m.lostItem?.caseId}</span>
+                <div className="p-4 rounded-xl bg-black/30 border border-white/[0.06] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium uppercase tracking-wider text-rose-300 text-[10px] font-mono">
+                      Reported Lost Item
+                    </span>
+                    <span className="text-neutral-400 font-mono text-[11px]">{m.lostItem?.caseId}</span>
+                  </div>
+                  <h4 className="font-semibold text-white text-sm">{m.lostItem?.itemName}</h4>
+                  <p className="text-neutral-400 line-clamp-2">{m.lostItem?.description}</p>
+                  <div className="pt-2 flex justify-end items-center">
                     <Link
                       to={`/items/${m.lostItem?.caseId}`}
-                      className="text-brand-600 hover:underline flex items-center font-medium"
+                      className="text-neutral-300 hover:text-white flex items-center font-medium text-[11px]"
                     >
-                      View Report <ExternalLink className="w-3 h-3 ml-1" />
+                      View Dossier <ExternalLink className="w-3 h-3 ml-1" />
                     </Link>
                   </div>
                 </div>
 
                 {/* Found Item */}
-                <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-100 space-y-2">
-                  <span className="font-bold uppercase tracking-wider text-emerald-700 text-[10px]">
-                    Reported Found Item
-                  </span>
-                  <h4 className="font-bold text-slate-900 text-sm">{m.foundItem?.itemName}</h4>
-                  <p className="text-slate-600 line-clamp-2">{m.foundItem?.description}</p>
-                  <div className="pt-2 flex justify-between items-center text-slate-500 text-[11px]">
-                    <span className="font-mono">{m.foundItem?.caseId}</span>
+                <div className="p-4 rounded-xl bg-black/30 border border-white/[0.06] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium uppercase tracking-wider text-emerald-300 text-[10px] font-mono">
+                      Reported Found Item
+                    </span>
+                    <span className="text-neutral-400 font-mono text-[11px]">{m.foundItem?.caseId}</span>
+                  </div>
+                  <h4 className="font-semibold text-white text-sm">{m.foundItem?.itemName}</h4>
+                  <p className="text-neutral-400 line-clamp-2">{m.foundItem?.description}</p>
+                  <div className="pt-2 flex justify-end items-center">
                     <Link
                       to={`/items/${m.foundItem?.caseId}`}
-                      className="text-brand-600 hover:underline flex items-center font-medium"
+                      className="text-neutral-300 hover:text-white flex items-center font-medium text-[11px]"
                     >
-                      View Report <ExternalLink className="w-3 h-3 ml-1" />
+                      View Dossier <ExternalLink className="w-3 h-3 ml-1" />
                     </Link>
                   </div>
                 </div>
@@ -219,16 +236,16 @@ export const AdminMatches: React.FC = () => {
                     size="sm"
                     variant="outline"
                     onClick={() => handleDismiss(m.id)}
-                    className="inline-flex items-center text-slate-700 hover:bg-slate-50"
+                    className="inline-flex items-center text-xs"
                   >
-                    <XCircle className="w-4 h-4 mr-1.5 text-slate-400" />
+                    <XCircle className="w-4 h-4 mr-1.5 text-neutral-400" />
                     Dismiss Match
                   </Button>
                   <Button
                     size="sm"
-                    variant="success"
+                    variant="primary"
                     onClick={() => handleConfirm(m.id)}
-                    className="inline-flex items-center shadow-sm"
+                    className="inline-flex items-center text-xs"
                   >
                     <CheckCircle className="w-4 h-4 mr-1.5" />
                     Confirm Match

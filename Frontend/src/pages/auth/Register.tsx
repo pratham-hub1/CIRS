@@ -19,6 +19,7 @@ import { Campus } from '../../types/auth';
 import { Role } from '../../types/enums';
 import { Button } from '../../components/common/Button';
 import { FadeIn } from '../../components/common/AnimatedTransitions';
+import { celebrateConfetti } from '../../lib/confetti';
 
 export const Register: React.FC = () => {
   const { register } = useAuth();
@@ -113,6 +114,7 @@ export const Register: React.FC = () => {
         departmentId: departmentId.trim() || undefined,
         role,
       });
+      celebrateConfetti();
       success('Account registered successfully! Welcome to CIRS.');
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
@@ -125,35 +127,35 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-brand-500 selection:text-white">
+    <div className="min-h-screen bg-[#0A0C10] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 selection:bg-white/20 selection:text-white">
       <FadeIn className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-700 via-brand-600 to-accent-600 flex items-center justify-center text-white font-extrabold mx-auto mb-4 shadow-elevated ring-4 ring-white">
-          <span className="text-xl font-mono tracking-wider">CI</span>
+        <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-white/15 flex items-center justify-center text-white font-bold text-sm tracking-widest mx-auto mb-4 shadow-sm">
+          CI
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+        <h1 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-white">
           Create an Account
         </h1>
-        <p className="mt-1.5 text-xs sm:text-sm text-slate-500 font-normal">
+        <p className="mt-1 text-xs sm:text-sm text-neutral-400">
           Register with your GSFC University student or faculty identity
         </p>
       </FadeIn>
 
       <FadeIn delay={0.1} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 sm:px-10 shadow-elevated rounded-3xl border border-slate-200/90">
+        <div className="bg-[#12151D] py-8 px-6 sm:px-8 rounded-2xl border border-white/[0.08] shadow-2xl">
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 font-medium flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                 Full Name
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
                   <UserIcon className="w-4 h-4" />
                 </div>
                 <input
@@ -162,17 +164,17 @@ export const Register: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Aarav Sharma"
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-medium"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                 University Email Address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
@@ -181,10 +183,10 @@ export const Register: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="rollnumber@gsfcuniversity.ac.in"
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-mono"
                 />
               </div>
-              <p className="mt-1 text-[11px] text-slate-400 font-normal">
+              <p className="mt-1 text-[11px] text-neutral-500">
                 Must end with @gsfcuniversity.ac.in
               </p>
             </div>
@@ -192,17 +194,17 @@ export const Register: React.FC = () => {
             {/* Campus Selection */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Campus <span className="text-rose-500">*</span>
+                <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300">
+                  Campus <span className="text-rose-400">*</span>
                 </label>
                 {isLoadingCampuses && (
-                  <span className="text-[11px] text-brand-600 flex items-center font-medium">
+                  <span className="text-[11px] text-neutral-400 flex items-center font-mono">
                     <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Fetching campuses...
                   </span>
                 )}
               </div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
                   <Building className="w-4 h-4" />
                 </div>
                 <select
@@ -210,7 +212,7 @@ export const Register: React.FC = () => {
                   disabled={isLoadingCampuses || campuses.length === 0}
                   value={campusId}
                   onChange={(e) => handleCampusChange(e.target.value)}
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white disabled:bg-slate-100 disabled:text-slate-400 font-medium"
+                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white font-mono disabled:opacity-50"
                 >
                   <option value="">
                     {isLoadingCampuses
@@ -227,15 +229,15 @@ export const Register: React.FC = () => {
                 </select>
               </div>
               {campusLoadError && (
-                <div className="mt-1.5 p-2 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-700 flex items-center justify-between font-medium">
+                <div className="mt-1.5 p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-300 flex items-center justify-between">
                   <span className="flex items-center">
-                    <AlertCircle className="w-3.5 h-3.5 mr-1 shrink-0 text-rose-500" />
+                    <AlertCircle className="w-3.5 h-3.5 mr-1 shrink-0 text-rose-400" />
                     {campusLoadError}
                   </span>
                   <button
                     type="button"
                     onClick={fetchCampuses}
-                    className="underline font-bold ml-2 text-rose-800 hover:text-rose-900"
+                    className="underline font-bold ml-2 text-white"
                   >
                     Retry
                   </button>
@@ -245,13 +247,13 @@ export const Register: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                   Role
                 </label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as Role)}
-                  className="block w-full py-2 px-3 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white font-medium"
+                  className="block w-full py-2 px-3 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white font-mono"
                 >
                   <option value={Role.STUDENT}>Student</option>
                   <option value={Role.FACULTY}>Faculty</option>
@@ -259,14 +261,14 @@ export const Register: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                   Department
                 </label>
                 <select
                   disabled={isLoadingCampuses || !campusId || availableDepartments.length === 0}
                   value={departmentId}
                   onChange={(e) => setDepartmentId(e.target.value)}
-                  className="block w-full py-2 px-3 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white disabled:bg-slate-100 disabled:text-slate-400 font-medium"
+                  className="block w-full py-2 px-3 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white font-mono disabled:opacity-50"
                 >
                   {!campusId ? (
                     <option value="">Select campus first</option>
@@ -287,11 +289,11 @@ export const Register: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                 Password (Min 8 Characters)
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -300,12 +302,12 @@ export const Register: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="block w-full pl-10 pr-10 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+                  className="block w-full pl-10 pr-10 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-400 hover:text-white"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -313,11 +315,11 @@ export const Register: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                 Confirm Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -326,7 +328,7 @@ export const Register: React.FC = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-mono"
                 />
               </div>
             </div>
@@ -336,23 +338,23 @@ export const Register: React.FC = () => {
               variant="primary"
               isLoading={isSubmitting}
               disabled={isLoadingCampuses || (campuses.length > 0 && !campusId)}
-              className="w-full py-2.5 mt-2 text-sm"
+              className="w-full py-2.5 mt-2 text-xs font-semibold"
             >
               <span>Complete Registration</span>
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-xs text-slate-500 font-medium">
+          <div className="mt-6 text-center text-xs text-neutral-400">
             Already registered?{' '}
-            <Link to="/login" className="font-bold text-brand-600 hover:text-brand-700 underline">
+            <Link to="/login" className="font-semibold text-white hover:underline">
               Sign in here
             </Link>
           </div>
         </div>
 
-        <div className="mt-6 text-center text-[11px] text-slate-400 font-medium flex items-center justify-center space-x-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+        <div className="mt-6 text-center text-[11px] text-neutral-500 flex items-center justify-center space-x-1.5">
+          <ShieldCheck className="w-3.5 h-3.5 text-neutral-400" />
           <span>Restricted to GSFC University Students &amp; Faculty</span>
         </div>
       </FadeIn>

@@ -7,6 +7,7 @@ import { Modal } from '../../components/common/Modal';
 import { PageTransition, StaggerContainer, StaggerItem } from '../../components/common/AnimatedTransitions';
 import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
+import { celebrateConfetti } from '../../lib/confetti';
 
 export const AdminStorageLocations: React.FC = () => {
   const { success, error } = useToast();
@@ -56,6 +57,7 @@ export const AdminStorageLocations: React.FC = () => {
         success('Storage location updated');
       } else {
         await adminService.createStorageLocation({ name: selectedName });
+        celebrateConfetti();
         success('New storage location created');
       }
       setShowModal(false);
@@ -69,11 +71,18 @@ export const AdminStorageLocations: React.FC = () => {
 
   return (
     <PageTransition className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-white/[0.06]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Storage Locations</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Official physical custody desks across GSFC University for found belongings.
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[11px] font-mono tracking-wider uppercase text-neutral-400 bg-white/[0.04] px-2.5 py-0.5 rounded-md border border-white/[0.06]">
+              Custody Infrastructure
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-display font-semibold text-white tracking-tight">
+            Storage Locations & Lockers
+          </h1>
+          <p className="text-sm text-neutral-400 mt-1 max-w-xl">
+            Authorized physical holding facilities across GSFC University for found property custody.
           </p>
         </div>
 
@@ -89,40 +98,48 @@ export const AdminStorageLocations: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="p-8 text-center text-xs text-slate-400">Loading locations...</div>
+        <div className="p-16 text-center text-xs font-mono text-neutral-500">
+          Loading authorized storage facilities...
+        </div>
+      ) : locations.length === 0 ? (
+        <div className="bg-[#12151D] p-12 rounded-2xl border border-white/[0.08] text-center text-neutral-400">
+          <Building2 className="w-8 h-8 mx-auto mb-2 opacity-30" />
+          <p className="text-sm font-medium text-white">No storage locations registered yet</p>
+          <p className="text-xs text-neutral-500 mt-1">Add a campus desk or security locker to start assigning found items.</p>
+        </div>
       ) : (
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {locations.map((loc) => (
             <StaggerItem
               key={loc.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 shadow-subtle hover:shadow-elevated transition-all flex flex-col justify-between group"
+              className="bg-[#12151D] rounded-2xl border border-white/[0.08] p-5 flex flex-col justify-between group hover:border-white/[0.16] transition-all"
             >
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center border border-brand-100 group-hover:scale-105 transition-transform">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-white/[0.04] text-neutral-300 flex items-center justify-center border border-white/[0.06]">
                     <Building2 className="w-5 h-5" />
                   </div>
                   <button
                     onClick={() => handleOpenEdit(loc)}
-                    className="p-1.5 text-slate-400 hover:text-brand-600 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/[0.05] transition-colors"
                     title="Edit Location"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
                 </div>
 
-                <h3 className="font-bold text-slate-900 text-base">
+                <h3 className="font-semibold text-white text-base">
                   {STORAGE_LOCATION_LABELS[loc.name] || loc.name}
                 </h3>
-                <span className="text-xs text-slate-400 font-mono block mt-0.5">
+                <span className="text-xs text-neutral-500 font-mono block mt-0.5">
                   ID: {loc.id}
                 </span>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs text-slate-600">
-                  <Package className="w-4 h-4 mr-2 text-slate-400" />
+                <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center text-xs text-neutral-400">
+                  <Package className="w-4 h-4 mr-2 text-neutral-500" />
                   <span>
                     Secured Inventory:{' '}
-                    <strong className="text-slate-900 font-bold">{loc._count?.items ?? 0} items</strong>
+                    <strong className="text-white font-medium">{loc._count?.items ?? 0} items</strong>
                   </span>
                 </div>
               </div>
@@ -140,26 +157,26 @@ export const AdminStorageLocations: React.FC = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
-              Location Name
+            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+              Location Facility
             </label>
             <select
               value={selectedName}
               onChange={(e) => setSelectedName(e.target.value as StorageLocationName)}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-sm border border-white/[0.08] rounded-xl bg-black/40 text-white focus:outline-none focus:ring-1 focus:ring-white/20"
             >
               {Object.values(StorageLocationName).map((n) => (
-                <option key={n} value={n}>
+                <option key={n} value={n} className="bg-[#12151D]">
                   {STORAGE_LOCATION_LABELS[n]} ({n})
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-2">
+          <div className="flex justify-end space-x-2 pt-3 border-t border-white/[0.06]">
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => setShowModal(false)}
             >

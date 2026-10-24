@@ -6,7 +6,7 @@ import {
   FileCode,
   ChevronDown,
   ChevronRight,
-  ShieldAlert,
+  Terminal,
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { AuditLogEntry, AuditLogResponse } from '../../types/admin';
@@ -65,40 +65,40 @@ export const AdminAuditLog: React.FC = () => {
 
   const getActionBadgeColor = (action: string) => {
     const act = action.toUpperCase();
-    if (act.includes('OVERRIDE')) return 'bg-rose-100 text-rose-800 border-rose-200';
+    if (act.includes('OVERRIDE')) return 'bg-rose-500/10 text-rose-300 border-rose-500/20';
     if (act.includes('REJECT') || act.includes('CANCEL') || act.includes('DISMISS'))
-      return 'bg-red-100 text-red-800 border-red-200';
+      return 'bg-rose-500/10 text-rose-300 border-rose-500/20';
     if (
       act.includes('APPROVE') ||
       act.includes('HANDOVER') ||
       act.includes('RETURN') ||
       act.includes('REDEEM')
     )
-      return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
     if (act.includes('READY') || act.includes('HOLD') || act.includes('STATUS'))
-      return 'bg-amber-100 text-amber-800 border-amber-200';
+      return 'bg-amber-500/10 text-amber-300 border-amber-500/20';
     if (act.includes('MATCH') || act.includes('CREATE'))
-      return 'bg-brand-100 text-brand-800 border-brand-200';
-    return 'bg-slate-100 text-slate-800 border-slate-200';
+      return 'bg-blue-500/10 text-blue-300 border-blue-500/20';
+    return 'bg-white/[0.04] text-neutral-300 border-white/[0.08]';
   };
 
   const totalPages = Math.ceil(totalCount / limit) || 1;
 
   return (
-    <FadeIn className="space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+    <FadeIn className="space-y-6 max-w-7xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/90 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200/60 flex items-center">
-              <History className="w-3 h-3 mr-1 text-brand-600" />
-              Security Governance Trail
+            <span className="text-[11px] font-mono tracking-wider uppercase text-neutral-400 bg-white/[0.04] px-2.5 py-0.5 rounded-md border border-white/[0.06] flex items-center">
+              <History className="w-3 h-3 mr-1 text-neutral-400" />
+              Security Governance
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Audit &amp; Chain-of-Custody Log
+          <h1 className="text-2xl sm:text-3xl font-display font-semibold text-white tracking-tight">
+            Audit & Chain-of-Custody Log
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500 max-w-xl font-normal">
+          <p className="mt-1 text-sm text-neutral-400 max-w-xl">
             Append-only, immutable security event log recording all custody transitions, verifications, handovers, and staff actions.
           </p>
         </div>
@@ -108,24 +108,24 @@ export const AdminAuditLog: React.FC = () => {
           size="sm"
           onClick={fetchLogs}
           isLoading={isLoading}
-          className="self-start sm:self-auto"
+          className="self-start sm:self-auto text-xs"
         >
           <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh Log
         </Button>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-subtle space-y-3">
+      <div className="bg-[#12151D] p-4 rounded-2xl border border-white/[0.08] space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Target ID Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search by Target ID / Case ID..."
+              placeholder="Search Target ID / Case ID..."
               value={searchTarget}
               onChange={(e) => setSearchTarget(e.target.value)}
-              className="w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+              className="w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm bg-black/40 border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 text-white placeholder-neutral-500 font-mono"
             />
           </div>
 
@@ -136,19 +136,19 @@ export const AdminAuditLog: React.FC = () => {
               setSelectedAction(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+            className="w-full px-3.5 py-2 text-xs sm:text-sm bg-black/40 border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 text-white font-mono"
           >
-            <option value="">All Actions</option>
-            <option value="ITEM_CREATED">ITEM_CREATED</option>
-            <option value="ITEM_STATUS_UPDATED">ITEM_STATUS_UPDATED</option>
-            <option value="ITEM_READY_FOR_COLLECTION">ITEM_READY_FOR_COLLECTION</option>
-            <option value="ITEM_HANDED_OVER">ITEM_HANDED_OVER</option>
-            <option value="CLAIM_CREATED">CLAIM_CREATED</option>
-            <option value="CLAIM_APPROVED">CLAIM_APPROVED</option>
-            <option value="CLAIM_REJECTED">CLAIM_REJECTED</option>
-            <option value="TOKEN_REDEEMED">TOKEN_REDEEMED</option>
-            <option value="MATCH_CONFIRMED">MATCH_CONFIRMED</option>
-            <option value="STORAGE_LOCATION_UPDATED">STORAGE_LOCATION_UPDATED</option>
+            <option value="" className="bg-[#12151D]">All Actions</option>
+            <option value="ITEM_CREATED" className="bg-[#12151D]">ITEM_CREATED</option>
+            <option value="ITEM_STATUS_UPDATED" className="bg-[#12151D]">ITEM_STATUS_UPDATED</option>
+            <option value="ITEM_READY_FOR_COLLECTION" className="bg-[#12151D]">ITEM_READY_FOR_COLLECTION</option>
+            <option value="ITEM_HANDED_OVER" className="bg-[#12151D]">ITEM_HANDED_OVER</option>
+            <option value="CLAIM_CREATED" className="bg-[#12151D]">CLAIM_CREATED</option>
+            <option value="CLAIM_APPROVED" className="bg-[#12151D]">CLAIM_APPROVED</option>
+            <option value="CLAIM_REJECTED" className="bg-[#12151D]">CLAIM_REJECTED</option>
+            <option value="TOKEN_REDEEMED" className="bg-[#12151D]">TOKEN_REDEEMED</option>
+            <option value="MATCH_CONFIRMED" className="bg-[#12151D]">MATCH_CONFIRMED</option>
+            <option value="STORAGE_LOCATION_UPDATED" className="bg-[#12151D]">STORAGE_LOCATION_UPDATED</option>
           </select>
 
           {/* Target Type Filter */}
@@ -158,23 +158,23 @@ export const AdminAuditLog: React.FC = () => {
               setSelectedTargetType(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium"
+            className="w-full px-3.5 py-2 text-xs sm:text-sm bg-black/40 border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 text-white font-mono"
           >
-            <option value="">All Target Types</option>
-            <option value="ITEM">ITEM</option>
-            <option value="CLAIM">CLAIM</option>
-            <option value="MATCH">MATCH</option>
-            <option value="USER">USER</option>
-            <option value="STORAGE_LOCATION">STORAGE_LOCATION</option>
+            <option value="" className="bg-[#12151D]">All Target Types</option>
+            <option value="ITEM" className="bg-[#12151D]">ITEM</option>
+            <option value="CLAIM" className="bg-[#12151D]">CLAIM</option>
+            <option value="MATCH" className="bg-[#12151D]">MATCH</option>
+            <option value="USER" className="bg-[#12151D]">USER</option>
+            <option value="STORAGE_LOCATION" className="bg-[#12151D]">STORAGE_LOCATION</option>
           </select>
         </div>
       </div>
 
       {/* Audit Log Table */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-subtle overflow-hidden">
+      <div className="bg-[#12151D] rounded-2xl border border-white/[0.08] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-50/80 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-200/80 tracking-wider">
+          <table className="w-full text-left text-xs text-neutral-300">
+            <thead className="bg-white/[0.01] text-[11px] uppercase font-medium text-neutral-400 border-b border-white/[0.06] tracking-wider font-mono">
               <tr>
                 <th className="py-3.5 px-4 w-10"></th>
                 <th className="py-3.5 px-4">Timestamp</th>
@@ -184,7 +184,7 @@ export const AdminAuditLog: React.FC = () => {
                 <th className="py-3.5 px-4 text-right">Payload</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/[0.04]">
               {isLoading ? (
                 <>
                   <TableRowSkeleton columns={6} />
@@ -193,8 +193,8 @@ export const AdminAuditLog: React.FC = () => {
                 </>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
-                    <History className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                  <td colSpan={6} className="py-12 text-center text-neutral-500 font-mono">
+                    <History className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     <p className="text-xs font-medium">No audit events match current criteria.</p>
                   </td>
                 </tr>
@@ -206,19 +206,19 @@ export const AdminAuditLog: React.FC = () => {
                   return (
                     <React.Fragment key={entry.id}>
                       <tr
-                        className={`hover:bg-slate-50/60 transition-colors ${
-                          isExpanded ? 'bg-brand-50/20' : ''
+                        className={`hover:bg-white/[0.02] transition-colors ${
+                          isExpanded ? 'bg-white/[0.03]' : ''
                         }`}
                       >
                         <td className="py-3.5 px-4 text-center">
                           {hasDiff ? (
                             <button
                               onClick={() => toggleExpand(entry.id)}
-                              className="text-slate-400 hover:text-slate-600 focus:outline-none"
+                              className="text-neutral-400 hover:text-white focus:outline-none transition-colors"
                               title="Toggle Details"
                             >
                               {isExpanded ? (
-                                <ChevronDown className="w-4 h-4 text-brand-600" />
+                                <ChevronDown className="w-4 h-4 text-white" />
                               ) : (
                                 <ChevronRight className="w-4 h-4" />
                               )}
@@ -227,7 +227,7 @@ export const AdminAuditLog: React.FC = () => {
                             <span className="w-4 h-4 inline-block" />
                           )}
                         </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-500 font-mono">
+                        <td className="py-3.5 px-4 whitespace-nowrap text-xs text-neutral-400 font-mono">
                           {new Date(entry.createdAt).toLocaleString(undefined, {
                             dateStyle: 'medium',
                             timeStyle: 'short',
@@ -237,22 +237,25 @@ export const AdminAuditLog: React.FC = () => {
                           {entry.actor ? (
                             <div className="flex items-center gap-2">
                               <div>
-                                <span className="font-bold text-slate-900 block text-xs">
+                                <span className="font-medium text-white block text-xs">
                                   {entry.actor.name}
                                 </span>
-                                <span className="text-[11px] text-slate-400 font-mono">
+                                <span className="text-[11px] text-neutral-500 font-mono">
                                   {entry.actor.email}
                                 </span>
                               </div>
                               <RoleBadge role={entry.actor.role} />
                             </div>
                           ) : (
-                            <span className="text-xs text-slate-400 italic">SYSTEM AUTOMATION</span>
+                            <span className="text-xs text-neutral-400 font-mono flex items-center">
+                              <Terminal className="w-3 h-3 mr-1 text-neutral-500" />
+                              SYSTEM
+                            </span>
                           )}
                         </td>
                         <td className="py-3.5 px-4">
                           <span
-                            className={`inline-block px-2.5 py-0.5 text-[10px] font-mono font-bold rounded-full border ${getActionBadgeColor(
+                            className={`inline-block px-2.5 py-0.5 text-[11px] font-mono font-medium rounded-full border ${getActionBadgeColor(
                               entry.action,
                             )}`}
                           >
@@ -261,11 +264,11 @@ export const AdminAuditLog: React.FC = () => {
                         </td>
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5 text-xs">
-                            <span className="text-slate-500 uppercase font-bold text-[10px] bg-slate-100 px-2 py-0.5 rounded">
+                            <span className="text-neutral-400 uppercase font-medium text-[10px] bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded font-mono">
                               {entry.targetType}
                             </span>
                             <span
-                              className="font-mono text-slate-800 truncate max-w-[140px] font-medium"
+                              className="font-mono text-neutral-300 truncate max-w-[140px]"
                               title={entry.targetId}
                             >
                               {entry.targetId}
@@ -276,10 +279,10 @@ export const AdminAuditLog: React.FC = () => {
                           {hasDiff && (
                             <button
                               onClick={() => setInspectEntry(entry)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-lg border border-brand-200 transition-colors"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-neutral-300 bg-white/[0.04] hover:bg-white/[0.08] rounded-lg border border-white/[0.08] transition-colors"
                             >
-                              <FileCode className="w-3.5 h-3.5" />
-                              Payload
+                              <FileCode className="w-3.5 h-3.5 text-neutral-400" />
+                              Inspect
                             </button>
                           )}
                         </td>
@@ -287,24 +290,24 @@ export const AdminAuditLog: React.FC = () => {
 
                       {/* Inline Expanded Diff Row */}
                       {isExpanded && (
-                        <tr className="bg-slate-50/70">
+                        <tr className="bg-black/30">
                           <td colSpan={6} className="p-4 sm:p-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-                              <div className="p-3.5 bg-white rounded-xl border border-slate-200">
-                                <span className="text-slate-500 font-sans font-bold block mb-1 text-[10px] uppercase">
-                                  Before Snapshot:
+                              <div className="p-3.5 bg-black/40 rounded-xl border border-white/[0.06]">
+                                <span className="text-neutral-400 font-medium block mb-1 text-[11px] uppercase">
+                                  Before State:
                                 </span>
-                                <pre className="text-slate-700 overflow-x-auto max-h-48 text-[11px] whitespace-pre-wrap">
+                                <pre className="text-rose-300/90 overflow-x-auto max-h-48 text-[11px] whitespace-pre-wrap">
                                   {entry.before
                                     ? JSON.stringify(entry.before, null, 2)
                                     : 'null (Initial Creation)'}
                                 </pre>
                               </div>
-                              <div className="p-3.5 bg-white rounded-xl border border-slate-200">
-                                <span className="text-slate-500 font-sans font-bold block mb-1 text-[10px] uppercase">
-                                  After Snapshot:
+                              <div className="p-3.5 bg-black/40 rounded-xl border border-white/[0.06]">
+                                <span className="text-neutral-400 font-medium block mb-1 text-[11px] uppercase">
+                                  After State:
                                 </span>
-                                <pre className="text-slate-700 overflow-x-auto max-h-48 text-[11px] whitespace-pre-wrap">
+                                <pre className="text-emerald-300/90 overflow-x-auto max-h-48 text-[11px] whitespace-pre-wrap">
                                   {entry.after ? JSON.stringify(entry.after, null, 2) : 'null (Deleted)'}
                                 </pre>
                               </div>
@@ -321,26 +324,26 @@ export const AdminAuditLog: React.FC = () => {
         </div>
 
         {/* Pagination Footer */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 font-medium">
+        <div className="p-4 border-t border-white/[0.06] bg-white/[0.01] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400 font-mono">
           <div>
-            Showing <span className="font-bold text-slate-800">{logs.length}</span> of{' '}
-            <span className="font-bold text-slate-800">{totalCount}</span> logged events
+            Showing <span className="font-semibold text-white">{logs.length}</span> of{' '}
+            <span className="font-semibold text-white">{totalCount}</span> events
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage <= 1 || isLoading}
-              className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-subtle"
+              className="px-3 py-1.5 bg-[#12151D] border border-white/[0.08] rounded-lg font-medium text-neutral-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               Previous
             </button>
-            <span className="px-2">
+            <span className="px-2 text-neutral-400">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage >= totalPages || isLoading}
-              className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-subtle"
+              className="px-3 py-1.5 bg-[#12151D] border border-white/[0.08] rounded-lg font-medium text-neutral-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               Next
             </button>
@@ -356,30 +359,30 @@ export const AdminAuditLog: React.FC = () => {
           title={`Audit Payload: ${inspectEntry.action}`}
         >
           <div className="space-y-4">
-            <div className="text-xs text-slate-500 space-y-1">
+            <div className="text-xs text-neutral-300 space-y-1 font-mono bg-black/30 p-3.5 rounded-xl border border-white/[0.08]">
               <p>
-                <strong className="text-slate-700">Record ID:</strong>{' '}
-                <span className="font-mono">{inspectEntry.id}</span>
+                <strong className="text-white">Record ID:</strong>{' '}
+                <span className="text-neutral-300">{inspectEntry.id}</span>
               </p>
               <p>
-                <strong className="text-slate-700">Target:</strong> {inspectEntry.targetType} #{' '}
-                <span className="font-mono">{inspectEntry.targetId}</span>
+                <strong className="text-white">Target:</strong> {inspectEntry.targetType} #{' '}
+                <span className="text-neutral-300">{inspectEntry.targetId}</span>
               </p>
               <p>
-                <strong className="text-slate-700">Actor:</strong>{' '}
+                <strong className="text-white">Actor:</strong>{' '}
                 {inspectEntry.actor?.name || 'SYSTEM'} ({inspectEntry.actor?.email || 'N/A'})
               </p>
               <p>
-                <strong className="text-slate-700">Logged At:</strong>{' '}
+                <strong className="text-white">Logged At:</strong>{' '}
                 {new Date(inspectEntry.createdAt).toLocaleString()}
               </p>
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                Complete Event State Record:
+              <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 block font-mono">
+                Complete Event Snapshot:
               </span>
-              <div className="bg-slate-950 text-slate-100 p-4 rounded-xl font-mono text-xs overflow-x-auto max-h-80">
+              <div className="bg-black/50 text-neutral-200 p-4 rounded-xl font-mono text-xs overflow-x-auto max-h-80 border border-white/[0.08]">
                 <pre>{JSON.stringify(inspectEntry, null, 2)}</pre>
               </div>
             </div>

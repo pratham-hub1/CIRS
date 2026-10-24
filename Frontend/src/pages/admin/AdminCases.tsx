@@ -11,6 +11,9 @@ import {
   KeyRound,
   ExternalLink,
   ShieldCheck,
+  Shield,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { Item } from '../../types/item';
@@ -23,6 +26,7 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { PageTransition } from '../../components/common/AnimatedTransitions';
 import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
+import { celebrateConfetti } from '../../lib/confetti';
 
 export const AdminCases: React.FC = () => {
   const { success, error } = useToast();
@@ -50,7 +54,6 @@ export const AdminCases: React.FC = () => {
 
   // Archive & Unclaimed dialog states
   const [archiveTargetCaseId, setArchiveTargetCaseId] = useState<string | null>(null);
-  const [unclaimedTargetCaseId, setUnclaimedTargetCaseId] = useState<string | null>(null);
   const [isProcessingAction, setIsProcessingAction] = useState(false);
 
   const fetchCases = useCallback(async () => {
@@ -88,6 +91,7 @@ export const AdminCases: React.FC = () => {
   const handleMarkReady = async (caseId: string) => {
     try {
       await adminService.markReadyForCollection(caseId);
+      celebrateConfetti();
       success(`Case ${caseId} marked Ready for Collection`);
       fetchCases();
     } catch (err: any) {
@@ -105,6 +109,7 @@ export const AdminCases: React.FC = () => {
         override,
         overrideReason: override ? overrideReason.trim() : undefined,
       });
+      celebrateConfetti();
       success(`Handover recorded for Case ${handoverTarget.caseId}`);
       setHandoverTarget(null);
       setOverride(false);
@@ -124,7 +129,7 @@ export const AdminCases: React.FC = () => {
     setIsAdvancing(true);
     try {
       await adminService.advanceItemStatus(advanceTarget.caseId, newStatus);
-      success(`Case ${advanceTarget.caseId} advanced to ${STATUS_LABELS[newStatus]}`);
+      success(`Status updated for Case ${advanceTarget.caseId}`);
       setAdvanceTarget(null);
       fetchCases();
     } catch (err: any) {
@@ -149,50 +154,46 @@ export const AdminCases: React.FC = () => {
     }
   };
 
-  const handleMarkUnclaimed = async () => {
-    if (!unclaimedTargetCaseId) return;
-    setIsProcessingAction(true);
-    try {
-      await adminService.markUnclaimed(unclaimedTargetCaseId);
-      success(`Case ${unclaimedTargetCaseId} marked Unclaimed`);
-      setUnclaimedTargetCaseId(null);
-      fetchCases();
-    } catch (err: any) {
-      error(err.message || 'Failed to update case');
-    } finally {
-      setIsProcessingAction(false);
-    }
-  };
-
   return (
-    <PageTransition className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <PageTransition className="space-y-8 max-w-7xl mx-auto text-white">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-white/[0.06]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Campus Case Management</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <div className="flex items-center space-x-2.5 mb-2">
+            <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+              CASE ADMINISTRATION
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[11px] font-mono text-neutral-400">
+              DESK OPERATIONS
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-white">
+            Campus Cases Desk
+          </h1>
+          <p className="text-sm text-neutral-400 mt-1 max-w-2xl">
             Review, advance lifecycle state, and execute physical handovers for all reported items across campus.
           </p>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-subtle space-y-3">
+      <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-5 space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div className="lg:col-span-2 relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by case ID, title, serial..."
-              className="w-full pl-10 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+              className="w-full pl-10 pr-3 py-2 text-xs border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-mono"
             />
           </div>
 
           <select
             value={type}
             onChange={(e) => setType(e.target.value as ItemType | '')}
-            className="py-2 px-3 text-xs border border-slate-200 rounded-lg bg-white"
+            className="py-2 px-3 text-xs border border-white/10 rounded-xl bg-neutral-900 text-white font-mono focus:outline-none focus:border-white/40"
           >
             <option value="">All Types</option>
             <option value={ItemType.LOST}>Lost Items</option>
@@ -202,7 +203,7 @@ export const AdminCases: React.FC = () => {
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as ItemCategory | '')}
-            className="py-2 px-3 text-xs border border-slate-200 rounded-lg bg-white"
+            className="py-2 px-3 text-xs border border-white/10 rounded-xl bg-neutral-900 text-white font-mono focus:outline-none focus:border-white/40"
           >
             <option value="">All Categories</option>
             {Object.values(ItemCategory).map((cat) => (
@@ -215,7 +216,7 @@ export const AdminCases: React.FC = () => {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as ItemStatus | '')}
-            className="py-2 px-3 text-xs border border-slate-200 rounded-lg bg-white"
+            className="py-2 px-3 text-xs border border-white/10 rounded-xl bg-neutral-900 text-white font-mono focus:outline-none focus:border-white/40"
           >
             <option value="">All Statuses</option>
             {Object.values(ItemStatus).map((s) => (
@@ -228,20 +229,20 @@ export const AdminCases: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-subtle overflow-hidden">
+      <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
+              <tr className="bg-neutral-900 border-b border-white/[0.06] text-neutral-400 font-mono font-semibold uppercase tracking-wider text-[10px]">
                 <th className="px-6 py-3.5">Case ID</th>
-                <th className="px-6 py-3.5">Item & Specs</th>
-                <th className="px-6 py-3.5">Type & Category</th>
+                <th className="px-6 py-3.5">Item &amp; Specs</th>
+                <th className="px-6 py-3.5">Type &amp; Category</th>
                 <th className="px-6 py-3.5">Status</th>
                 <th className="px-6 py-3.5">Storage Location</th>
-                <th className="px-6 py-3.5 text-right">Lifecycle Actions</th>
+                <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-white/[0.04] text-neutral-300">
               {isLoading ? (
                 <>
                   <TableRowSkeleton />
@@ -250,21 +251,22 @@ export const AdminCases: React.FC = () => {
                 </>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">
+                  <td colSpan={6} className="px-6 py-12 text-center text-neutral-500 italic font-mono">
                     No cases match the specified filters.
                   </td>
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item.caseId} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="px-6 py-4 font-mono font-bold text-slate-900">
-                      <Link to={`/items/${item.caseId}`} className="hover:text-brand-600 hover:underline">
-                        {item.caseId}
+                  <tr key={item.caseId} className="hover:bg-white/[0.03] transition-colors group">
+                    <td className="px-6 py-4 font-mono font-semibold text-white">
+                      <Link to={`/items/${item.caseId}`} className="text-white hover:text-neutral-300 transition-colors flex items-center">
+                        #{item.caseId}
+                        <ExternalLink className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400" />
                       </Link>
                     </td>
                     <td className="px-6 py-4 max-w-xs">
-                      <div className="font-semibold text-slate-900 truncate">{item.itemName}</div>
-                      <div className="text-[11px] text-slate-400 truncate">
+                      <div className="font-semibold text-white truncate">{item.itemName}</div>
+                      <div className="text-[11px] text-neutral-400 truncate font-mono">
                         {item.brand} • {item.colour}
                       </div>
                     </td>
@@ -279,7 +281,7 @@ export const AdminCases: React.FC = () => {
                     <td className="px-6 py-4">
                       <ItemStatusBadge status={item.status} size="sm" />
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    <td className="px-6 py-4 text-neutral-300 font-mono">
                       {item.storageLocation?.name || '—'}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -289,7 +291,7 @@ export const AdminCases: React.FC = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => handleMarkReady(item.caseId)}
-                            className="px-2.5 py-1 text-[11px] h-auto font-semibold text-blue-700 bg-blue-50/80 hover:bg-blue-100 border-blue-200"
+                            className="px-2.5 py-1 text-[11px] h-auto font-medium"
                             title="Mark Ready for Collection"
                           >
                             Mark Ready
@@ -301,7 +303,7 @@ export const AdminCases: React.FC = () => {
                             size="sm"
                             variant="success"
                             onClick={() => setHandoverTarget(item)}
-                            className="px-2.5 py-1 text-[11px] h-auto font-semibold"
+                            className="px-2.5 py-1 text-[11px] h-auto font-medium"
                             title="Record Staff Handover"
                           >
                             Handover
@@ -315,7 +317,7 @@ export const AdminCases: React.FC = () => {
                             setAdvanceTarget(item);
                             setNewStatus(item.status);
                           }}
-                          className="px-2 py-1 text-[11px] h-auto font-medium text-slate-700"
+                          className="px-2 py-1 text-[11px] h-auto font-medium"
                         >
                           Status
                         </Button>
@@ -324,7 +326,7 @@ export const AdminCases: React.FC = () => {
                           size="sm"
                           variant="ghost"
                           onClick={() => setArchiveTargetCaseId(item.caseId)}
-                          className="px-2 py-1 text-[11px] h-auto font-medium text-slate-500 hover:text-rose-600"
+                          className="px-2 py-1 text-[11px] h-auto font-medium text-neutral-500 hover:text-rose-400"
                           title="Archive Case"
                         >
                           Archive
@@ -347,7 +349,7 @@ export const AdminCases: React.FC = () => {
         description={`Record physical item handover for Case ${handoverTarget?.caseId}`}
       >
         <form onSubmit={handleHandoverSubmit} className="space-y-4">
-          <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-xs text-emerald-900 leading-relaxed">
+          <div className="p-3 bg-neutral-900 rounded-xl border border-white/[0.06] text-xs text-neutral-300 leading-relaxed font-mono">
             Record that the claimant visited the security desk, proved ownership, and physically received this item.
           </div>
 
@@ -357,18 +359,18 @@ export const AdminCases: React.FC = () => {
                 type="checkbox"
                 checked={override}
                 onChange={(e) => setOverride(e.target.checked)}
-                className="mt-0.5 rounded text-brand-600 focus:ring-brand-500"
+                className="mt-0.5 rounded text-white focus:ring-0 bg-neutral-800 border-white/20"
               />
-              <span className="text-xs text-slate-700 leading-normal">
-                <strong>Staff Emergency Override:</strong> Mark item immediately RETURNED even if user has not yet completed phone token confirmation.
+              <span className="text-xs text-neutral-300 leading-normal">
+                <strong className="text-white">Staff Emergency Override:</strong> Mark item immediately RETURNED even if user has not yet completed phone token confirmation.
               </span>
             </label>
           </div>
 
           {override && (
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
-                Override Justification / Officer Remarks <span className="text-rose-500">*</span>
+              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1">
+                Override Justification / Officer Remarks <span className="text-rose-400">*</span>
               </label>
               <textarea
                 required
@@ -376,7 +378,7 @@ export const AdminCases: React.FC = () => {
                 value={overrideReason}
                 onChange={(e) => setOverrideReason(e.target.value)}
                 placeholder="State the reason (e.g. claimant phone battery dead, verified physically in-person)..."
-                className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                className="w-full px-3 py-2 text-xs border border-white/10 rounded-xl bg-neutral-900 text-white placeholder-neutral-500 font-mono focus:outline-none focus:ring-1 focus:ring-white"
               />
             </div>
           )}
@@ -411,13 +413,13 @@ export const AdminCases: React.FC = () => {
       >
         <form onSubmit={handleAdvanceStatusSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1">
               Select Target Status
             </label>
             <select
               value={newStatus}
               onChange={(e) => setNewStatus(e.target.value as ItemStatus)}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 bg-white"
+              className="w-full px-3 py-2 text-sm border border-white/10 rounded-xl bg-neutral-900 text-white font-mono focus:outline-none focus:ring-1 focus:ring-white"
             >
               {Object.values(ItemStatus).map((s) => (
                 <option key={s} value={s}>

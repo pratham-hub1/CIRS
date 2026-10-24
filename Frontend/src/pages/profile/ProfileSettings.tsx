@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
@@ -18,6 +19,7 @@ import { FadeIn } from '../../components/common/AnimatedTransitions';
 import { useToast } from '../../context/ToastContext';
 import { NotificationPreference } from '../../types/auth';
 import { Role } from '../../types/enums';
+import { celebrateConfetti } from '../../lib/confetti';
 
 export const ProfileSettings: React.FC = () => {
   const { user, refreshProfile } = useAuth();
@@ -70,6 +72,7 @@ export const ProfileSettings: React.FC = () => {
         departmentId: departmentId || undefined,
       });
       await refreshProfile();
+      celebrateConfetti();
       success('Profile updated successfully');
     } catch (err: any) {
       error(err.message || 'Failed to update profile');
@@ -87,6 +90,7 @@ export const ProfileSettings: React.FC = () => {
         digestEnabled: prefs.digestEnabled,
       });
       setPrefs(updated);
+      celebrateConfetti();
       success('Notification preferences updated');
     } catch (err: any) {
       error(err.message || 'Failed to update notification preferences');
@@ -96,28 +100,32 @@ export const ProfileSettings: React.FC = () => {
   };
 
   return (
-    <FadeIn className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+    <FadeIn className="space-y-8 max-w-4xl mx-auto text-white">
       {/* Top Header */}
-      <div className="border-b border-slate-200/90 pb-5">
-        <div className="flex items-center space-x-2 mb-1">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200/60">
-            Account Preferences
+      <div className="border-b border-white/[0.06] pb-6">
+        <div className="flex items-center space-x-2.5 mb-2">
+          <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+            ACCOUNT MANAGEMENT
+          </span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span className="text-[11px] font-mono text-neutral-400">
+            VERIFIED CREDENTIALS
           </span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Profile &amp; Settings
+        <h1 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-white">
+          Profile &amp; Account Settings
         </h1>
-        <p className="mt-1 text-xs sm:text-sm text-slate-500 font-normal">
-          Manage your GSFC University identity, department affiliations, and alert dispatch channels.
+        <p className="mt-1 text-sm text-neutral-400 max-w-xl">
+          Manage your campus identity, department affiliations, and alert dispatch channels.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Left Column: Personal Profile */}
         <div className="md:col-span-7 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle">
-            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-700 via-brand-600 to-accent-600 text-white flex items-center justify-center font-extrabold text-xl shadow-subtle ring-4 ring-brand-50">
+          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 sm:p-7">
+            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/[0.06]">
+              <div className="w-14 h-14 rounded-full bg-neutral-800 border border-white/10 text-white flex items-center justify-center font-bold text-lg">
                 {user?.name
                   ? user.name
                       .split(' ')
@@ -128,8 +136,8 @@ export const ProfileSettings: React.FC = () => {
                   : 'U'}
               </div>
               <div>
-                <h2 className="text-lg font-extrabold text-slate-900">{user?.name || 'GSFC User'}</h2>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">{user?.email}</p>
+                <h2 className="text-base font-bold text-white">{user?.name || 'GSFC User'}</h2>
+                <p className="text-xs text-neutral-400 font-mono mt-0.5">{user?.email}</p>
                 <div className="mt-2">
                   <RoleBadge role={user?.role} />
                 </div>
@@ -140,7 +148,7 @@ export const ProfileSettings: React.FC = () => {
               <div>
                 <label
                   htmlFor="user-name"
-                  className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5"
+                  className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5"
                 >
                   Full Name
                 </label>
@@ -149,30 +157,30 @@ export const ProfileSettings: React.FC = () => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-medium text-slate-800"
+                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-neutral-900 border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                   University Email (Read-Only)
                 </label>
-                <div className="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm bg-slate-100/70 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed">
-                  <Mail className="w-4 h-4 text-slate-400" />
-                  <span className="font-mono text-xs">{user?.email || 'student@gsfcuniversity.ac.in'}</span>
+                <div className="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm bg-neutral-900/60 border border-white/10 rounded-xl text-neutral-400 cursor-not-allowed font-mono">
+                  <Mail className="w-4 h-4 text-neutral-500" />
+                  <span>{user?.email || 'student@gsfcuniversity.ac.in'}</span>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1 font-normal">
+                <p className="text-[11px] text-neutral-500 mt-1">
                   Email addresses are permanently tied to university directory credentials.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
                   Campus Organization
                 </label>
-                <div className="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm bg-slate-100/70 border border-slate-200 rounded-xl text-slate-700 font-medium">
-                  <Building className="w-4 h-4 text-slate-400" />
-                  <span>{user?.campus?.name || 'GSFC University — Vigyan Bhavan Main Campus'}</span>
+                <div className="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm bg-neutral-900/60 border border-white/10 rounded-xl text-neutral-300 font-mono">
+                  <Building className="w-4 h-4 text-neutral-400" />
+                  <span>{user?.campus?.name || 'GSFC University — Main Campus'}</span>
                 </div>
               </div>
 
@@ -184,116 +192,85 @@ export const ProfileSettings: React.FC = () => {
                   isLoading={isSavingProfile}
                 >
                   <Save className="w-3.5 h-3.5 mr-1.5" />
-                  Save Profile Changes
+                  Save Changes
                 </Button>
               </div>
             </form>
           </div>
 
           {/* Account Role Information */}
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-subtle">
-            <div className="flex items-center gap-2 mb-2">
-              <Shield className="w-4 h-4 text-brand-600" />
-              <h3 className="text-sm font-bold text-slate-900">Access &amp; Permissions</h3>
+          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 space-y-3">
+            <div className="flex items-center space-x-2 text-xs font-semibold text-white">
+              <Shield className="w-4 h-4 text-neutral-400" />
+              <span>Permission Tier: {user?.role || 'STUDENT'}</span>
             </div>
-            <p className="text-xs text-slate-500 mb-3 font-normal">
-              Your account privileges are verified via your institutional credentials:
+            <p className="text-xs text-neutral-400 leading-relaxed">
+              Your account grants access to submit lost &amp; found reports, file ownership claims, receive match alerts, and redeem collection tokens.
             </p>
-            <div className="flex items-center gap-2.5">
-              <RoleBadge role={user?.role} />
-              <span className="text-xs text-slate-600 font-medium">
-                {user?.role === Role.ADMIN
-                  ? 'Authorized campus security & item custodian privileges.'
-                  : user?.role === Role.FACULTY
-                  ? 'University faculty member access.'
-                  : 'Student recovery access.'}
-              </span>
-            </div>
           </div>
         </div>
 
         {/* Right Column: Notification Preferences */}
         <div className="md:col-span-5 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-subtle">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-              <Bell className="w-5 h-5 text-brand-600" />
-              <h2 className="text-base font-extrabold text-slate-900">Notification Settings</h2>
+          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 sm:p-7">
+            <div className="flex items-center space-x-2.5 mb-4 pb-4 border-b border-white/[0.06]">
+              <Bell className="w-4 h-4 text-neutral-400" />
+              <h3 className="text-sm font-semibold text-white">Alert Preferences</h3>
             </div>
 
-            {/* Email dispatch notice */}
-            <div className="p-4 bg-brand-50/70 border border-brand-200/80 rounded-2xl text-xs text-brand-950 mb-5 flex items-start gap-2.5">
-              <Info className="w-4 h-4 text-brand-600 mt-0.5 shrink-0" />
-              <div>
-                <span className="font-bold block mb-0.5 text-brand-900">Notification Channels:</span>
-                <p className="text-brand-800 leading-relaxed font-normal">
-                  In-app notifications appear instantly in your top bar and Notification Center.
-                </p>
+            {isLoadingPrefs ? (
+              <div className="py-8 text-center text-xs text-neutral-500 font-mono">
+                Loading preferences...
               </div>
-            </div>
-
-            <form onSubmit={handleSavePreferences} className="space-y-4">
-              <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
-                <div>
-                  <span className="text-xs font-bold text-slate-800 block">
-                    Instant Notifications
-                  </span>
-                  <p className="text-[11px] text-slate-400 font-normal">
-                    Receive alerts when cases match or claim status updates.
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+            ) : (
+              <form onSubmit={handleSavePreferences} className="space-y-4">
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-neutral-900 border border-white/[0.06]">
+                  <div>
+                    <span className="text-xs font-semibold text-white block">Email Dispatch</span>
+                    <span className="text-[11px] text-neutral-400 block mt-0.5">
+                      Receive immediate emails for claims and matches.
+                    </span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={prefs.emailEnabled}
-                    onChange={(e) => setPrefs({ ...prefs, emailEnabled: e.target.checked })}
-                    className="sr-only peer"
+                    onChange={(e) =>
+                      setPrefs((prev) => ({ ...prev, emailEnabled: e.target.checked }))
+                    }
+                    className="w-4 h-4 rounded text-white bg-neutral-800 border-white/20 focus:ring-0 cursor-pointer"
                   />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
-                </label>
-              </div>
-
-              <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
-                <div>
-                  <span className="text-xs font-bold text-slate-800 block">
-                    Campus Recovery Digest
-                  </span>
-                  <p className="text-[11px] text-slate-400 font-normal">
-                    Daily summary of items handed into security.
-                  </p>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-neutral-900 border border-white/[0.06]">
+                  <div>
+                    <span className="text-xs font-semibold text-white block">Daily Telemetry Digest</span>
+                    <span className="text-[11px] text-neutral-400 block mt-0.5">
+                      Summary of newly reported campus items.
+                    </span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={prefs.digestEnabled}
-                    onChange={(e) => setPrefs({ ...prefs, digestEnabled: e.target.checked })}
-                    className="sr-only peer"
+                    onChange={(e) =>
+                      setPrefs((prev) => ({ ...prev, digestEnabled: e.target.checked }))
+                    }
+                    className="w-4 h-4 rounded text-white bg-neutral-800 border-white/20 focus:ring-0 cursor-pointer"
                   />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
-                </label>
-              </div>
+                </div>
 
-              <Button
-                type="submit"
-                variant="outline"
-                size="sm"
-                isLoading={isSavingPrefs}
-                className="w-full"
-              >
-                Update Preferences
-              </Button>
-            </form>
-          </div>
-
-          {/* Security & Access Info */}
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-subtle space-y-2 text-xs">
-            <div className="flex items-center gap-2 text-slate-900 font-bold">
-              <Shield className="w-4 h-4 text-emerald-600" />
-              <span>Identity &amp; Security Protocol</span>
-            </div>
-            <p className="text-slate-500 leading-relaxed font-normal text-[11px]">
-              Sessions are maintained using short-lived JWT tokens with rotating refresh cookies.
-              Privacy-first data masking ensures student contact details remain confidential.
-            </p>
+                <div className="pt-2">
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    size="sm"
+                    isLoading={isSavingPrefs}
+                    className="w-full"
+                  >
+                    Update Alert Dispatch
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </div>

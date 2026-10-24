@@ -5,26 +5,23 @@ import {
   Search,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   FileText,
-  User,
-  ArrowRight,
   ExternalLink,
   ShieldAlert,
   Clock,
-  Sparkles,
   MessageSquare,
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { Claim, Appeal } from '../../types/claim';
-import { AppealStatus, ClaimStatus } from '../../types/enums';
-import { AppealStatusBadge, ClaimStatusBadge, CategoryBadge } from '../../components/common/Badge';
+import { AppealStatus } from '../../types/enums';
+import { AppealStatusBadge } from '../../components/common/Badge';
 import { TableRowSkeleton } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
 import { PageTransition } from '../../components/common/AnimatedTransitions';
 import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
 import { resolveImageUrl } from '../../services/apiClient';
+import { celebrateConfetti } from '../../lib/confetti';
 
 interface AppealWithClaim {
   appeal: Appeal;
@@ -49,7 +46,6 @@ export const AdminAppeals: React.FC = () => {
   const fetchClaimsWithAppeals = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Get all claims to inspect their appeals
       const data = await adminService.getClaims();
       setClaims(data || []);
     } catch (err: any) {
@@ -73,7 +69,6 @@ export const AdminAppeals: React.FC = () => {
         }
       }
     }
-    // Sort by createdAt descending
     return list.sort(
       (a, b) => new Date(b.appeal.createdAt).getTime() - new Date(a.appeal.createdAt).getTime(),
     );
@@ -122,6 +117,7 @@ export const AdminAppeals: React.FC = () => {
         decisionReason.trim() || undefined,
       );
 
+      celebrateConfetti();
       success(
         decision === AppealStatus.ACCEPTED
           ? 'Appeal accepted: Claim reopened to PENDING for reverification.'
@@ -143,77 +139,79 @@ export const AdminAppeals: React.FC = () => {
     <PageTransition>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-800/40">
-              <Scale className="w-6 h-6" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-white/[0.06]">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[11px] font-mono tracking-wider uppercase text-neutral-400 bg-white/[0.04] px-2.5 py-0.5 rounded-md border border-white/[0.06]">
+                Adjudication Desk
+              </span>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Appeals Queue</h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Review contested claim rejections, evaluate statements, and determine re-evaluations.
-              </p>
-            </div>
+            <h1 className="text-2xl sm:text-3xl font-display font-semibold text-white tracking-tight">
+              Appeals Queue
+            </h1>
+            <p className="text-sm text-neutral-400 mt-1 max-w-xl">
+              Review contested claim rejections, evaluate claimant statements, and execute re-evaluation rulings.
+            </p>
           </div>
         </div>
 
         {/* Metric Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
-              <span className="text-xs font-semibold uppercase tracking-wider">Total Appeals</span>
-              <FileText className="w-4 h-4 text-blue-500" />
+          <div className="bg-[#12151D] p-5 rounded-2xl border border-white/[0.08]">
+            <div className="flex items-center justify-between text-neutral-400 mb-2">
+              <span className="text-xs font-medium uppercase tracking-wider">Total Appeals</span>
+              <FileText className="w-4 h-4 text-neutral-500" />
             </div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">
+            <div className="text-2xl sm:text-3xl font-display font-semibold text-white">
               {metrics.total}
             </div>
-            <p className="text-xs text-slate-500 mt-1">Submitted to date</p>
+            <p className="text-xs text-neutral-500 mt-1">Submitted to date</p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
-              <span className="text-xs font-semibold uppercase tracking-wider">Pending Decision</span>
-              <Clock className="w-4 h-4 text-amber-500" />
+          <div className="bg-[#12151D] p-5 rounded-2xl border border-white/[0.08]">
+            <div className="flex items-center justify-between text-neutral-400 mb-2">
+              <span className="text-xs font-medium uppercase tracking-wider">Pending Review</span>
+              <Clock className="w-4 h-4 text-amber-400/80" />
             </div>
-            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+            <div className="text-2xl sm:text-3xl font-display font-semibold text-amber-400">
               {metrics.pending}
             </div>
-            <p className="text-xs text-slate-500 mt-1">Require review</p>
+            <p className="text-xs text-neutral-500 mt-1">Awaiting verdict</p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
-              <span className="text-xs font-semibold uppercase tracking-wider">Accepted (Reopened)</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          <div className="bg-[#12151D] p-5 rounded-2xl border border-white/[0.08]">
+            <div className="flex items-center justify-between text-neutral-400 mb-2">
+              <span className="text-xs font-medium uppercase tracking-wider">Accepted</span>
+              <CheckCircle2 className="w-4 h-4 text-emerald-400/80" />
             </div>
-            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+            <div className="text-2xl sm:text-3xl font-display font-semibold text-emerald-400">
               {metrics.accepted}
             </div>
-            <p className="text-xs text-slate-500 mt-1">Re-evaluating claim</p>
+            <p className="text-xs text-neutral-500 mt-1">Reopened for verification</p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
-              <span className="text-xs font-semibold uppercase tracking-wider">Rejected</span>
-              <XCircle className="w-4 h-4 text-rose-500" />
+          <div className="bg-[#12151D] p-5 rounded-2xl border border-white/[0.08]">
+            <div className="flex items-center justify-between text-neutral-400 mb-2">
+              <span className="text-xs font-medium uppercase tracking-wider">Rejected</span>
+              <XCircle className="w-4 h-4 text-rose-400/80" />
             </div>
-            <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">
+            <div className="text-2xl sm:text-3xl font-display font-semibold text-rose-400">
               {metrics.rejected}
             </div>
-            <p className="text-xs text-slate-500 mt-1">Final decisions</p>
+            <p className="text-xs text-neutral-500 mt-1">Final rulings</p>
           </div>
         </div>
 
         {/* Filter Bar */}
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="bg-[#12151D] p-4 rounded-2xl border border-white/[0.08] flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-3 text-neutral-400" />
             <input
               type="text"
               placeholder="Search appellant, case ID, reason..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-white/[0.08] bg-black/40 text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-white/20"
             />
           </div>
 
@@ -222,12 +220,12 @@ export const AdminAppeals: React.FC = () => {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as AppealStatus | '')}
               aria-label="Filter by appeal status"
-              className="w-full sm:w-auto px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium"
+              className="w-full sm:w-auto px-3 py-2 text-xs rounded-xl border border-white/[0.08] bg-black/40 text-neutral-300 focus:outline-none focus:ring-1 focus:ring-white/20 font-mono"
             >
-              <option value="">All Appeal Statuses</option>
-              <option value={AppealStatus.PENDING}>Pending Review</option>
-              <option value={AppealStatus.ACCEPTED}>Accepted (Claim Reopened)</option>
-              <option value={AppealStatus.REJECTED}>Rejected (Final)</option>
+              <option value="" className="bg-[#12151D]">All Appeal Statuses</option>
+              <option value={AppealStatus.PENDING} className="bg-[#12151D]">Pending Review</option>
+              <option value={AppealStatus.ACCEPTED} className="bg-[#12151D]">Accepted (Claim Reopened)</option>
+              <option value={AppealStatus.REJECTED} className="bg-[#12151D]">Rejected (Final)</option>
             </select>
           </div>
         </div>
@@ -235,46 +233,43 @@ export const AdminAppeals: React.FC = () => {
         {/* Appeals Cards List */}
         <div className="space-y-4">
           {isLoading ? (
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-              <div className="space-y-4">
-                <TableRowSkeleton columns={4} />
-                <TableRowSkeleton columns={4} />
-              </div>
+            <div className="bg-[#12151D] rounded-2xl border border-white/[0.08] p-6 space-y-4">
+              <TableRowSkeleton columns={4} />
+              <TableRowSkeleton columns={4} />
             </div>
           ) : filteredAppeals.length === 0 ? (
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center text-slate-400 dark:text-slate-500">
-              <Scale className="w-10 h-10 mx-auto mb-2 opacity-40 text-primary-500" />
-              <div className="font-medium text-slate-700 dark:text-slate-300">
+            <div className="bg-[#12151D] rounded-2xl border border-white/[0.08] p-12 text-center text-neutral-500">
+              <Scale className="w-8 h-8 mx-auto mb-2 opacity-30 text-neutral-400" />
+              <div className="font-medium text-white text-sm">
                 No appeals found in this queue.
               </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Appeals submitted by claimants following a rejection will appear here for security
-                review.
+              <p className="text-xs text-neutral-500 mt-1">
+                Contested claim appeals will automatically appear here for supervisory determination.
               </p>
             </div>
           ) : (
             filteredAppeals.map(({ appeal, claim }) => (
               <div
                 key={appeal.id}
-                className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 space-y-4 hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+                className="bg-[#12151D] rounded-2xl border border-white/[0.08] p-5 space-y-4 hover:border-white/[0.14] transition-all"
               >
                 {/* Header row: Appellant info & Status */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-white/[0.06]">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 flex items-center justify-center font-bold text-sm">
+                    <div className="w-9 h-9 rounded-full bg-white/[0.06] text-white border border-white/[0.1] flex items-center justify-center font-semibold text-xs">
                       {claim.claimant?.name ? claim.claimant.name[0].toUpperCase() : 'U'}
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                      <div className="font-medium text-white text-sm flex items-center gap-2">
                         {claim.claimant?.name || 'Institutional Member'}
-                        <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
+                        <span className="text-xs font-mono text-neutral-400">
                           ({claim.claimant?.email || 'N/A'})
                         </span>
                       </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5">
+                      <div className="text-xs text-neutral-500 flex items-center gap-2 mt-0.5 font-mono">
                         <span>Submitted {new Date(appeal.createdAt).toLocaleDateString()}</span>
                         <span>•</span>
-                        <span>Appeal ID: <code className="font-mono text-primary-600">{appeal.id.slice(0, 12)}</code></span>
+                        <span>Appeal ID: <code>{appeal.id.slice(0, 10)}</code></span>
                       </div>
                     </div>
                   </div>
@@ -285,9 +280,9 @@ export const AdminAppeals: React.FC = () => {
                 </div>
 
                 {/* Target Item Reference */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 text-sm">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-black/30 border border-white/[0.06] text-xs">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded bg-slate-200 dark:bg-slate-700 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-lg bg-black/40 border border-white/[0.08] overflow-hidden flex items-center justify-center flex-shrink-0">
                       {claim.item?.images && claim.item.images.length > 0 ? (
                         <img
                           src={resolveImageUrl(claim.item.images[0])}
@@ -295,51 +290,51 @@ export const AdminAppeals: React.FC = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <FileText className="w-4 h-4 text-slate-400" />
+                        <FileText className="w-4 h-4 text-neutral-500" />
                       )}
                     </div>
                     <div>
-                      <div className="font-medium text-slate-900 dark:text-white">
+                      <div className="font-medium text-white text-sm">
                         {claim.item?.itemName || 'Unspecified Item'}
                       </div>
-                      <div className="text-xs text-slate-500 flex items-center gap-2">
-                        <span>Case: <span className="font-mono text-primary-600 font-semibold">{claim.item?.caseId}</span></span>
+                      <div className="text-xs text-neutral-400 flex items-center gap-2 font-mono mt-0.5">
+                        <span>Case: <span className="text-white font-medium">{claim.item?.caseId}</span></span>
                         <span>•</span>
-                        <span>Claim Status: <span className="font-semibold">{claim.status}</span></span>
+                        <span>Claim Status: <span className="text-neutral-300">{claim.status}</span></span>
                       </div>
                     </div>
                   </div>
 
                   {claim.item?.caseId && (
                     <Link to={`/items/${claim.item.caseId}`}>
-                      <Button variant="ghost" size="sm" className="h-8 text-xs">
+                      <Button variant="ghost" size="sm" className="h-8 text-xs text-neutral-300 hover:text-white">
                         <ExternalLink className="w-3.5 h-3.5 mr-1" />
-                        Inspect Case
+                        View Case
                       </Button>
                     </Link>
                   )}
                 </div>
 
-                {/* Side-by-side statements: Original Rejection Reason & Appeal Statement */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Side-by-side statements */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                   {/* Original rejection reason */}
-                  <div className="p-3.5 rounded-lg bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 text-xs space-y-1.5">
-                    <div className="flex items-center gap-1.5 font-semibold text-rose-800 dark:text-rose-300">
-                      <ShieldAlert className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-                      <span>Original Claim Rejection Reason</span>
+                  <div className="p-3.5 rounded-xl bg-black/30 border border-rose-500/15 space-y-1.5">
+                    <div className="flex items-center gap-1.5 font-medium text-rose-300">
+                      <ShieldAlert className="w-4 h-4 text-rose-400" />
+                      <span>Original Claim Rejection Rationale</span>
                     </div>
-                    <p className="text-rose-900 dark:text-rose-200 leading-relaxed italic">
+                    <p className="text-neutral-300 leading-relaxed italic">
                       "{claim.decisionReason || 'Insufficient proof of ownership provided.'}"
                     </p>
                   </div>
 
                   {/* Appellant statement */}
-                  <div className="p-3.5 rounded-lg bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/40 text-xs space-y-1.5">
-                    <div className="flex items-center gap-1.5 font-semibold text-blue-800 dark:text-blue-300">
-                      <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span>Appellant's Appeal Statement</span>
+                  <div className="p-3.5 rounded-xl bg-black/30 border border-blue-500/15 space-y-1.5">
+                    <div className="flex items-center gap-1.5 font-medium text-blue-300">
+                      <MessageSquare className="w-4 h-4 text-blue-400" />
+                      <span>Appellant's Contestation Statement</span>
                     </div>
-                    <p className="text-blue-900 dark:text-blue-200 leading-relaxed">
+                    <p className="text-neutral-300 leading-relaxed">
                       "{appeal.reason}"
                     </p>
                   </div>
@@ -347,14 +342,14 @@ export const AdminAppeals: React.FC = () => {
 
                 {/* Footer: Decisions info / Action button */}
                 <div className="flex items-center justify-between pt-2">
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-neutral-500">
                     {appeal.status !== AppealStatus.PENDING ? (
-                      <span className="flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      <span className="flex items-center gap-1 text-emerald-400">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                         Decided on {appeal.decidedAt ? new Date(appeal.decidedAt).toLocaleString() : 'N/A'}
                       </span>
                     ) : (
-                      <span className="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
+                      <span className="text-amber-400 font-medium flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
                         Awaiting security review and verdict
                       </span>
@@ -393,42 +388,42 @@ export const AdminAppeals: React.FC = () => {
         >
           {targetItem && (
             <form onSubmit={handleDecisionSubmit} className="space-y-4">
-              <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
-                <div className="font-semibold text-slate-900 dark:text-white text-sm">
+              <div className="p-3.5 rounded-xl bg-black/30 border border-white/[0.08] text-xs space-y-2">
+                <div className="font-semibold text-white text-sm">
                   {targetItem.claim.item?.itemName}
                 </div>
                 <div>
-                  <span className="text-slate-500">Appellant:</span>{' '}
-                  <span className="font-medium text-slate-800 dark:text-slate-200">
+                  <span className="text-neutral-400">Appellant:</span>{' '}
+                  <span className="font-medium text-neutral-200">
                     {targetItem.claim.claimant?.name}
                   </span>
                 </div>
-                <div className="p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 italic text-slate-700 dark:text-slate-300">
+                <div className="p-2.5 rounded-lg bg-black/40 border border-white/[0.06] italic text-neutral-300">
                   "{targetItem.appeal.reason}"
                 </div>
               </div>
 
               {/* Decision Selector */}
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block text-xs font-medium text-neutral-300">
                   Select Adjudication Verdict
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setDecision(AppealStatus.ACCEPTED)}
-                    className={`p-3 rounded-lg border text-left flex flex-col justify-between transition-all ${
+                    className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                       decision === AppealStatus.ACCEPTED
-                        ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 ring-2 ring-emerald-500/20'
-                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                        ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
+                        : 'border-white/[0.08] bg-black/20 hover:border-white/[0.16] text-neutral-400'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-700 dark:text-emerald-400">
+                    <div className="flex items-center gap-1.5 font-medium text-xs text-emerald-300">
                       <CheckCircle2 className="w-4 h-4" />
                       Accept Appeal
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                      Reopens the claim to <span className="font-semibold">PENDING</span> for
+                    <p className="text-[11px] text-neutral-400 mt-1">
+                      Reopens the claim to <span className="font-medium text-white">PENDING</span> for
                       security re-verification.
                     </p>
                   </button>
@@ -436,17 +431,17 @@ export const AdminAppeals: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setDecision(AppealStatus.REJECTED)}
-                    className={`p-3 rounded-lg border text-left flex flex-col justify-between transition-all ${
+                    className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
                       decision === AppealStatus.REJECTED
-                        ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-200 ring-2 ring-rose-500/20'
-                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                        ? 'border-rose-500/40 bg-rose-500/10 text-rose-200'
+                        : 'border-white/[0.08] bg-black/20 hover:border-white/[0.16] text-neutral-400'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 font-bold text-xs text-rose-700 dark:text-rose-400">
+                    <div className="flex items-center gap-1.5 font-medium text-xs text-rose-300">
                       <XCircle className="w-4 h-4" />
                       Reject Appeal
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="text-[11px] text-neutral-400 mt-1">
                       Maintains claim rejection as final. Requires a reason.
                     </p>
                   </button>
@@ -455,8 +450,8 @@ export const AdminAppeals: React.FC = () => {
 
               {/* Reason textarea */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Decision Notes / Reason {decision === AppealStatus.REJECTED && <span className="text-rose-500">*</span>}
+                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                  Decision Notes / Reason {decision === AppealStatus.REJECTED && <span className="text-rose-400">*</span>}
                 </label>
                 <textarea
                   rows={3}
@@ -465,14 +460,14 @@ export const AdminAppeals: React.FC = () => {
                   onChange={(e) => setDecisionReason(e.target.value)}
                   placeholder={
                     decision === AppealStatus.ACCEPTED
-                      ? 'e.g., Appellant provided valid proof of purchase matching serial details.'
-                      : 'e.g., Provided statement contradicts original security custody report.'
+                      ? 'e.g. Appellant submitted valid proof of purchase matching serial details.'
+                      : 'e.g. Provided statement contradicts original security custody report.'
                   }
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-white/[0.08] bg-black/40 text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-white/20"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex justify-end gap-2 pt-3 border-t border-white/[0.06]">
                 <Button
                   type="button"
                   variant="secondary"

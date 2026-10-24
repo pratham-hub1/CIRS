@@ -19,6 +19,7 @@ import { Modal } from '../../components/common/Modal';
 import { PageTransition } from '../../components/common/AnimatedTransitions';
 import { Button } from '../../components/common/Button';
 import { useToast } from '../../context/ToastContext';
+import { celebrateConfetti } from '../../lib/confetti';
 
 export const AdminClaims: React.FC = () => {
   const { success, error } = useToast();
@@ -65,7 +66,8 @@ export const AdminClaims: React.FC = () => {
   const handleApprove = async (claimId: string) => {
     try {
       await adminService.approveClaim(claimId);
-      success('Claim approved! Item hold created and single-use collection token issued.');
+      celebrateConfetti();
+      success('Claim approved! Item hold created and collection token issued.');
       if (inspectClaim && inspectClaim.id === claimId) {
         setInspectClaim(null);
       }
@@ -132,7 +134,7 @@ export const AdminClaims: React.FC = () => {
       );
       success(
         appealDecision === AppealStatus.ACCEPTED
-          ? 'Appeal accepted: Claim reopened to PENDING for re-verification.'
+          ? 'Appeal accepted: Claim reopened to PENDING.'
           : 'Appeal rejected.',
       );
       setAppealTarget(null);
@@ -145,12 +147,23 @@ export const AdminClaims: React.FC = () => {
   };
 
   return (
-    <PageTransition className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <PageTransition className="space-y-8 max-w-7xl mx-auto text-white">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-white/[0.06]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Claim Verifications</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Review ownership evidence, evaluate verification answers, and issue collection tokens.
+          <div className="flex items-center space-x-2.5 mb-2">
+            <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+              OWNERSHIP ADJUDICATION
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[11px] font-mono text-neutral-400">
+              CLAIMS DESK
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-white">
+            Claims Queue
+          </h1>
+          <p className="text-sm text-neutral-400 mt-1 max-w-2xl">
+            Review ownership evidence, evaluate verification answers, and issue collection vouchers.
           </p>
         </div>
 
@@ -159,32 +172,32 @@ export const AdminClaims: React.FC = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value as ClaimStatus | '')}
-            className="py-1.5 px-3 text-xs border border-slate-300 rounded-lg bg-white font-medium focus:ring-2 focus:ring-brand-500"
+            className="py-2 px-3 text-xs border border-white/10 rounded-xl bg-neutral-900 text-neutral-300 font-mono focus:outline-none focus:border-white/40"
           >
-            <option value="">All Review Statuses</option>
-            <option value={ClaimStatus.PENDING}>Pending Review</option>
-            <option value={ClaimStatus.INFO_REQUESTED}>Info Requested</option>
-            <option value={ClaimStatus.APPROVED}>Approved</option>
-            <option value={ClaimStatus.REJECTED}>Rejected</option>
+            <option value="" className="bg-[#12151D]">All Review Statuses</option>
+            <option value={ClaimStatus.PENDING} className="bg-[#12151D]">Pending Review</option>
+            <option value={ClaimStatus.INFO_REQUESTED} className="bg-[#12151D]">Info Requested</option>
+            <option value={ClaimStatus.APPROVED} className="bg-[#12151D]">Approved</option>
+            <option value={ClaimStatus.REJECTED} className="bg-[#12151D]">Rejected</option>
           </select>
         </div>
       </div>
 
       {/* Claims Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-subtle overflow-hidden">
+      <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-xs font-sans">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
+              <tr className="bg-neutral-900 border-b border-white/[0.06] text-neutral-400 font-mono font-semibold uppercase tracking-wider text-[10px]">
                 <th className="px-6 py-3.5">Claim ID</th>
                 <th className="px-6 py-3.5">Target Item</th>
                 <th className="px-6 py-3.5">Claimant</th>
-                <th className="px-6 py-3.5">Verification Level</th>
+                <th className="px-6 py-3.5">Verification</th>
                 <th className="px-6 py-3.5">Status</th>
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-white/[0.04] text-neutral-300">
               {isLoading ? (
                 <>
                   <TableRowSkeleton />
@@ -193,25 +206,25 @@ export const AdminClaims: React.FC = () => {
                 </>
               ) : claims.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">
-                    No claims awaiting review in this queue.
+                  <td colSpan={6} className="px-6 py-12 text-center text-neutral-500 font-mono italic">
+                    No claims awaiting adjudication in this sector queue.
                   </td>
                 </tr>
               ) : (
                 claims.map((claim) => (
-                  <tr key={claim.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="px-6 py-4 font-mono font-bold text-slate-900">
-                      {claim.id.slice(0, 10)}...
+                  <tr key={claim.id} className="hover:bg-white/[0.03] transition-colors">
+                    <td className="px-6 py-4 font-mono font-semibold text-white">
+                      #{claim.id.slice(0, 8)}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-slate-900">{claim.item?.itemName}</div>
-                      <span className="text-[11px] text-slate-400 font-mono">
-                        {claim.item?.caseId}
+                      <div className="font-semibold text-white">{claim.item?.itemName}</div>
+                      <span className="text-[11px] text-neutral-500 font-mono">
+                        #{claim.item?.caseId}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-medium text-slate-800">{claim.claimant?.name || 'Student'}</div>
-                      <div className="text-[11px] text-slate-400">{claim.claimant?.email}</div>
+                      <div className="font-semibold text-white">{claim.claimant?.name || 'Student'}</div>
+                      <div className="text-[11px] text-neutral-500 font-mono">{claim.claimant?.email}</div>
                     </td>
                     <td className="px-6 py-4">
                       <VerificationLevelBadge level={claim.verificationLevel} />
@@ -225,7 +238,7 @@ export const AdminClaims: React.FC = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => setInspectClaim(claim)}
-                          className="px-2.5 py-1 text-[11px] h-auto font-semibold"
+                          className="px-2.5 py-1 text-[11px] h-auto"
                         >
                           Inspect Evidence
                         </Button>
@@ -236,7 +249,7 @@ export const AdminClaims: React.FC = () => {
                               size="sm"
                               variant="success"
                               onClick={() => handleApprove(claim.id)}
-                              className="px-2.5 py-1 text-[11px] h-auto font-semibold"
+                              className="px-2.5 py-1 text-[11px] h-auto"
                             >
                               Approve
                             </Button>
@@ -244,7 +257,7 @@ export const AdminClaims: React.FC = () => {
                               size="sm"
                               variant="danger"
                               onClick={() => setRejectTargetId(claim.id)}
-                              className="px-2.5 py-1 text-[11px] h-auto font-semibold"
+                              className="px-2.5 py-1 text-[11px] h-auto"
                             >
                               Reject
                             </Button>
@@ -256,7 +269,7 @@ export const AdminClaims: React.FC = () => {
                             size="sm"
                             variant="secondary"
                             onClick={() => setAppealTarget(claim.appeals[0])}
-                            className="px-2.5 py-1 text-[11px] h-auto font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border-purple-200 flex items-center"
+                            className="px-2.5 py-1 text-[11px] h-auto flex items-center"
                           >
                             <RotateCcw className="w-3 h-3 mr-1" /> Decide Appeal
                           </Button>
@@ -280,28 +293,28 @@ export const AdminClaims: React.FC = () => {
           description={`Claimant verification profile for "${inspectClaim.item?.itemName}"`}
           maxWidth="2xl"
         >
-          <div className="space-y-5 text-xs">
-            <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+          <div className="space-y-5 text-xs text-white">
+            <div className="flex items-center justify-between p-4 bg-neutral-900 rounded-xl border border-white/[0.06]">
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Claimant</span>
-                <span className="font-bold text-slate-900 text-sm">{inspectClaim.claimant?.name}</span>
-                <span className="text-slate-500 block">{inspectClaim.claimant?.email}</span>
+                <span className="text-neutral-500 block text-[10px] uppercase font-mono">Claimant</span>
+                <span className="font-semibold text-white text-sm">{inspectClaim.claimant?.name}</span>
+                <span className="text-neutral-400 block text-xs">{inspectClaim.claimant?.email}</span>
               </div>
               <VerificationLevelBadge level={inspectClaim.verificationLevel} />
             </div>
 
             {/* Submitted description and marks */}
-            <div className="space-y-2 p-3.5 rounded-xl border border-slate-200 bg-white">
-              <span className="font-bold uppercase tracking-wider text-slate-500 text-[10px] block">
+            <div className="space-y-2 p-4 rounded-xl border border-white/[0.06] bg-neutral-900">
+              <span className="font-semibold uppercase tracking-wider text-neutral-400 text-[10px] block font-mono">
                 Submitted Ownership Details
               </span>
-              <p className="text-slate-700 leading-relaxed">
+              <p className="text-neutral-300 leading-relaxed">
                 <strong>Description:</strong> {inspectClaim.description}
               </p>
-              <p className="text-slate-700">
+              <p className="text-neutral-300">
                 <strong>Identifying Marks:</strong> {inspectClaim.identifyingMarks}
               </p>
-              <p className="text-slate-500">
+              <p className="text-neutral-500 font-mono text-[11px]">
                 <strong>Loss Incident:</strong> {inspectClaim.placeLost} on{' '}
                 {new Date(inspectClaim.dateLost).toLocaleDateString()}
               </p>
@@ -309,19 +322,19 @@ export const AdminClaims: React.FC = () => {
 
             {/* Verification Q&A */}
             <div className="space-y-2">
-              <span className="font-bold uppercase tracking-wider text-slate-500 text-[10px] block">
-                Verification Questions & Answers ({inspectClaim.questions.length})
+              <span className="font-semibold uppercase tracking-wider text-neutral-400 text-[10px] block font-mono">
+                Verification Questions &amp; Answers ({inspectClaim.questions.length})
               </span>
               {inspectClaim.questions.map((q, idx) => (
-                <div key={q.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
-                  <div className="font-semibold text-slate-800">
+                <div key={q.id} className="p-3 bg-neutral-900 rounded-xl border border-white/[0.06] space-y-1">
+                  <div className="font-semibold text-white">
                     {idx + 1}. {q.questionText}
                   </div>
-                  <div className="text-slate-600 bg-white p-2 rounded border border-slate-200/80">
+                  <div className="text-neutral-300 bg-neutral-950 p-2.5 rounded-lg border border-white/[0.04]">
                     {q.answerText ? (
                       q.answerText
                     ) : (
-                      <span className="text-purple-600 italic">Unanswered</span>
+                      <span className="text-amber-400 italic">Unanswered</span>
                     )}
                   </div>
                 </div>
@@ -330,17 +343,17 @@ export const AdminClaims: React.FC = () => {
 
             {/* Documents */}
             <div className="space-y-2">
-              <span className="font-bold uppercase tracking-wider text-slate-500 text-[10px] block">
+              <span className="font-semibold uppercase tracking-wider text-neutral-400 text-[10px] block font-mono">
                 Proof Documents ({inspectClaim.documents.length})
               </span>
               {inspectClaim.documents.length === 0 ? (
-                <p className="text-slate-400 italic">No proof documents attached.</p>
+                <p className="text-neutral-500 italic">No proof documents attached.</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   {inspectClaim.documents.map((doc) => (
-                    <div key={doc.id} className="p-2.5 rounded bg-slate-50 border border-slate-200 flex justify-between items-center">
-                      <span className="truncate font-medium">{doc.docType}</span>
-                      <a href={resolveImageUrl(doc.url)} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline ml-2 font-semibold">
+                    <div key={doc.id} className="p-2.5 rounded-xl bg-neutral-900 border border-white/[0.06] flex justify-between items-center">
+                      <span className="truncate font-semibold">{doc.docType}</span>
+                      <a href={resolveImageUrl(doc.url)} target="_blank" rel="noreferrer" className="text-white hover:underline ml-2 font-semibold">
                         View
                       </a>
                     </div>
@@ -350,7 +363,7 @@ export const AdminClaims: React.FC = () => {
             </div>
 
             {/* Action buttons inside inspection */}
-            <div className="flex items-center justify-end space-x-2 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-end space-x-2 pt-4 border-t border-white/[0.06]">
               <Button
                 type="button"
                 variant="outline"
@@ -359,7 +372,6 @@ export const AdminClaims: React.FC = () => {
                   setRequestInfoTargetId(inspectClaim.id);
                   setInspectClaim(null);
                 }}
-                className="text-purple-700 bg-purple-50/80 hover:bg-purple-100 border-purple-200"
               >
                 Request More Info
               </Button>
@@ -380,7 +392,7 @@ export const AdminClaims: React.FC = () => {
                 size="sm"
                 onClick={() => handleApprove(inspectClaim.id)}
               >
-                Approve & Issue Token
+                Approve &amp; Issue Token
               </Button>
             </div>
           </div>
@@ -396,7 +408,7 @@ export const AdminClaims: React.FC = () => {
       >
         <form onSubmit={handleRejectSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1">
               Rejection Reason <span className="text-rose-500">*</span>
             </label>
             <textarea
@@ -405,7 +417,7 @@ export const AdminClaims: React.FC = () => {
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="e.g. Serial numbers do not match device records, or insufficient proof provided..."
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs border border-white/10 rounded-xl bg-neutral-900 text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-white"
             />
           </div>
 
@@ -439,7 +451,7 @@ export const AdminClaims: React.FC = () => {
       >
         <form onSubmit={handleRequestInfoSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1">
               Instructions for Claimant <span className="text-rose-500">*</span>
             </label>
             <textarea
@@ -448,12 +460,12 @@ export const AdminClaims: React.FC = () => {
               value={requestReason}
               onChange={(e) => setRequestReason(e.target.value)}
               placeholder="Explain what details require clarification..."
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs border border-white/10 rounded-xl bg-neutral-900 text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1">
               Custom Verification Question (Optional)
             </label>
             <input
@@ -461,7 +473,7 @@ export const AdminClaims: React.FC = () => {
               value={newQuestionText}
               onChange={(e) => setNewQuestionText(e.target.value)}
               placeholder="e.g. What stickers or scratches are on the back?"
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs border border-white/10 rounded-xl bg-neutral-900 text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-white"
             />
           </div>
 
@@ -494,19 +506,19 @@ export const AdminClaims: React.FC = () => {
         description="Accepting an appeal reopens the claim to PENDING for re-verification."
       >
         <form onSubmit={handleDecideAppealSubmit} className="space-y-4">
-          <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs">
-            <span className="font-semibold block text-slate-700 mb-1">Claimant Appeal Statement:</span>
-            <p className="text-slate-600 italic">"{appealTarget?.reason}"</p>
+          <div className="p-3 bg-neutral-900 rounded-xl border border-white/[0.06] text-xs">
+            <span className="font-semibold block text-neutral-300 mb-1">Claimant Appeal Statement:</span>
+            <p className="text-neutral-400 italic">"{appealTarget?.reason}"</p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1">
               Decision
             </label>
             <select
               value={appealDecision}
               onChange={(e) => setAppealDecision(e.target.value as AppealStatus)}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs border border-white/10 rounded-xl bg-neutral-900 text-white focus:outline-none focus:ring-1 focus:ring-white font-mono"
             >
               <option value={AppealStatus.ACCEPTED}>Accept Appeal (Reopen to PENDING)</option>
               <option value={AppealStatus.REJECTED}>Deny Appeal (Terminal Rejection)</option>
@@ -514,7 +526,7 @@ export const AdminClaims: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+            <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1">
               Supervisor Decision Remarks (Optional)
             </label>
             <input
@@ -522,7 +534,7 @@ export const AdminClaims: React.FC = () => {
               value={appealDecisionReason}
               onChange={(e) => setAppealDecisionReason(e.target.value)}
               placeholder="Comments on appeal determination..."
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs border border-white/10 rounded-xl bg-neutral-900 text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-white font-mono"
             />
           </div>
 
