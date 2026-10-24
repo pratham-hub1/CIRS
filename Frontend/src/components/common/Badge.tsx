@@ -18,57 +18,48 @@ export const ItemStatusBadge: React.FC<{ status: ItemStatus; size?: 'sm' | 'md';
   size = 'md',
   className,
 }) => {
-  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs font-semibold';
+  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs';
 
-  let colorClasses = 'bg-slate-100 text-slate-700 border-slate-200/80';
-  let dotColor = 'bg-slate-400';
-  let pulse = false;
+  let colorClasses = 'bg-white/[0.04] text-neutral-300 border-white/[0.08]';
+  let dotColor = 'bg-neutral-400';
 
   switch (status) {
     case ItemStatus.LOST_REPORTED:
-      colorClasses = 'bg-rose-50/80 text-rose-700 border-rose-200';
-      dotColor = 'bg-rose-500';
-      pulse = true;
+      colorClasses = 'bg-rose-500/10 text-rose-300 border-rose-500/20';
+      dotColor = 'bg-rose-400';
       break;
     case ItemStatus.FOUND:
-      colorClasses = 'bg-amber-50/80 text-amber-800 border-amber-200';
-      dotColor = 'bg-amber-500';
-      pulse = true;
+      colorClasses = 'bg-amber-500/10 text-amber-300 border-amber-500/20';
+      dotColor = 'bg-amber-400';
       break;
     case ItemStatus.READY_FOR_COLLECTION:
-      colorClasses = 'bg-sky-50 text-sky-700 border-sky-200';
-      dotColor = 'bg-sky-500';
-      pulse = true;
+      colorClasses = 'bg-blue-500/10 text-blue-300 border-blue-500/20';
+      dotColor = 'bg-blue-400';
       break;
     case ItemStatus.RETURNED:
-      colorClasses = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      dotColor = 'bg-emerald-500';
+      colorClasses = 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
+      dotColor = 'bg-emerald-400';
       break;
     case ItemStatus.ARCHIVED:
-      colorClasses = 'bg-slate-100 text-slate-600 border-slate-200';
-      dotColor = 'bg-slate-400';
+      colorClasses = 'bg-white/[0.03] text-neutral-400 border-white/[0.06]';
+      dotColor = 'bg-neutral-500';
       break;
     case ItemStatus.UNCLAIMED:
-      colorClasses = 'bg-purple-50 text-purple-700 border-purple-200';
-      dotColor = 'bg-purple-500';
+      colorClasses = 'bg-purple-500/10 text-purple-300 border-purple-500/20';
+      dotColor = 'bg-purple-400';
       break;
   }
 
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border shadow-subtle tracking-tight',
+        'inline-flex items-center rounded-full border font-medium tracking-wide',
         sizeClasses,
         colorClasses,
         className,
       )}
     >
-      <span className="relative flex h-2 w-2 mr-1.5 shrink-0">
-        {pulse && (
-          <span className={cn('animate-ping absolute inline-flex h-full w-full rounded-full opacity-60', dotColor)} />
-        )}
-        <span className={cn('relative inline-flex rounded-full h-2 w-2', dotColor)} />
-      </span>
+      <span className={cn('h-1.5 w-1.5 rounded-full mr-1.5 shrink-0', dotColor)} />
       <span>{STATUS_LABELS[status] || status}</span>
     </span>
   );
@@ -79,52 +70,44 @@ export const ClaimStatusBadge: React.FC<{ status: ClaimStatus; size?: 'sm' | 'md
   size = 'md',
   className,
 }) => {
-  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs font-semibold';
+  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs';
 
-  let colorClasses = 'bg-slate-100 text-slate-700 border-slate-200/80';
-  let dotColor = 'bg-slate-400';
-  let pulse = false;
+  let colorClasses = 'bg-white/[0.04] text-neutral-300 border-white/[0.08]';
+  let dotColor = 'bg-neutral-400';
 
   switch (status) {
     case ClaimStatus.PENDING:
-      colorClasses = 'bg-amber-50 text-amber-800 border-amber-200';
-      dotColor = 'bg-amber-500';
-      pulse = true;
+      colorClasses = 'bg-amber-500/10 text-amber-300 border-amber-500/20';
+      dotColor = 'bg-amber-400';
       break;
     case ClaimStatus.INFO_REQUESTED:
-      colorClasses = 'bg-purple-50 text-purple-700 border-purple-200';
-      dotColor = 'bg-purple-500';
-      pulse = true;
+      colorClasses = 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20';
+      dotColor = 'bg-indigo-400';
       break;
     case ClaimStatus.APPROVED:
-      colorClasses = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      dotColor = 'bg-emerald-500';
+      colorClasses = 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
+      dotColor = 'bg-emerald-400';
       break;
     case ClaimStatus.REJECTED:
-      colorClasses = 'bg-rose-50 text-rose-700 border-rose-200';
-      dotColor = 'bg-rose-500';
+      colorClasses = 'bg-rose-500/10 text-rose-300 border-rose-500/20';
+      dotColor = 'bg-rose-400';
       break;
     case ClaimStatus.WITHDRAWN:
-      colorClasses = 'bg-slate-100 text-slate-600 border-slate-200';
-      dotColor = 'bg-slate-400';
+      colorClasses = 'bg-white/[0.03] text-neutral-400 border-white/[0.06]';
+      dotColor = 'bg-neutral-500';
       break;
   }
 
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border shadow-subtle tracking-tight',
+        'inline-flex items-center rounded-full border font-medium tracking-wide',
         sizeClasses,
         colorClasses,
         className,
       )}
     >
-      <span className="relative flex h-2 w-2 mr-1.5 shrink-0">
-        {pulse && (
-          <span className={cn('animate-ping absolute inline-flex h-full w-full rounded-full opacity-60', dotColor)} />
-        )}
-        <span className={cn('relative inline-flex rounded-full h-2 w-2', dotColor)} />
-      </span>
+      <span className={cn('h-1.5 w-1.5 rounded-full mr-1.5 shrink-0', dotColor)} />
       <span>{CLAIM_STATUS_LABELS[status] || status}</span>
     </span>
   );
@@ -134,19 +117,19 @@ export const VerificationLevelBadge: React.FC<{ level: VerificationLevel; classN
   level,
   className,
 }) => {
-  let color = 'bg-slate-100 text-slate-700 border-slate-200';
+  let color = 'bg-white/[0.04] text-neutral-300 border-white/[0.08]';
   if (level === VerificationLevel.HIGH) {
-    color = 'bg-rose-50 text-rose-800 border-rose-200/80';
+    color = 'bg-rose-500/10 text-rose-300 border-rose-500/20';
   } else if (level === VerificationLevel.MEDIUM) {
-    color = 'bg-amber-50 text-amber-800 border-amber-200/80';
+    color = 'bg-amber-500/10 text-amber-300 border-amber-500/20';
   } else if (level === VerificationLevel.LOW) {
-    color = 'bg-sky-50 text-sky-800 border-sky-200/80';
+    color = 'bg-blue-500/10 text-blue-300 border-blue-500/20';
   }
 
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border shadow-subtle tracking-tight',
+        'inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border',
         color,
         className,
       )}
@@ -160,10 +143,10 @@ export const ItemTypeBadge: React.FC<{ type: ItemType; className?: string }> = (
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wider uppercase border shadow-subtle',
+        'inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium uppercase tracking-wider border',
         type === ItemType.LOST
-          ? 'bg-rose-50 text-rose-700 border-rose-200/80'
-          : 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+          ? 'bg-rose-500/10 text-rose-300 border-rose-500/20'
+          : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
         className,
       )}
     >
@@ -176,7 +159,7 @@ export const CategoryBadge: React.FC<{ category: ItemCategory; className?: strin
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200/80 shadow-subtle',
+        'inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium text-neutral-300 bg-white/[0.04] border border-white/[0.08]',
         className,
       )}
     >
@@ -187,18 +170,18 @@ export const CategoryBadge: React.FC<{ category: ItemCategory; className?: strin
 
 export const RoleBadge: React.FC<{ role?: Role | null; className?: string }> = ({ role, className }) => {
   if (!role) return null;
-  let color = 'bg-slate-100 text-slate-700 border-slate-200';
+  let color = 'bg-white/[0.04] text-neutral-300 border-white/[0.08]';
   if (role === Role.ADMIN) {
-    color = 'bg-purple-50 text-purple-700 border-purple-200';
+    color = 'bg-purple-500/10 text-purple-300 border-purple-500/20';
   } else if (role === Role.FACULTY) {
-    color = 'bg-brand-50 text-brand-700 border-brand-200';
+    color = 'bg-blue-500/10 text-blue-300 border-blue-500/20';
   } else if (role === Role.STUDENT) {
-    color = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    color = 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
   }
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shadow-subtle',
+        'inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border',
         color,
         className,
       )}
@@ -212,21 +195,21 @@ export const AppealStatusBadge: React.FC<{ status: AppealStatus; className?: str
   status,
   className,
 }) => {
-  let color = 'bg-amber-50 text-amber-700 border-amber-200';
-  let dotColor = 'bg-amber-500';
+  let color = 'bg-amber-500/10 text-amber-300 border-amber-500/20';
+  let dotColor = 'bg-amber-400';
 
   if (status === AppealStatus.ACCEPTED) {
-    color = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    dotColor = 'bg-emerald-500';
+    color = 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
+    dotColor = 'bg-emerald-400';
   } else if (status === AppealStatus.REJECTED) {
-    color = 'bg-rose-50 text-rose-700 border-rose-200';
-    dotColor = 'bg-rose-500';
+    color = 'bg-rose-500/10 text-rose-300 border-rose-500/20';
+    dotColor = 'bg-rose-400';
   }
 
   return (
     <span
       className={cn(
-        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border shadow-subtle tracking-tight',
+        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border',
         color,
         className,
       )}
@@ -236,4 +219,3 @@ export const AppealStatusBadge: React.FC<{ status: AppealStatus; className?: str
     </span>
   );
 };
-

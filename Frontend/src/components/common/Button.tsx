@@ -28,21 +28,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none select-none';
+      'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-white/40 disabled:opacity-40 disabled:pointer-events-none select-none tracking-normal';
 
     const variants = {
       primary:
-        'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 focus:ring-brand-500 shadow-sm hover:shadow-elevated',
+        'bg-white text-neutral-950 hover:bg-neutral-200 active:bg-neutral-300 shadow-sm font-semibold',
       secondary:
-        'bg-slate-100 text-slate-800 hover:bg-slate-200 active:bg-slate-300 focus:ring-slate-400 border border-slate-200/80',
+        'bg-white/[0.06] text-white hover:bg-white/[0.1] active:bg-white/[0.12] border border-white/[0.08]',
       outline:
-        'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300 focus:ring-brand-500 shadow-subtle hover:border-slate-400',
+        'bg-transparent text-neutral-300 hover:text-white hover:bg-white/[0.05] border border-white/[0.12] active:bg-white/[0.08]',
       ghost:
-        'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-400',
+        'bg-transparent text-neutral-400 hover:text-white hover:bg-white/[0.05] active:bg-white/[0.08]',
       danger:
-        'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 focus:ring-rose-500 shadow-sm',
+        'bg-rose-500/15 text-rose-300 border border-rose-500/25 hover:bg-rose-500/25 active:bg-rose-500/30 font-medium',
       success:
-        'bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 focus:ring-emerald-500 shadow-sm',
+        'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 hover:bg-emerald-500/25 active:bg-emerald-500/30 font-medium',
     };
 
     const sizes = {
@@ -54,8 +54,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <motion.button
         ref={ref}
-        whileTap={!disabled && !isLoading ? { scale: 0.98 } : undefined}
-        whileHover={!disabled && !isLoading ? { translateY: -1 } : undefined}
+        whileTap={!disabled && !isLoading ? { scale: 0.99 } : undefined}
         transition={{ duration: 0.1 }}
         disabled={disabled || isLoading}
         className={cn(baseStyles, variants[variant], sizes[size], className)}

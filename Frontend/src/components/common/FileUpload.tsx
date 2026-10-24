@@ -74,41 +74,41 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   return (
     <div className="w-full">
-      {label && <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>}
+      {label && <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">{label}</label>}
 
       {previewUrl ? (
-        <div className="relative border border-slate-200 rounded-xl p-4 bg-slate-50 flex items-center justify-between">
+        <div className="relative border border-white/[0.08] rounded-xl p-4 bg-[#12151D] flex items-center justify-between">
           <div className="flex items-center space-x-3 overflow-hidden">
             {isPdf ? (
-              <div className="w-12 h-12 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
+              <div className="w-12 h-12 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 flex-shrink-0">
                 <FileText className="w-6 h-6" />
               </div>
             ) : (
               <img
                 src={resolveImageUrl(previewUrl)}
                 alt="Upload preview"
-                className="w-12 h-12 object-cover rounded-lg border border-slate-200 flex-shrink-0"
+                className="w-12 h-12 object-cover rounded-lg border border-white/[0.08] flex-shrink-0"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
                 }}
               />
             )}
             <div className="truncate">
-              <p className="text-sm font-medium text-slate-800 truncate">
+              <p className="text-sm font-medium text-white truncate">
                 {uploadedName || 'Uploaded File'}
               </p>
-              <p className="text-xs text-emerald-600 flex items-center mt-0.5">
-                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Ready for submission
+              <p className="text-xs text-emerald-400 flex items-center mt-0.5">
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> File verified
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleClear}
-            className="p-1.5 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 transition-colors"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/[0.05] transition-colors"
             title="Remove file"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       ) : (
@@ -120,10 +120,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+          className={`border border-dashed rounded-2xl p-7 text-center cursor-pointer transition-all ${
             isDragging
-              ? 'border-brand-500 bg-brand-50/50'
-              : 'border-slate-300 hover:border-slate-400 bg-slate-50/50'
+              ? 'border-white/50 bg-white/[0.04]'
+              : 'border-white/[0.12] hover:border-white/[0.25] bg-[#12151D]/60 hover:bg-[#12151D]'
           }`}
         >
           <input
@@ -135,26 +135,25 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           />
 
           <div className="flex flex-col items-center justify-center">
-            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-neutral-300 mb-2.5">
               <Upload className="w-5 h-5" />
             </div>
-            <p className="text-sm font-medium text-slate-700">
+            <p className="text-sm font-medium text-neutral-200">
               {isUploading ? (
-                <span className="text-brand-600 animate-pulse">Uploading file to server...</span>
+                <span className="text-white animate-pulse">Uploading file...</span>
               ) : (
                 <>
-                  <span className="text-brand-600 hover:underline">Click to upload</span> or drag
-                  and drop
+                  <span className="text-white underline">Click to upload</span> or drag and drop
                 </>
               )}
             </p>
-            <p className="text-xs text-slate-500 mt-1">{helperText}</p>
+            <p className="text-xs text-neutral-400 mt-1">{helperText}</p>
           </div>
         </div>
       )}
 
       {error && (
-        <div className="flex items-center text-rose-600 text-xs mt-1.5">
+        <div className="flex items-center text-rose-400 text-xs mt-1.5">
           <AlertCircle className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
           <span>{error}</span>
         </div>

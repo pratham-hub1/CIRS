@@ -83,9 +83,10 @@ export const StaggerContainer: React.FC<{
 export const StaggerItem: React.FC<{
   children: React.ReactNode;
   className?: string;
-}> = ({ children, className = '' }) => {
+  onClick?: () => void;
+}> = ({ children, className = '', onClick }) => {
   return (
-    <motion.div variants={staggerItemVariants} className={className}>
+    <motion.div variants={staggerItemVariants} className={className} onClick={onClick}>
       {children}
     </motion.div>
   );

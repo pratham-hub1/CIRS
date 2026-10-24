@@ -41,13 +41,15 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         richColors
         closeButton
         expand={false}
-        duration={4200}
-        theme="light"
+        duration={3500}
+        theme="dark"
         toastOptions={{
           style: {
-            borderRadius: '0.75rem',
-            boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.08)',
-            border: '1px solid #e2e8f0',
+            borderRadius: '0.875rem',
+            backgroundColor: '#12151D',
+            color: '#FFFFFF',
+            boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
             fontFamily: 'inherit',
           },
         }}

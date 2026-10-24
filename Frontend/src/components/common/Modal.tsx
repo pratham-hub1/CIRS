@@ -48,44 +48,44 @@ export const Modal: React.FC<ModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-          {/* Backdrop with blur */}
+          {/* Subtle dark backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm"
             onClick={onClose}
           />
 
-          {/* Modal Dialog */}
+          {/* Modal Card */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            initial={{ opacity: 0, scale: 0.98, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: 'spring', duration: 0.35, bounce: 0.15 }}
-            className={`relative bg-white rounded-2xl shadow-float border border-slate-200/90 w-full ${maxWidthClasses} overflow-hidden z-10 my-8`}
+            exit={{ opacity: 0, scale: 0.98, y: 8 }}
+            transition={{ type: 'spring', duration: 0.25, bounce: 0 }}
+            className={`relative bg-[#12151D] rounded-2xl shadow-elevated border border-white/[0.08] w-full ${maxWidthClasses} overflow-hidden z-10 my-8`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-white">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] bg-white/[0.01]">
               <div>
-                <h3 id="modal-title" className="text-lg font-bold text-slate-900 tracking-tight">
+                <h3 id="modal-title" className="text-base font-semibold text-white tracking-tight">
                   {title}
                 </h3>
-                {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
+                {description && <p className="text-xs text-neutral-400 mt-0.5">{description}</p>}
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/[0.05] transition-colors focus:outline-none"
                 aria-label="Close modal"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-6 max-h-[calc(100vh-12rem)] overflow-y-auto scrollbar-thin">
+            <div className="p-6 max-h-[calc(100vh-12rem)] overflow-y-auto text-neutral-300">
               {children}
             </div>
           </motion.div>
