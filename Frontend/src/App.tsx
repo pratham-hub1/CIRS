@@ -123,6 +123,14 @@ export const App: React.FC = () => {
           }
         />
         <Route
+          path="admin/storage-locations"
+          element={
+            <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+              <AdminStorageLocations />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="admin/redeem"
           element={
             <ProtectedRoute allowedRoles={[Role.ADMIN]}>
@@ -148,6 +156,14 @@ export const App: React.FC = () => {
         />
         <Route
           path="admin/audit"
+          element={
+            <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+              <AdminAuditLog />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="admin/audit-log"
           element={
             <ProtectedRoute allowedRoles={[Role.ADMIN]}>
               <AdminAuditLog />
