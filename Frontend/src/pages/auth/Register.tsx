@@ -11,6 +11,8 @@ import {
   RefreshCw,
   ShieldCheck,
   ArrowRight,
+  Sparkles,
+  CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -19,6 +21,7 @@ import { Campus } from '../../types/auth';
 import { Role } from '../../types/enums';
 import { Button } from '../../components/common/Button';
 import { FadeIn } from '../../components/common/AnimatedTransitions';
+import { AmbientCanvas } from '../../components/common/AmbientCanvas';
 import { celebrateConfetti } from '../../lib/confetti';
 
 export const Register: React.FC = () => {
@@ -71,6 +74,17 @@ export const Register: React.FC = () => {
 
   const selectedCampus = campuses.find((c) => c.id === campusId);
   const availableDepartments = selectedCampus?.departments || [];
+
+  // Password strength calculation
+  const getPasswordStrength = (pwd: string) => {
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    return score;
+  };
+  const passwordStrength = getPasswordStrength(password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,237 +141,328 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0C10] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 selection:bg-white/20 selection:text-white">
-      <FadeIn className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-white/15 flex items-center justify-center text-white font-bold text-sm tracking-widest mx-auto mb-4 shadow-sm">
-          CI
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-white">
-          Create an Account
-        </h1>
-        <p className="mt-1 text-xs sm:text-sm text-neutral-400">
-          Register with your GSFC University student or faculty identity
-        </p>
-      </FadeIn>
+    <div className="min-h-screen bg-[#08090C] text-white flex flex-col lg:grid lg:grid-cols-12 relative overflow-hidden selection:bg-white selection:text-black font-sans">
+      {/* Background Animated Particle Canvas */}
+      <AmbientCanvas particleCount={55} />
 
-      <FadeIn delay={0.1} className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-[#12151D] py-8 px-6 sm:px-8 rounded-2xl border border-white/[0.08] shadow-2xl">
-          {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 font-medium flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
-                  <UserIcon className="w-4 h-4" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Aarav Sharma"
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-medium"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
-                University Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="rollnumber@gsfcuniversity.ac.in"
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-mono"
-                />
-              </div>
-              <p className="mt-1 text-[11px] text-neutral-500">
-                Must end with @gsfcuniversity.ac.in
-              </p>
-            </div>
-
-            {/* Campus Selection */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300">
-                  Campus <span className="text-rose-400">*</span>
-                </label>
-                {isLoadingCampuses && (
-                  <span className="text-[11px] text-neutral-400 flex items-center font-mono">
-                    <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Fetching campuses...
-                  </span>
-                )}
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
-                  <Building className="w-4 h-4" />
-                </div>
-                <select
-                  required
-                  disabled={isLoadingCampuses || campuses.length === 0}
-                  value={campusId}
-                  onChange={(e) => handleCampusChange(e.target.value)}
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white font-mono disabled:opacity-50"
-                >
-                  <option value="">
-                    {isLoadingCampuses
-                      ? 'Loading campus directory...'
-                      : campuses.length === 0
-                      ? 'No campuses available'
-                      : '-- Select your campus --'}
-                  </option>
-                  {campuses.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {campusLoadError && (
-                <div className="mt-1.5 p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-300 flex items-center justify-between">
-                  <span className="flex items-center">
-                    <AlertCircle className="w-3.5 h-3.5 mr-1 shrink-0 text-rose-400" />
-                    {campusLoadError}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={fetchCampuses}
-                    className="underline font-bold ml-2 text-white"
-                  >
-                    Retry
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
-                  Role
-                </label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as Role)}
-                  className="block w-full py-2 px-3 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white font-mono"
-                >
-                  <option value={Role.STUDENT}>Student</option>
-                  <option value={Role.FACULTY}>Faculty</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
-                  Department
-                </label>
-                <select
-                  disabled={isLoadingCampuses || !campusId || availableDepartments.length === 0}
-                  value={departmentId}
-                  onChange={(e) => setDepartmentId(e.target.value)}
-                  className="block w-full py-2 px-3 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white font-mono disabled:opacity-50"
-                >
-                  {!campusId ? (
-                    <option value="">Select campus first</option>
-                  ) : availableDepartments.length === 0 ? (
-                    <option value="">No departments</option>
-                  ) : (
-                    <>
-                      <option value="">None / General</option>
-                      {availableDepartments.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name} ({d.code})
-                        </option>
-                      ))}
-                    </>
-                  )}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
-                Password (Min 8 Characters)
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="block w-full pl-10 pr-10 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-mono"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-neutral-400 hover:text-white"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-neutral-300 mb-1.5">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="block w-full pl-10 pr-3.5 py-2 text-xs sm:text-sm border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-neutral-900 text-white placeholder-neutral-500 font-mono"
-                />
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              variant="primary"
-              isLoading={isSubmitting}
-              disabled={isLoadingCampuses || (campuses.length > 0 && !campusId)}
-              className="w-full py-2.5 mt-2 text-xs font-semibold"
-            >
-              <span>Complete Registration</span>
-              <ArrowRight className="w-4 h-4 ml-1.5" />
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center text-xs text-neutral-400">
-            Already registered?{' '}
-            <Link to="/login" className="font-semibold text-white hover:underline">
-              Sign in here
-            </Link>
+      {/* Left Column: Platform Onboarding & Institutional Guarantees (Desktop) */}
+      <div className="hidden lg:flex lg:col-span-6 xl:col-span-6 flex-col justify-between p-12 xl:p-16 relative z-10 border-r border-white/[0.06]">
+        {/* Top bar */}
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-xl bg-white text-black font-display font-bold flex items-center justify-center text-sm tracking-wider shadow-sm">
+            CI
+          </div>
+          <div>
+            <span className="font-display font-bold tracking-tight text-white text-base">
+              CIRS
+            </span>
+            <span className="block text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
+              INSTITUTIONAL REGISTRATION
+            </span>
           </div>
         </div>
 
-        <div className="mt-6 text-center text-[11px] text-neutral-500 flex items-center justify-center space-x-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-neutral-400" />
-          <span>Restricted to GSFC University Students &amp; Faculty</span>
+        {/* Center Showcase */}
+        <div className="max-w-xl space-y-6 my-auto py-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span>CAMPUS ENROLLMENT PROTOCOL</span>
+          </div>
+
+          <h1 className="text-4xl xl:text-5xl font-display font-semibold tracking-tight text-white leading-[1.15]">
+            Join the recovery ecosystem of GSFC University.
+          </h1>
+
+          <p className="text-base text-neutral-400 font-normal leading-relaxed">
+            Create an account to report missing belongings, track recovery progress in real time, and verify property claims through campus security.
+          </p>
+
+          <div className="space-y-3.5 pt-2">
+            <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+              <CheckCircle2 className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-white">Automated Matching Radar</h4>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  Instant candidate correlation when matching lost reports and found articles appear.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+              <ShieldCheck className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-white">Cryptographic Collection Pass</h4>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  Single-use digital token issued for secure physical custody handover.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </FadeIn>
+
+        {/* Bottom */}
+        <div className="flex items-center space-x-3 text-xs text-neutral-400 pt-6 border-t border-white/[0.06]">
+          <Building className="w-4 h-4 text-neutral-300 shrink-0" />
+          <span>Institutional tenancy strictly validated against official campus records.</span>
+        </div>
+      </div>
+
+      {/* Right Column: Registration Form */}
+      <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 relative z-10 my-auto w-full">
+        <FadeIn className="w-full max-w-lg">
+          {/* Mobile Header */}
+          <div className="lg:hidden text-center mb-8">
+            <div className="w-11 h-11 rounded-xl bg-white text-black font-display font-bold flex items-center justify-center text-sm mx-auto mb-3">
+              CI
+            </div>
+            <h1 className="text-2xl font-display font-bold text-white">Create an Account</h1>
+            <p className="text-xs text-neutral-400 mt-1">GSFC University • Campus Item Recovery System</p>
+          </div>
+
+          <div className="bg-[#12151D]/90 backdrop-blur-2xl p-7 sm:p-9 rounded-3xl border border-white/[0.08] shadow-2xl space-y-6">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-xl font-display font-semibold text-white tracking-tight">
+                  Register Account
+                </h2>
+                <span className="text-[11px] font-mono text-neutral-400">Step 1 of 1</span>
+              </div>
+              <p className="text-xs text-neutral-400">
+                Register with your official student or faculty credentials.
+              </p>
+            </div>
+
+            {errorMessage && (
+              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 font-medium flex items-center gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                    <UserIcon className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Aarav Sharma"
+                    className="block w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-black/40 text-white placeholder-neutral-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                  University Email Address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="rollnumber@gsfcuniversity.ac.in"
+                    className="block w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-black/40 text-white placeholder-neutral-500 font-mono transition-all"
+                  />
+                </div>
+                <p className="mt-1 text-[11px] text-neutral-500">
+                  Must end with @gsfcuniversity.ac.in
+                </p>
+              </div>
+
+              {/* Campus Selection */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-medium text-neutral-300">
+                    Campus Facility <span className="text-neutral-400">*</span>
+                  </label>
+                  {isLoadingCampuses && (
+                    <span className="text-[11px] text-neutral-400 flex items-center font-mono">
+                      <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Querying directory...
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                    <Building className="w-4 h-4" />
+                  </div>
+                  <select
+                    required
+                    disabled={isLoadingCampuses || campuses.length === 0}
+                    value={campusId}
+                    onChange={(e) => handleCampusChange(e.target.value)}
+                    className="block w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-black/40 text-white font-mono disabled:opacity-50"
+                  >
+                    <option value="" className="bg-[#12151D]">
+                      {isLoadingCampuses
+                        ? 'Loading campus directory...'
+                        : campuses.length === 0
+                        ? 'No campuses available'
+                        : '-- Select your campus --'}
+                    </option>
+                    {campuses.map((c) => (
+                      <option key={c.id} value={c.id} className="bg-[#12151D]">
+                        {c.name} ({c.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {campusLoadError && (
+                  <div className="mt-1.5 p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-300 flex items-center justify-between">
+                    <span className="flex items-center">
+                      <AlertCircle className="w-3.5 h-3.5 mr-1 shrink-0 text-rose-400" />
+                      {campusLoadError}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={fetchCampuses}
+                      className="underline font-bold ml-2 text-white"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Department Selection */}
+                <div>
+                  <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                    Department (Optional)
+                  </label>
+                  <select
+                    disabled={!campusId || availableDepartments.length === 0}
+                    value={departmentId}
+                    onChange={(e) => setDepartmentId(e.target.value)}
+                    className="block w-full py-2.5 px-3 text-xs sm:text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-black/40 text-white disabled:opacity-40"
+                  >
+                    <option value="" className="bg-[#12151D]">
+                      {!campusId
+                        ? 'Select campus first'
+                        : availableDepartments.length === 0
+                        ? 'No specific departments'
+                        : '-- Select department --'}
+                    </option>
+                    {availableDepartments.map((d) => (
+                      <option key={d.id} value={d.id} className="bg-[#12151D]">
+                        {d.name} ({d.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Role */}
+                <div>
+                  <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                    Role Designation
+                  </label>
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as Role)}
+                    className="block w-full py-2.5 px-3 text-xs sm:text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-black/40 text-white"
+                  >
+                    <option value={Role.STUDENT} className="bg-[#12151D]">Student</option>
+                    <option value={Role.FACULTY} className="bg-[#12151D]">Faculty Member</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Password Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                    Password (8+ chars)
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="block w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-black/40 text-white placeholder-neutral-500 font-mono transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-400 hover:text-white"
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                  {/* Strength bar */}
+                  {password && (
+                    <div className="mt-1.5 flex gap-1">
+                      {[1, 2, 3, 4].map((step) => (
+                        <div
+                          key={step}
+                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                            passwordStrength >= step
+                              ? passwordStrength <= 2
+                                ? 'bg-amber-400'
+                                : 'bg-emerald-400'
+                              : 'bg-white/10'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="block w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-black/40 text-white placeholder-neutral-500 font-mono transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                isLoading={isSubmitting}
+                className="w-full py-2.5 text-xs font-semibold mt-2"
+              >
+                <span>Create Institutional Account</span>
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            </form>
+
+            <div className="pt-4 border-t border-white/[0.06] text-center text-xs text-neutral-400">
+              Already registered?{' '}
+              <Link to="/login" className="font-semibold text-white hover:underline">
+                Sign in to your account
+              </Link>
+            </div>
+          </div>
+        </FadeIn>
+      </div>
     </div>
   );
 };
