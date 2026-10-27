@@ -6,6 +6,7 @@ import { ErrorBoundary } from '../common/ErrorBoundary';
 import { PageTransition } from '../common/AnimatedTransitions';
 import { SidebarProvider, useSidebar } from '../../context/SidebarContext';
 import { CommandPalette } from '../common/CommandPalette';
+import { AmbientCanvas } from '../common/AmbientCanvas';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import {
@@ -111,28 +112,31 @@ const LayoutContent: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0A0C10] flex flex-col font-sans text-slate-100 antialiased selection:bg-white/20 selection:text-white">
-      <Header
-        onToggleMobileMenu={openMobileMenu}
-        onOpenCommandPalette={() => setCommandPaletteOpen(true)}
-      />
-      <MobileNav isOpen={isMobileOpen} onClose={closeMobileMenu} />
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-      />
+    <div className="min-h-screen bg-[#08090C] flex flex-col font-sans text-slate-100 antialiased selection:bg-white selection:text-black relative">
+      <AmbientCanvas particleCount={32} className="opacity-40" />
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Header
+          onToggleMobileMenu={openMobileMenu}
+          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+        />
+        <MobileNav isOpen={isMobileOpen} onClose={closeMobileMenu} />
+        <CommandPalette
+          isOpen={commandPaletteOpen}
+          onClose={() => setCommandPaletteOpen(false)}
+        />
 
-      {/* Main Full-Width Content Container (No Left Sidebar!) */}
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto w-full pb-24 lg:pb-12">
-        <ErrorBoundary>
-          <PageTransition key={location.pathname}>
-            <Outlet />
-          </PageTransition>
-        </ErrorBoundary>
-      </main>
+        {/* Main Full-Width Content Container (Expansive & De-congested) */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto w-full pb-28 lg:pb-16">
+          <ErrorBoundary>
+            <PageTransition key={location.pathname}>
+              <Outlet />
+            </PageTransition>
+          </ErrorBoundary>
+        </main>
 
-      {/* Mobile Floating Bottom Dock */}
-      <MobileDock />
+        {/* Mobile Floating Bottom Dock */}
+        <MobileDock />
+      </div>
     </div>
   );
 };
