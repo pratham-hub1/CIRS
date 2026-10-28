@@ -205,8 +205,8 @@ export const SearchBrowse: React.FC = () => {
               className="px-3 py-1.5 text-xs bg-neutral-900 border border-white/10 rounded-xl text-neutral-300 focus:outline-none focus:border-white/40"
             >
               <option value="" className="bg-[#12151D] text-neutral-300">All Types (Lost & Found)</option>
-              <option value={ItemType.LOST} className="bg-[#12151D] text-rose-300">Lost Items</option>
-              <option value={ItemType.FOUND} className="bg-[#12151D] text-emerald-300">Found Items</option>
+              <option value={ItemType.LOST} className="bg-[#12151D] text-neutral-300">Lost Items</option>
+              <option value={ItemType.FOUND} className="bg-[#12151D] text-neutral-300">Found Items</option>
             </select>
 
             {/* Category Filter */}
