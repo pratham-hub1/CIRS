@@ -505,7 +505,7 @@ export const ItemDetails: React.FC = () => {
                     >
                       <div>
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/[0.06] text-white border border-white/[0.1]">
                             {(m.score * 100).toFixed(0)}% Similarity
                           </span>
                           <span className="text-xs font-mono text-neutral-400">
