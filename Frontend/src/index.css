@@ -53,6 +53,15 @@
   .glass-panel {
     @apply bg-[#0E1017]/85 backdrop-blur-xl border border-white/[0.08] shadow-glass;
   }
+
+  /* Interactive tactile micro-haptics */
+  .haptic-press {
+    @apply active:scale-[0.98] transition-transform duration-100 ease-out;
+  }
+
+  .card-elevate {
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:border-white/[0.18] hover:shadow-card;
+  }
 }
 
 /* Reduced motion preference */

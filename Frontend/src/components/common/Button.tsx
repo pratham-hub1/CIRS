@@ -54,8 +54,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <motion.button
         ref={ref}
-        whileTap={!disabled && !isLoading ? { scale: 0.99 } : undefined}
-        transition={{ duration: 0.1 }}
+        whileTap={!disabled && !isLoading ? { scale: 0.98 } : undefined}
+        transition={{ duration: 0.08 }}
         disabled={disabled || isLoading}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         {...props}
