@@ -139,10 +139,10 @@ export const Dashboard: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-2xl bg-[#171B26] border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          className="p-5 rounded-2xl bg-[#12151D] border border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         >
           <div className="flex items-start space-x-3.5">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mt-0.5">
+            <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white mt-0.5">
               <AlertCircle className="w-5 h-5" />
             </div>
             <div>
@@ -156,7 +156,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <Link
             to={`/claims/${infoRequestedClaim.id}`}
-            className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-semibold rounded-xl transition-colors whitespace-nowrap self-stretch sm:self-auto text-center"
+            className="px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-semibold rounded-xl transition-colors whitespace-nowrap self-stretch sm:self-auto text-center"
           >
             Provide Information
           </Link>
@@ -167,10 +167,10 @@ export const Dashboard: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-2xl bg-[#171B26] border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          className="p-5 rounded-2xl bg-[#12151D] border border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
         >
           <div className="flex items-start space-x-3.5">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mt-0.5">
+            <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white mt-0.5">
               <KeyRound className="w-5 h-5" />
             </div>
             <div>
@@ -184,7 +184,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <Link
             to={`/claims/${approvedClaim.id}`}
-            className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold rounded-xl transition-colors whitespace-nowrap self-stretch sm:self-auto text-center"
+            className="px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-semibold rounded-xl transition-colors whitespace-nowrap self-stretch sm:self-auto text-center"
           >
             View Redemption Pass
           </Link>
@@ -385,10 +385,10 @@ export const Dashboard: React.FC = () => {
                 {possibleMatches.slice(0, 2).map((match) => (
                   <div
                     key={match.id}
-                    className="p-4 rounded-2xl bg-[#141824] border border-amber-500/20 hover:border-amber-500/40 transition-all"
+                    className="p-4 rounded-2xl bg-[#12151D] border border-white/[0.08] hover:border-white/[0.16] transition-all"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.06] text-white border border-white/[0.1]">
                         {Math.round(match.score * 100)}% Match
                       </span>
                       <span className="text-[10px] font-mono text-neutral-500">
