@@ -195,7 +195,7 @@ export const CommunityFeed: React.FC = () => {
               onClick={() => setSelectedType(ItemType.LOST)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 selectedType === ItemType.LOST
-                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                  ? 'bg-white text-black font-semibold shadow-sm'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
@@ -205,7 +205,7 @@ export const CommunityFeed: React.FC = () => {
               onClick={() => setSelectedType(ItemType.FOUND)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 selectedType === ItemType.FOUND
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  ? 'bg-white text-black font-semibold shadow-sm'
                   : 'text-neutral-400 hover:text-white'
               }`}
             >
