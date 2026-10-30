@@ -7,6 +7,7 @@ interface Particle {
   vy: number;
   radius: number;
   alpha: number;
+  depth: number;
 }
 
 interface AmbientCanvasProps {
@@ -39,6 +40,7 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
     };
     window.addEventListener('resize', handleResize);
 
+    // Mouse Interaction
     const mouse = { x: -1000, y: -1000 };
     const handleMouseMove = (e: MouseEvent) => {
       mouse.x = e.clientX;
@@ -48,38 +50,69 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
       window.addEventListener('mousemove', handleMouseMove);
     }
 
+    // Scroll & Wheel Dynamic Hyperspace Physics
+    let scrollVelocity = 0;
+    let targetScrollVelocity = 0;
+    let lastScrollY = window.scrollY || 0;
+
+    const handleWheel = (e: WheelEvent) => {
+      const delta = Math.max(-28, Math.min(28, e.deltaY * 0.15));
+      targetScrollVelocity += delta;
+    };
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY || 0;
+      const diff = currentScrollY - lastScrollY;
+      targetScrollVelocity += diff * 0.3;
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
     const particles: Particle[] = [];
     const count = particleCount;
 
     for (let i = 0; i < count; i++) {
+      const depth = Math.random() * 1.2 + 0.6; // 0.6 to 1.8 depth layer
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        radius: Math.random() * 1.6 + 0.8,
-        alpha: Math.random() * 0.45 + 0.35,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        radius: (Math.random() * 1.4 + 0.8) * depth,
+        alpha: Math.min(0.85, Math.random() * 0.45 + 0.35),
+        depth,
       });
     }
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Draw subtle connections
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+      // Smooth scroll velocity interpolation & decay
+      scrollVelocity += (targetScrollVelocity - scrollVelocity) * 0.12;
+      targetScrollVelocity *= 0.88;
 
-          if (dist < 130) {
-            const lineAlpha = (1 - dist / 130) * 0.12;
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 255, 255, ${lineAlpha})`;
-            ctx.lineWidth = 0.7;
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
+      const isFast = Math.abs(scrollVelocity) > 0.4;
+
+      // Draw connections when not warping rapidly
+      if (Math.abs(scrollVelocity) < 6) {
+        const connDamping = Math.max(0.2, 1 - Math.abs(scrollVelocity) / 6);
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 130) {
+              const lineAlpha = (1 - dist / 130) * 0.12 * connDamping;
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(255, 255, 255, ${lineAlpha})`;
+              ctx.lineWidth = 0.7;
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
           }
         }
       }
@@ -89,11 +122,14 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
         p.x += p.vx;
         p.y += p.vy;
 
-        // Bounce from walls gently
+        // Dynamic vertical parallax displacement from scroll
+        p.y -= scrollVelocity * p.depth * 1.6;
+
+        // Seamless screen wrap-around
         if (p.x < 0) p.x = width;
         else if (p.x > width) p.x = 0;
-        if (p.y < 0) p.y = height;
-        else if (p.y > height) p.y = 0;
+        if (p.y < 0) p.y = height + (p.y % height);
+        else if (p.y > height) p.y = p.y % height;
 
         // Subtle mouse repulsion
         if (interactive) {
@@ -107,10 +143,22 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
           }
         }
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        // Draw particle node or elongated speed streak
         ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
-        ctx.fill();
+        if (isFast) {
+          const streak = -scrollVelocity * p.depth * 3.2;
+          ctx.beginPath();
+          ctx.lineWidth = p.radius * 2;
+          ctx.strokeStyle = `rgba(255, 255, 255, ${p.alpha * 0.9})`;
+          ctx.lineCap = 'round';
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x, p.y + streak);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -120,6 +168,8 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('scroll', handleScroll);
       if (interactive) {
         window.removeEventListener('mousemove', handleMouseMove);
       }
