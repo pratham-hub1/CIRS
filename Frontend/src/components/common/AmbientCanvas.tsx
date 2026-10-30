@@ -16,7 +16,7 @@ interface AmbientCanvasProps {
 }
 
 export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
-  particleCount = 45,
+  particleCount = 75,
   interactive = true,
   className = '',
 }) => {
@@ -49,16 +49,16 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
     }
 
     const particles: Particle[] = [];
-    const count = Math.min(particleCount, Math.floor((width * height) / 25000));
+    const count = particleCount;
 
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35,
-        radius: Math.random() * 1.5 + 0.5,
-        alpha: Math.random() * 0.25 + 0.1,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        radius: Math.random() * 1.6 + 0.8,
+        alpha: Math.random() * 0.45 + 0.35,
       });
     }
 
@@ -72,11 +72,11 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 120) {
-            const lineAlpha = (1 - dist / 120) * 0.05;
+          if (dist < 130) {
+            const lineAlpha = (1 - dist / 130) * 0.12;
             ctx.beginPath();
             ctx.strokeStyle = `rgba(255, 255, 255, ${lineAlpha})`;
-            ctx.lineWidth = 0.6;
+            ctx.lineWidth = 0.7;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.stroke();
@@ -130,8 +130,8 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
   return (
     <div className={`fixed inset-0 pointer-events-none z-0 overflow-hidden ${className}`}>
       {/* Soft atmospheric gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.03)_0%,transparent_60%)] pointer-events-none" />
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-60" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.05)_0%,transparent_65%)] pointer-events-none" />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-90" />
     </div>
   );
 };

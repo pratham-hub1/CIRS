@@ -156,7 +156,7 @@ export const Register: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#08090C] text-white flex flex-col lg:grid lg:grid-cols-12 relative overflow-hidden selection:bg-white selection:text-black font-sans">
       {/* Background Animated Particle Canvas */}
-      <AmbientCanvas particleCount={55} />
+      <AmbientCanvas particleCount={95} />
 
       {/* Left Column: Platform Onboarding & Institutional Guarantees (Desktop) */}
       <div className="hidden lg:flex lg:col-span-6 xl:col-span-6 flex-col justify-between p-12 xl:p-16 relative z-10 border-r border-white/[0.06]">
