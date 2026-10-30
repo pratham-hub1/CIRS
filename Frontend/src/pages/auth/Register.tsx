@@ -179,25 +179,24 @@ export const Register: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-white text-black font-display font-bold flex items-center justify-center text-sm tracking-wider shadow-sm">
               CI
             </div>
-            <motion.div style={{ y: titleBounceY }}>
-              <span className="font-display font-bold tracking-tight text-white text-base">
+            <div>
+              <motion.span style={{ y: titleBounceY }} className="inline-block font-display font-bold tracking-tight text-white text-base">
                 CIRS
-              </span>
-              <span className="block text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
+              </motion.span>
+              <motion.span style={{ y: subtextBounceY }} className="block text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
                 INSTITUTIONAL REGISTRATION
-              </span>
-            </motion.div>
+              </motion.span>
+            </div>
           </div>
 
           {/* Center Showcase */}
           <div className="max-w-xl space-y-6 my-auto py-10">
-            <motion.div
-              style={{ y: titleBounceY }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono"
-            >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>CAMPUS ENROLLMENT PROTOCOL</span>
-            </motion.div>
+              <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                CAMPUS ENROLLMENT PROTOCOL
+              </motion.span>
+            </div>
 
             <motion.h1
               style={{ y: titleBounceY }}
@@ -213,59 +212,68 @@ export const Register: React.FC = () => {
               Create an account to report missing belongings, track recovery progress in real time, and verify property claims through campus security.
             </motion.p>
 
-            <motion.div style={{ y: subtextBounceY }} className="space-y-3.5 pt-2">
+            <div className="space-y-3.5 pt-2">
               <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
                 <CheckCircle2 className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-semibold text-white">Automated Matching Radar</h4>
-                  <p className="text-xs text-neutral-400 mt-0.5">
+                  <motion.h4 style={{ y: titleBounceY }} className="text-sm font-semibold text-white">
+                    Automated Matching Radar
+                  </motion.h4>
+                  <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 mt-0.5">
                     Instant candidate correlation when matching lost reports and found articles appear.
-                  </p>
+                  </motion.p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
                 <ShieldCheck className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-semibold text-white">Cryptographic Collection Pass</h4>
-                  <p className="text-xs text-neutral-400 mt-0.5">
+                  <motion.h4 style={{ y: titleBounceY }} className="text-sm font-semibold text-white">
+                    Cryptographic Collection Pass
+                  </motion.h4>
+                  <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 mt-0.5">
                     Single-use digital token issued for secure physical custody handover.
-                  </p>
+                  </motion.p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Bottom */}
-          <motion.div
-            style={{ y: subtextBounceY }}
-            className="flex items-center justify-between text-xs text-neutral-400 pt-6 border-t border-white/[0.06]"
-          >
+          <div className="flex items-center justify-between text-xs text-neutral-400 pt-6 border-t border-white/[0.06]">
             <div className="flex items-center space-x-3">
               <Building className="w-4 h-4 text-neutral-300 shrink-0" />
-              <span>Institutional tenancy strictly validated against official campus records.</span>
+              <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                Institutional tenancy strictly validated against official campus records.
+              </motion.span>
             </div>
             <a
               href="#registration-details"
               className="hidden xl:inline-flex items-center gap-1.5 text-[11px] font-mono text-neutral-400 hover:text-white transition-colors"
             >
-              <span>Protocol Specs</span>
+              <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                Protocol Specs
+              </motion.span>
               <ChevronDown className="w-3.5 h-3.5 animate-bounce" />
             </a>
-          </motion.div>
+          </div>
         </div>
 
         {/* Right Column: Registration Form with 3D Tilt & Specular Sheen GlassCard */}
         <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 relative z-10 my-auto w-full">
           <FadeIn className="w-full max-w-lg">
             {/* Mobile Header */}
-            <motion.div style={{ y: titleBounceY }} className="lg:hidden text-center mb-8">
+            <div className="lg:hidden text-center mb-8">
               <div className="w-11 h-11 rounded-xl bg-white text-black font-display font-bold flex items-center justify-center text-sm mx-auto mb-3">
                 CI
               </div>
-              <h1 className="text-2xl font-display font-bold text-white">Create an Account</h1>
-              <p className="text-xs text-neutral-400 mt-1">GSFC University • Campus Item Recovery System</p>
-            </motion.div>
+              <motion.h1 style={{ y: titleBounceY }} className="text-2xl font-display font-bold text-white">
+                Create an Account
+              </motion.h1>
+              <motion.p style={{ y: subtextBounceY }} className="text-xs text-neutral-400 mt-1">
+                GSFC University • Campus Item Recovery System
+              </motion.p>
+            </div>
 
             {/* Interactive Registration GlassCard with 3D Tilt & Specular Sheen Hover Effect */}
             <GlassCard
@@ -273,17 +281,19 @@ export const Register: React.FC = () => {
               enableSheen
               className="p-7 sm:p-9 rounded-3xl border border-white/[0.08] hover:border-white/[0.22] hover:shadow-[0_24px_60px_rgba(0,0,0,0.7)] transition-all duration-300 space-y-6"
             >
-              <motion.div style={{ y: titleBounceY }}>
+              <div>
                 <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-xl font-display font-semibold text-white tracking-tight">
+                  <motion.h2 style={{ y: titleBounceY }} className="text-xl font-display font-semibold text-white tracking-tight">
                     Register Account
-                  </h2>
-                  <span className="text-[11px] font-mono text-neutral-400">Step 1 of 1</span>
+                  </motion.h2>
+                  <motion.span style={{ y: subtextBounceY }} className="text-[11px] font-mono text-neutral-400 inline-block">
+                    Step 1 of 1
+                  </motion.span>
                 </div>
-                <p className="text-xs text-neutral-400">
+                <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400">
                   Register with your official student or faculty credentials.
-                </p>
-              </motion.div>
+                </motion.p>
+              </div>
 
               {errorMessage && (
                 <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 font-medium flex items-center gap-2.5">
@@ -293,10 +303,13 @@ export const Register: React.FC = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <motion.div style={{ y: bodyBounceY }}>
-                  <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                <div>
+                  <motion.label
+                    style={{ y: subtextBounceY }}
+                    className="inline-block text-xs font-medium text-neutral-300 mb-1.5"
+                  >
                     Full Name
-                  </label>
+                  </motion.label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
                       <UserIcon className="w-4 h-4" />
@@ -310,12 +323,15 @@ export const Register: React.FC = () => {
                       className="block w-full pl-10 pr-3.5 py-2.5 text-base sm:text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-black/40 text-white placeholder-neutral-500 transition-all"
                     />
                   </div>
-                </motion.div>
+                </div>
 
-                <motion.div style={{ y: bodyBounceY }}>
-                  <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                <div>
+                  <motion.label
+                    style={{ y: subtextBounceY }}
+                    className="inline-block text-xs font-medium text-neutral-300 mb-1.5"
+                  >
                     University Email Address
-                  </label>
+                  </motion.label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
                       <Mail className="w-4 h-4" />
@@ -329,17 +345,20 @@ export const Register: React.FC = () => {
                       className="block w-full pl-10 pr-3.5 py-2.5 text-base sm:text-sm border border-white/[0.08] rounded-xl focus:outline-none focus:ring-1 focus:ring-white bg-black/40 text-white placeholder-neutral-500 font-mono transition-all"
                     />
                   </div>
-                  <p className="mt-1 text-[11px] text-neutral-500">
+                  <motion.p style={{ y: subtextBounceY }} className="mt-1 text-[11px] text-neutral-500 inline-block">
                     Must end with @gsfcuniversity.ac.in
-                  </p>
-                </motion.div>
+                  </motion.p>
+                </div>
 
                 {/* Campus Selection */}
-                <motion.div style={{ y: bodyBounceY }}>
+                <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-xs font-medium text-neutral-300">
+                    <motion.label
+                      style={{ y: subtextBounceY }}
+                      className="inline-block text-xs font-medium text-neutral-300"
+                    >
                       Campus Facility <span className="text-neutral-400">*</span>
-                    </label>
+                    </motion.label>
                     {isLoadingCampuses && (
                       <span className="text-[11px] text-neutral-400 flex items-center font-mono">
                         <RefreshCw className="w-3 h-3 mr-1 animate-spin" /> Querying directory...
@@ -386,14 +405,17 @@ export const Register: React.FC = () => {
                       </button>
                     </div>
                   )}
-                </motion.div>
+                </div>
 
-                <motion.div style={{ y: bodyBounceY }} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Department Selection */}
                   <div>
-                    <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                    <motion.label
+                      style={{ y: subtextBounceY }}
+                      className="inline-block text-xs font-medium text-neutral-300 mb-1.5"
+                    >
                       Department (Optional)
-                    </label>
+                    </motion.label>
                     <select
                       disabled={!campusId || availableDepartments.length === 0}
                       value={departmentId}
@@ -417,9 +439,12 @@ export const Register: React.FC = () => {
 
                   {/* Role */}
                   <div>
-                    <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                    <motion.label
+                      style={{ y: subtextBounceY }}
+                      className="inline-block text-xs font-medium text-neutral-300 mb-1.5"
+                    >
                       Role Designation
-                    </label>
+                    </motion.label>
                     <select
                       value={role}
                       onChange={(e) => setRole(e.target.value as Role)}
@@ -429,14 +454,17 @@ export const Register: React.FC = () => {
                       <option value={Role.FACULTY} className="bg-[#12151D]">Faculty Member</option>
                     </select>
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Password Fields */}
-                <motion.div style={{ y: bodyBounceY }} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                    <motion.label
+                      style={{ y: subtextBounceY }}
+                      className="inline-block text-xs font-medium text-neutral-300 mb-1.5"
+                    >
                       Password (8+ chars)
-                    </label>
+                    </motion.label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
                         <Lock className="w-4 h-4" />
@@ -477,9 +505,12 @@ export const Register: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                    <motion.label
+                      style={{ y: subtextBounceY }}
+                      className="inline-block text-xs font-medium text-neutral-300 mb-1.5"
+                    >
                       Confirm Password
-                    </label>
+                    </motion.label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
                         <Lock className="w-4 h-4" />
@@ -494,7 +525,7 @@ export const Register: React.FC = () => {
                       />
                     </div>
                   </div>
-                </motion.div>
+                </div>
 
                 <Button
                   type="submit"
@@ -503,28 +534,28 @@ export const Register: React.FC = () => {
                   rightIcon={<ArrowRight className="w-4 h-4 shrink-0" />}
                   className="w-full py-2.5 text-xs font-semibold mt-2"
                 >
-                  Create Institutional Account
+                  <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                    Create Institutional Account
+                  </motion.span>
                 </Button>
               </form>
 
-              <motion.div
-                style={{ y: subtextBounceY }}
-                className="pt-4 border-t border-white/[0.06] text-center text-xs text-neutral-400"
-              >
-                Already registered?{' '}
-                <Link to="/login" className="font-semibold text-white hover:underline">
-                  Sign in to your account
-                </Link>
-              </motion.div>
+              <div className="pt-4 border-t border-white/[0.06] text-center text-xs text-neutral-400">
+                <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                  Already registered?{' '}
+                  <Link to="/login" className="font-semibold text-white hover:underline">
+                    Sign in to your account
+                  </Link>
+                </motion.span>
+              </div>
             </GlassCard>
 
-            <motion.div
-              style={{ y: subtextBounceY }}
-              className="mt-6 text-center text-[11px] text-neutral-500 flex items-center justify-center space-x-1.5"
-            >
+            <div className="mt-6 text-center text-[11px] text-neutral-500 flex items-center justify-center space-x-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-neutral-400" />
-              <span>Identity Verification via GSFC Directory Services</span>
-            </motion.div>
+              <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                Identity Verification via GSFC Directory Services
+              </motion.span>
+            </div>
           </FadeIn>
         </div>
       </div>
@@ -535,13 +566,12 @@ export const Register: React.FC = () => {
 
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-20 lg:py-28 space-y-16">
           <div className="text-center max-w-3xl mx-auto space-y-4">
-            <motion.div
-              style={{ y: titleBounceY }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono"
-            >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono">
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
-              <span>ONBOARDING GOVERNANCE &amp; TRUST</span>
-            </motion.div>
+              <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                ONBOARDING GOVERNANCE &amp; TRUST
+              </motion.span>
+            </div>
             <motion.h2
               style={{ y: titleBounceY }}
               className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight"
@@ -557,23 +587,22 @@ export const Register: React.FC = () => {
             </motion.p>
           </div>
 
-          <motion.div
-            style={{ y: bodyBounceY }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <GlassCard enableTilt enableSheen className="p-7 space-y-4">
               <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
                 <Cpu className="w-5 h-5 text-neutral-200" />
               </div>
-              <h3 className="text-base font-semibold text-white">
+              <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
                 Institutional Domain Check
-              </h3>
-              <p className="text-xs text-neutral-400 leading-relaxed">
+              </motion.h3>
+              <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
                 Registration requires active university affiliation ending in @gsfcuniversity.ac.in, keeping public trolls and unauthorized outsiders out.
-              </p>
+              </motion.p>
               <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>Zero spoofing attack surface</span>
+                <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                  Zero spoofing attack surface
+                </motion.span>
               </div>
             </GlassCard>
 
@@ -581,15 +610,17 @@ export const Register: React.FC = () => {
               <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
                 <Key className="w-5 h-5 text-neutral-200" />
               </div>
-              <h3 className="text-base font-semibold text-white">
+              <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
                 Encrypted Auth Vault
-              </h3>
-              <p className="text-xs text-neutral-400 leading-relaxed">
+              </motion.h3>
+              <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
                 Credentials are authenticated against cryptographic key derivation protocols, protecting student and faculty records at rest and in transit.
-              </p>
+              </motion.p>
               <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>Argon2id hashing standard</span>
+                <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                  Argon2id hashing standard
+                </motion.span>
               </div>
             </GlassCard>
 
@@ -597,30 +628,33 @@ export const Register: React.FC = () => {
               <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
                 <FileCheck2 className="w-5 h-5 text-neutral-200" />
               </div>
-              <h3 className="text-base font-semibold text-white">
+              <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
                 Transparent Adjudication
-              </h3>
-              <p className="text-xs text-neutral-400 leading-relaxed">
+              </motion.h3>
+              <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
                 File lost cases, submit ownership evidence, and communicate securely with custodians through an immutable timestamped messaging log.
-              </p>
+              </motion.p>
               <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>100% auditable history</span>
+                <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                  100% auditable history
+                </motion.span>
               </div>
             </GlassCard>
-          </motion.div>
+          </div>
 
           {/* Institutional Tenancy Footer */}
-          <motion.div
-            style={{ y: subtextBounceY }}
-            className="pt-12 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4"
-          >
+          <div className="pt-12 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
             <div className="flex items-center space-x-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="font-mono text-neutral-400">GSFC UNIVERSITY INSTANCE • CIRS v2.4</span>
+              <motion.span style={{ y: subtextBounceY }} className="font-mono text-neutral-400 inline-block">
+                GSFC UNIVERSITY INSTANCE • CIRS v2.4
+              </motion.span>
             </div>
-            <span>Academic Portal • Governed by Campus Property Policies</span>
-          </motion.div>
+            <motion.span style={{ y: subtextBounceY }} className="inline-block">
+              Academic Portal • Governed by Campus Property Policies
+            </motion.span>
+          </div>
         </div>
       </div>
     </div>

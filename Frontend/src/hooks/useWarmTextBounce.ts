@@ -3,53 +3,60 @@ import { useScroll, useVelocity, useSpring, useTransform, useMotionValue } from 
 
 /**
  * useWarmTextBounce
- * Produces an organic, subtle, and warm elastic bounce on typography during page scrolling,
- * trackpad gestures, mouse wheeling, and mobile touch swiping.
+ * Generates a refined, subtle, and warm elastic bounce strictly for typography text nodes.
+ * Keeps all cards, containers, input fields, and grids completely anchored and static.
  */
 export function useWarmTextBounce() {
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
 
-  // Organic spring physics: warm, cushioned, gentle harmonic resonance
+  // Gentle, warm spring physics with organic cushioning
   const springConfig = {
-    stiffness: 95,
-    damping: 13,
-    mass: 0.7,
+    stiffness: 120,
+    damping: 16,
+    mass: 0.5,
   };
 
-  // Primary title scroll spring (subtle displacement ~8-10px)
+  // Primary title text spring (very subtle ~3-4px displacement)
   const smoothTitleVelocity = useSpring(scrollVelocity, springConfig);
-  const scrollTitleY = useTransform(smoothTitleVelocity, [-800, 0, 800], [9, 0, -9]);
+  const scrollTitleY = useTransform(smoothTitleVelocity, [-700, 0, 700], [3.5, 0, -3.5]);
 
-  // Secondary body scroll spring (slightly more elastic ~12-14px)
+  // Secondary body text spring (~4-5px displacement)
   const smoothBodyVelocity = useSpring(scrollVelocity, {
-    stiffness: 85,
-    damping: 12,
-    mass: 0.8,
+    stiffness: 110,
+    damping: 15,
+    mass: 0.55,
   });
-  const scrollBodyY = useTransform(smoothBodyVelocity, [-800, 0, 800], [13, 0, -13]);
+  const scrollBodyY = useTransform(smoothBodyVelocity, [-700, 0, 700], [4.5, 0, -4.5]);
 
-  // Interactive impulse motion value for wheel, trackpad, and touch swipe
+  // Subtext / label text spring (~3px displacement)
+  const smoothSubtextVelocity = useSpring(scrollVelocity, {
+    stiffness: 130,
+    damping: 17,
+    mass: 0.45,
+  });
+  const scrollSubtextY = useTransform(smoothSubtextVelocity, [-700, 0, 700], [3.0, 0, -3.0]);
+
+  // Interactive impulse for mouse wheel, trackpad, and mobile touch swiping
   const interactiveImpulse = useMotionValue(0);
   const smoothInteractive = useSpring(interactiveImpulse, springConfig);
 
   const decayTimerRef = useRef<any>(null);
 
   useEffect(() => {
-    // 1. Mouse wheel & trackpad handler
+    // 1. Mouse wheel & trackpad listener
     const handleWheel = (e: WheelEvent) => {
-      // Scale down deltaY smoothly and clamp to safe warm displacement
-      const delta = Math.max(-10, Math.min(10, e.deltaY * 0.12));
+      // Gentle impulse clamped to subtle max ±3.5px
+      const delta = Math.max(-3.5, Math.min(3.5, e.deltaY * 0.04));
       interactiveImpulse.set(-delta);
 
       if (decayTimerRef.current) clearTimeout(decayTimerRef.current);
       decayTimerRef.current = setTimeout(() => {
-        // Return to rest position with spring oscillation
         interactiveImpulse.set(0);
-      }, 110);
+      }, 100);
     };
 
-    // 2. Mobile touch gesture handler
+    // 2. Mobile touch gesture listener
     let lastTouchY = 0;
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length > 0) {
@@ -62,7 +69,7 @@ export function useWarmTextBounce() {
         const currentY = e.touches[0].clientY;
         const delta = lastTouchY - currentY;
         lastTouchY = currentY;
-        const impulse = Math.max(-12, Math.min(12, delta * 0.35));
+        const impulse = Math.max(-4, Math.min(4, delta * 0.12));
         interactiveImpulse.set(-impulse);
       }
     };
@@ -88,22 +95,22 @@ export function useWarmTextBounce() {
     };
   }, [interactiveImpulse]);
 
-  // Combined title bounce (scrollY + wheel/touch impulses)
+  // Combined title text bounce (applied ONLY to text nodes)
   const titleBounceY = useTransform(
     [scrollTitleY, smoothInteractive],
     ([scrollVal, interVal]: any) => Number(scrollVal) + Number(interVal)
   );
 
-  // Combined body/form bounce (slightly more amplified for organic liquid feel)
+  // Combined body text bounce (applied ONLY to paragraphs / descriptions)
   const bodyBounceY = useTransform(
     [scrollBodyY, smoothInteractive],
-    ([scrollVal, interVal]: any) => Number(scrollVal) + Number(interVal) * 1.3
+    ([scrollVal, interVal]: any) => Number(scrollVal) + Number(interVal) * 1.15
   );
 
-  // Combined badge/subtext bounce (staggered micro-bounce)
+  // Combined subtext / label bounce (applied ONLY to labels / badge text)
   const subtextBounceY = useTransform(
-    [scrollBodyY, smoothInteractive],
-    ([scrollVal, interVal]: any) => Number(scrollVal) * 0.8 + Number(interVal) * 1.1
+    [scrollSubtextY, smoothInteractive],
+    ([scrollVal, interVal]: any) => Number(scrollVal) + Number(interVal) * 0.9
   );
 
   return {
