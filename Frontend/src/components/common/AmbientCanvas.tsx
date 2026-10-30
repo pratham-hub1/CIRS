@@ -78,10 +78,10 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
-        radius: (Math.random() * 0.9 + 0.6) * depth,
-        alpha: Math.random() * 0.3 + 0.15, // soft glow 0.15 - 0.45
+        vx: (Math.random() - 0.5) * 0.28,
+        vy: (Math.random() - 0.5) * 0.28,
+        radius: (Math.random() * 1.15 + 0.78) * depth,
+        alpha: Math.random() * 0.38 + 0.20, // +30% presence: 0.20 - 0.58
         depth,
       });
     }
@@ -90,26 +90,26 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
       ctx.clearRect(0, 0, width, height);
 
       // Smooth scroll velocity interpolation & decay
-      scrollVelocity += (targetScrollVelocity - scrollVelocity) * 0.1;
+      scrollVelocity += (targetScrollVelocity - scrollVelocity) * 0.11;
       targetScrollVelocity *= 0.86;
 
       // Only fast scrolling triggers subtle micro-streak; normal scrolling remains calm circular nodes
-      const isFast = Math.abs(scrollVelocity) > 2.8;
+      const isFast = Math.abs(scrollVelocity) > 2.6;
 
       // Draw subtle mesh connections when calm
-      if (Math.abs(scrollVelocity) < 4) {
-        const connDamping = Math.max(0.1, 1 - Math.abs(scrollVelocity) / 4);
+      if (Math.abs(scrollVelocity) < 4.5) {
+        const connDamping = Math.max(0.12, 1 - Math.abs(scrollVelocity) / 4.5);
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
             const dx = particles[i].x - particles[j].x;
             const dy = particles[i].y - particles[j].y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 95) {
-              const lineAlpha = (1 - dist / 95) * 0.07 * connDamping;
+            if (dist < 115) {
+              const lineAlpha = (1 - dist / 115) * 0.09 * connDamping;
               ctx.beginPath();
               ctx.strokeStyle = `rgba(255, 255, 255, ${lineAlpha})`;
-              ctx.lineWidth = 0.55;
+              ctx.lineWidth = 0.65;
               ctx.moveTo(particles[i].x, particles[i].y);
               ctx.lineTo(particles[j].x, particles[j].y);
               ctx.stroke();
@@ -123,8 +123,8 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
         p.x += p.vx;
         p.y += p.vy;
 
-        // Gentle vertical parallax displacement from scroll (calm, non-distracting)
-        p.y -= scrollVelocity * p.depth * 0.65;
+        // Gentle vertical parallax displacement from scroll (+30% responsive)
+        p.y -= scrollVelocity * p.depth * 0.85;
 
         // Seamless screen wrap-around
         if (p.x < 0) p.x = width;
@@ -137,20 +137,20 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
           const mdx = p.x - mouse.x;
           const mdy = p.y - mouse.y;
           const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-          if (mdist < 110 && mdist > 0) {
-            const force = (1 - mdist / 110) * 0.5;
+          if (mdist < 120 && mdist > 0) {
+            const force = (1 - mdist / 120) * 0.6;
             p.x += (mdx / mdist) * force;
             p.y += (mdy / mdist) * force;
           }
         }
 
-        // Render calm node or subtle capped micro-streak (no heavy rain effect)
+        // Render calm node or subtle capped micro-streak (+30% visibility without rain congestion)
         if (isFast) {
-          const rawStreak = -scrollVelocity * p.depth * 0.6;
-          const streak = Math.max(-14, Math.min(14, rawStreak));
+          const rawStreak = -scrollVelocity * p.depth * 0.78;
+          const streak = Math.max(-18, Math.min(18, rawStreak));
           ctx.beginPath();
-          ctx.lineWidth = Math.min(1.2, p.radius * 0.9);
-          ctx.strokeStyle = `rgba(255, 255, 255, ${p.alpha * 0.35})`;
+          ctx.lineWidth = Math.min(1.5, p.radius * 1.1);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${p.alpha * 0.45})`;
           ctx.lineCap = 'round';
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(p.x, p.y + streak);
