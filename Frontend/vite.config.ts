@@ -4,7 +4,7 @@ import path from 'path';
 
 const BACKEND_TARGET =
   process.env.VITE_BACKEND_TARGET ||
-  'https://external-loan-generous-campus.trycloudflare.com';
+  'https://thu-headers-copied-familiar.trycloudflare.com';
 
 // https://vitejs.dev/config/
 export default defineConfig({
