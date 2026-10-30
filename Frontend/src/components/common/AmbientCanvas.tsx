@@ -78,10 +78,10 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.28,
-        vy: (Math.random() - 0.5) * 0.28,
-        radius: (Math.random() * 1.15 + 0.78) * depth,
-        alpha: Math.random() * 0.38 + 0.20, // +30% presence: 0.20 - 0.58
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        radius: (Math.random() * 1.5 + 1.0) * depth,
+        alpha: Math.random() * 0.49 + 0.26, // +30% presence: 0.26 - 0.75
         depth,
       });
     }
@@ -94,22 +94,22 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
       targetScrollVelocity *= 0.86;
 
       // Only fast scrolling triggers subtle micro-streak; normal scrolling remains calm circular nodes
-      const isFast = Math.abs(scrollVelocity) > 2.6;
+      const isFast = Math.abs(scrollVelocity) > 2.5;
 
       // Draw subtle mesh connections when calm
-      if (Math.abs(scrollVelocity) < 4.5) {
-        const connDamping = Math.max(0.12, 1 - Math.abs(scrollVelocity) / 4.5);
+      if (Math.abs(scrollVelocity) < 5) {
+        const connDamping = Math.max(0.15, 1 - Math.abs(scrollVelocity) / 5);
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
             const dx = particles[i].x - particles[j].x;
             const dy = particles[i].y - particles[j].y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 115) {
-              const lineAlpha = (1 - dist / 115) * 0.09 * connDamping;
+            if (dist < 130) {
+              const lineAlpha = (1 - dist / 130) * 0.12 * connDamping;
               ctx.beginPath();
               ctx.strokeStyle = `rgba(255, 255, 255, ${lineAlpha})`;
-              ctx.lineWidth = 0.65;
+              ctx.lineWidth = 0.75;
               ctx.moveTo(particles[i].x, particles[i].y);
               ctx.lineTo(particles[j].x, particles[j].y);
               ctx.stroke();
@@ -123,8 +123,8 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
         p.x += p.vx;
         p.y += p.vy;
 
-        // Gentle vertical parallax displacement from scroll (+30% responsive)
-        p.y -= scrollVelocity * p.depth * 0.85;
+        // Gentle vertical parallax displacement from scroll
+        p.y -= scrollVelocity * p.depth * 1.05;
 
         // Seamless screen wrap-around
         if (p.x < 0) p.x = width;
@@ -137,20 +137,20 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
           const mdx = p.x - mouse.x;
           const mdy = p.y - mouse.y;
           const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-          if (mdist < 120 && mdist > 0) {
-            const force = (1 - mdist / 120) * 0.6;
+          if (mdist < 130 && mdist > 0) {
+            const force = (1 - mdist / 130) * 0.65;
             p.x += (mdx / mdist) * force;
             p.y += (mdy / mdist) * force;
           }
         }
 
-        // Render calm node or subtle capped micro-streak (+30% visibility without rain congestion)
+        // Render calm node or subtle capped micro-streak
         if (isFast) {
-          const rawStreak = -scrollVelocity * p.depth * 0.78;
-          const streak = Math.max(-18, Math.min(18, rawStreak));
+          const rawStreak = -scrollVelocity * p.depth * 0.95;
+          const streak = Math.max(-22, Math.min(22, rawStreak));
           ctx.beginPath();
-          ctx.lineWidth = Math.min(1.5, p.radius * 1.1);
-          ctx.strokeStyle = `rgba(255, 255, 255, ${p.alpha * 0.45})`;
+          ctx.lineWidth = Math.min(1.8, p.radius * 1.15);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${p.alpha * 0.55})`;
           ctx.lineCap = 'round';
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(p.x, p.y + streak);

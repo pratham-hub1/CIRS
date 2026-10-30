@@ -170,7 +170,7 @@ export const Register: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#08090C] text-white flex flex-col relative overflow-x-hidden selection:bg-white selection:text-black font-sans scroll-smooth">
       {/* Background Animated Particle Canvas with Luminous Calm Parallax */}
-      <AmbientCanvas particleCount={55} />
+      <AmbientCanvas particleCount={72} />
 
       {/* Hero Registration Section */}
       <div className="min-h-screen flex flex-col lg:grid lg:grid-cols-12 relative z-10 w-full">
