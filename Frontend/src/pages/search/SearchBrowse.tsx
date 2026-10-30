@@ -24,6 +24,8 @@ import { ItemStatusBadge, ItemTypeBadge, CategoryBadge } from '../../components/
 import { EmptyState } from '../../components/common/EmptyState';
 import { CardSkeleton } from '../../components/common/LoadingSpinner';
 import { Button } from '../../components/common/Button';
+import { GlassCard } from '../../components/common/GlassCard';
+import { DynamicTicker } from '../../components/common/DynamicTicker';
 import { StaggerContainer, StaggerItem, FadeIn } from '../../components/common/AnimatedTransitions';
 import { formatRelativeTime } from '../../lib/utils';
 
@@ -355,7 +357,7 @@ export const SearchBrowse: React.FC = () => {
             const displayImage = resolveImageUrl(rawImage);
             return (
               <StaggerItem key={item.caseId}>
-                <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] hover:border-white/[0.16] hover:bg-[#151923] overflow-hidden transition-all flex flex-col justify-between group h-full">
+                <GlassCard enableTilt enableSheen className="overflow-hidden flex flex-col justify-between h-full">
                   <div>
                     {displayImage ? (
                       <div className="h-48 w-full bg-neutral-900 overflow-hidden relative">
@@ -446,7 +448,7 @@ export const SearchBrowse: React.FC = () => {
                       </Link>
                     </div>
                   </div>
-                </div>
+                </GlassCard>
               </StaggerItem>
             );
           })}

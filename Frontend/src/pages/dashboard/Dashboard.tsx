@@ -37,6 +37,8 @@ import { CardSkeleton } from '../../components/common/LoadingSpinner';
 import { StaggerContainer, StaggerItem, FadeIn } from '../../components/common/AnimatedTransitions';
 import { formatRelativeTime } from '../../lib/utils';
 import { Button } from '../../components/common/Button';
+import { GlassCard } from '../../components/common/GlassCard';
+import { DynamicTicker } from '../../components/common/DynamicTicker';
 
 export const Dashboard: React.FC = () => {
   const { user, role, isAdmin } = useAuth();
@@ -134,6 +136,9 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Dynamic Telemetry Marquee with Interactive Hover Pause */}
+      <DynamicTicker className="rounded-2xl border border-white/[0.08]" />
+
       {/* Critical Status Alert Banners (Action Required) */}
       {infoRequestedClaim && (
         <motion.div
@@ -191,9 +196,9 @@ export const Dashboard: React.FC = () => {
         </motion.div>
       )}
 
-      {/* KPI Metric Blocks (Minimalist Apple/Tesla style) */}
+      {/* KPI Metric Blocks (3D Interactive Tilt Glass Cards) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="p-6 rounded-2xl bg-[#12151D] border border-white/[0.07] hover:border-white/[0.14] transition-all group">
+        <GlassCard enableTilt enableSheen className="p-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
               LOST REPORTS
@@ -211,9 +216,9 @@ export const Dashboard: React.FC = () => {
               View cases →
             </Link>
           </div>
-        </div>
+        </GlassCard>
 
-        <div className="p-6 rounded-2xl bg-[#12151D] border border-white/[0.07] hover:border-white/[0.14] transition-all group">
+        <GlassCard enableTilt enableSheen className="p-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
               FOUND DEPOSITS
@@ -231,9 +236,9 @@ export const Dashboard: React.FC = () => {
               View items →
             </Link>
           </div>
-        </div>
+        </GlassCard>
 
-        <div className="p-6 rounded-2xl bg-[#12151D] border border-white/[0.07] hover:border-white/[0.14] transition-all group">
+        <GlassCard enableTilt enableSheen className="p-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
               ACTIVE CLAIMS
@@ -251,9 +256,9 @@ export const Dashboard: React.FC = () => {
               View claims →
             </Link>
           </div>
-        </div>
+        </GlassCard>
 
-        <div className="p-6 rounded-2xl bg-[#12151D] border border-white/[0.07] hover:border-white/[0.14] transition-all group">
+        <GlassCard enableTilt enableSheen className="p-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
               RESOLVED RETURNS
@@ -269,7 +274,7 @@ export const Dashboard: React.FC = () => {
             <span>Successfully recovered</span>
             <span className="text-emerald-400 font-bold">100% Verified</span>
           </div>
-        </div>
+        </GlassCard>
       </div>
 
       {/* Main Two-Column Content Grid: Active Items & Community Radar */}
@@ -383,9 +388,11 @@ export const Dashboard: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {possibleMatches.slice(0, 2).map((match) => (
-                  <div
+                  <GlassCard
                     key={match.id}
-                    className="p-4 rounded-2xl bg-[#12151D] border border-white/[0.08] hover:border-white/[0.16] transition-all"
+                    enableTilt
+                    enableSheen
+                    className="p-4"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.06] text-white border border-white/[0.1]">
@@ -409,7 +416,7 @@ export const Dashboard: React.FC = () => {
                         Inspect match candidate <ArrowRight className="w-3 h-3" />
                       </Link>
                     </div>
-                  </div>
+                  </GlassCard>
                 ))}
               </div>
             </div>
@@ -477,8 +484,8 @@ export const Dashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Quick Help & Custody Hours Card */}
-          <div className="p-5 rounded-2xl bg-[#12151D] border border-white/[0.07] space-y-3">
+          {/* Quick Help & Custody Hours Card (Interactive Glass Card) */}
+          <GlassCard enableTilt enableSheen className="p-5 space-y-3">
             <div className="flex items-center space-x-2 text-white text-xs font-semibold">
               <Shield className="w-4 h-4 text-neutral-400" />
               <span>Campus Custody Desk</span>
@@ -490,7 +497,7 @@ export const Dashboard: React.FC = () => {
               <span>HOURS: 09:00 - 18:00</span>
               <span className="text-emerald-400 font-semibold">DESK ACTIVE</span>
             </div>
-          </div>
+          </GlassCard>
         </div>
       </div>
     </div>

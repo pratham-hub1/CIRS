@@ -23,6 +23,8 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { CardSkeleton } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
 import { Button } from '../../components/common/Button';
+import { GlassCard } from '../../components/common/GlassCard';
+import { DynamicTicker } from '../../components/common/DynamicTicker';
 import { StaggerContainer, StaggerItem, FadeIn } from '../../components/common/AnimatedTransitions';
 import { useToast } from '../../context/ToastContext';
 import { formatRelativeTime } from '../../lib/utils';
@@ -155,6 +157,9 @@ export const CommunityFeed: React.FC = () => {
         </div>
       </FadeIn>
 
+      {/* Dynamic Telemetry Marquee with Interactive Hover Pause */}
+      <DynamicTicker className="rounded-2xl border border-white/[0.08]" />
+
       {/* Filter and Search Bar */}
       <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-5 space-y-4">
         {/* Search input */}
@@ -281,7 +286,7 @@ export const CommunityFeed: React.FC = () => {
             const displayImage = resolveImageUrl(rawImage);
             return (
               <StaggerItem key={item.caseId}>
-                <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] overflow-hidden hover:border-white/[0.16] hover:bg-[#151923] transition-all flex flex-col justify-between group h-full">
+                <GlassCard enableTilt enableSheen className="overflow-hidden flex flex-col justify-between h-full">
                   <div>
                     {/* Photo or Category Placeholder Banner */}
                     {displayImage ? (
@@ -360,7 +365,7 @@ export const CommunityFeed: React.FC = () => {
                       <ChevronRight className="w-3.5 h-3.5 ml-1 text-neutral-400 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                   </div>
-                </div>
+                </GlassCard>
               </StaggerItem>
             );
           })}
