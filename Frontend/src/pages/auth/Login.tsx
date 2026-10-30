@@ -11,6 +11,7 @@ import { GlassCard } from '../../components/common/GlassCard';
 import { DynamicTicker } from '../../components/common/DynamicTicker';
 import { celebrateConfetti } from '../../lib/confetti';
 import { useWarmTextBounce } from '../../hooks/useWarmTextBounce';
+import { TypewriterText } from '../../components/common/TypewriterText';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
@@ -95,7 +96,7 @@ export const Login: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                CENTRAL RECOVERY SYSTEM • LIVE TELEMETRY
+                <TypewriterText text="CENTRAL RECOVERY SYSTEM • LIVE TELEMETRY" speed={16} delay={100} cursor={false} />
               </motion.span>
             </div>
 
@@ -103,14 +104,19 @@ export const Login: React.FC = () => {
               style={{ y: titleBounceY }}
               className="text-4xl xl:text-5xl font-display font-semibold tracking-tight text-white leading-[1.15]"
             >
-              Autonomous item recovery across campus grounds.
+              <TypewriterText text="Autonomous item recovery across campus grounds." speed={26} delay={250} />
             </motion.h1>
 
             <motion.p
               style={{ y: bodyBounceY }}
               className="text-base text-neutral-400 font-normal leading-relaxed"
             >
-              A unified institutional network pairing lost and found articles with multi-attribute AI correlation and cryptographic custody verification.
+              <TypewriterText
+                text="A unified institutional network pairing lost and found articles with multi-attribute AI correlation and cryptographic custody verification."
+                speed={12}
+                delay={900}
+                cursor={false}
+              />
             </motion.p>
 
             {/* Metric cards (Containers stay completely fixed; only typography bounces) */}
@@ -174,7 +180,7 @@ export const Login: React.FC = () => {
                 CIRS
               </motion.h1>
               <motion.p style={{ y: subtextBounceY }} className="text-xs text-neutral-400 mt-1">
-                Campus Item Recovery System • GSFC University
+                <TypewriterText text="Campus Item Recovery System • GSFC University" speed={20} delay={200} />
               </motion.p>
             </div>
 
@@ -187,14 +193,14 @@ export const Login: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <motion.h2 style={{ y: titleBounceY }} className="text-xl font-display font-semibold text-white tracking-tight">
-                    Sign In
+                    <TypewriterText text="Sign In" speed={40} delay={350} />
                   </motion.h2>
                   <motion.span style={{ y: subtextBounceY }} className="text-[11px] font-mono text-neutral-400 inline-block">
                     GSFC SSO
                   </motion.span>
                 </div>
                 <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400">
-                  Enter your institutional credentials to access your cases.
+                  <TypewriterText text="Enter your institutional credentials to access your cases." speed={16} delay={650} cursor={false} />
                 </motion.p>
               </div>
 
