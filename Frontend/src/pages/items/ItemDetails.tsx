@@ -317,25 +317,25 @@ export const ItemDetails: React.FC = () => {
           </span>
           <ItemStatusBadge status={item.status} size="sm" />
         </div>
-        <div className="grid grid-cols-4 gap-2 text-center text-xs">
+        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center text-xs">
           {[
             { step: 1, label: 'Reported' },
-            { step: 2, label: 'In Custody / Matching' },
-            { step: 3, label: 'Ready for Collection' },
-            { step: 4, label: 'Resolved & Returned' },
+            { step: 2, label: 'Custody / Radar' },
+            { step: 3, label: 'Collection' },
+            { step: 4, label: 'Returned' },
           ].map((st) => (
             <div key={st.step} className="flex flex-col items-center">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center font-mono font-bold text-xs mb-2 transition-all ${
+                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-mono font-bold text-[10px] sm:text-xs mb-1.5 sm:mb-2 transition-all ${
                   currentStep >= st.step
                     ? 'bg-white text-black shadow-sm'
                     : 'bg-neutral-800 text-neutral-500 border border-white/[0.06]'
                 }`}
               >
-                {currentStep > st.step ? <Check className="w-4 h-4" /> : st.step}
+                {currentStep > st.step ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : st.step}
               </div>
               <span
-                className={`text-[11px] font-medium leading-tight ${
+                className={`text-[9px] sm:text-[11px] font-medium leading-tight ${
                   currentStep >= st.step ? 'text-white' : 'text-neutral-500'
                 }`}
               >

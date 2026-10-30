@@ -197,82 +197,82 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* KPI Metric Blocks (3D Interactive Tilt Glass Cards) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <GlassCard enableTilt enableSheen className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <GlassCard enableTilt enableSheen className="p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <span className="text-[10px] sm:text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
               LOST REPORTS
             </span>
-            <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-neutral-300">
-              <FileQuestion className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-neutral-300">
+              <FileQuestion className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">
+          <div className="text-2xl sm:text-4xl font-display font-bold text-white tracking-tight">
             {isLoading ? '—' : lostCount}
           </div>
-          <div className="text-[11px] text-neutral-500 mt-2 font-mono flex items-center justify-between">
-            <span>Pending recovery</span>
-            <Link to="/my-cases" className="hover:text-white transition-colors">
+          <div className="text-[10px] sm:text-[11px] text-neutral-500 mt-2 font-mono flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
+            <span className="truncate">Pending recovery</span>
+            <Link to="/my-cases" className="hover:text-white transition-colors truncate">
               View cases →
             </Link>
           </div>
         </GlassCard>
 
-        <GlassCard enableTilt enableSheen className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
+        <GlassCard enableTilt enableSheen className="p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <span className="text-[10px] sm:text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
               FOUND DEPOSITS
             </span>
-            <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-neutral-300">
-              <Compass className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-neutral-300">
+              <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">
+          <div className="text-2xl sm:text-4xl font-display font-bold text-white tracking-tight">
             {isLoading ? '—' : foundCount}
           </div>
-          <div className="text-[11px] text-neutral-500 mt-2 font-mono flex items-center justify-between">
-            <span>Items turned in</span>
-            <Link to="/my-cases" className="hover:text-white transition-colors">
+          <div className="text-[10px] sm:text-[11px] text-neutral-500 mt-2 font-mono flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
+            <span className="truncate">Items turned in</span>
+            <Link to="/my-cases" className="hover:text-white transition-colors truncate">
               View items →
             </Link>
           </div>
         </GlassCard>
 
-        <GlassCard enableTilt enableSheen className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
+        <GlassCard enableTilt enableSheen className="p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <span className="text-[10px] sm:text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
               ACTIVE CLAIMS
             </span>
-            <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-neutral-300">
-              <ClipboardCheck className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-neutral-300">
+              <ClipboardCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">
+          <div className="text-2xl sm:text-4xl font-display font-bold text-white tracking-tight">
             {isLoading ? '—' : myClaims.length}
           </div>
-          <div className="text-[11px] text-neutral-500 mt-2 font-mono flex items-center justify-between">
-            <span>Under adjudication</span>
-            <Link to="/my-claims" className="hover:text-white transition-colors">
+          <div className="text-[10px] sm:text-[11px] text-neutral-500 mt-2 font-mono flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
+            <span className="truncate">Adjudication</span>
+            <Link to="/my-claims" className="hover:text-white transition-colors truncate">
               View claims →
             </Link>
           </div>
         </GlassCard>
 
-        <GlassCard enableTilt enableSheen className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
-              RESOLVED RETURNS
+        <GlassCard enableTilt enableSheen className="p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <span className="text-[10px] sm:text-[11px] font-mono tracking-wider text-neutral-400 uppercase">
+              RESOLVED
             </span>
-            <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-emerald-400">
-              <CheckCircle className="w-4 h-4" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-emerald-400">
+              <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">
+          <div className="text-2xl sm:text-4xl font-display font-bold text-white tracking-tight">
             {isLoading ? '—' : returnedCount}
           </div>
-          <div className="text-[11px] text-neutral-500 mt-2 font-mono flex items-center justify-between">
-            <span>Successfully recovered</span>
-            <span className="text-emerald-400 font-bold">100% Verified</span>
+          <div className="text-[10px] sm:text-[11px] text-neutral-500 mt-2 font-mono flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-1">
+            <span className="truncate">Recovered</span>
+            <span className="text-emerald-400 font-bold truncate">100% Verified</span>
           </div>
         </GlassCard>
       </div>

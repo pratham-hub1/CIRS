@@ -32,7 +32,7 @@ const MobileDock: React.FC = () => {
     }`;
 
   return (
-    <nav className="lg:hidden fixed bottom-3 left-4 right-4 z-30 bg-[#0C0F17]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl flex items-center justify-around px-2 py-1 max-w-md mx-auto">
+    <nav className="lg:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-3 right-3 sm:left-4 sm:right-4 z-30 bg-[#0C0F17]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl flex items-center justify-around px-2 py-1 max-w-md mx-auto">
       {isAdmin ? (
         <>
           <NavLink to="/admin" end className={dockClass}>
@@ -128,7 +128,7 @@ const LayoutContent: React.FC = () => {
         />
 
         {/* Main Full-Width Content Container (Expansive & De-congested) */}
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto w-full pb-28 lg:pb-16">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-10 max-w-7xl mx-auto w-full pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-16">
           <ErrorBoundary>
             <PageTransition key={location.pathname}>
               <Outlet />
