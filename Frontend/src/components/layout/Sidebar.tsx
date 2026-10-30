@@ -38,7 +38,7 @@ export const Sidebar: React.FC = () => {
       isCollapsed ? 'justify-center px-0 py-3' : 'px-3.5 py-2.5'
     } text-xs font-semibold rounded-xl transition-all duration-200 ${
       isActive
-        ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/10 text-cyan-300 border border-cyan-500/40 shadow-neon-cyan font-bold'
+        ? 'bg-white/[0.08] text-white border border-white/[0.14] font-semibold shadow-sm'
         : 'text-slate-400 hover:text-slate-100 hover:bg-white/[0.06] border border-transparent'
     }`;
 
@@ -56,7 +56,7 @@ export const Sidebar: React.FC = () => {
           >
             <span>{title}</span>
             {typeof badge === 'number' && badge > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-cyan-500 text-black font-bold text-[10px]">
+              <span className="px-1.5 py-0.2 rounded-full bg-white text-black font-bold text-[10px]">
                 {badge}
               </span>
             )}
@@ -76,7 +76,7 @@ export const Sidebar: React.FC = () => {
       <div className="p-4 border-b border-white/10 flex items-center justify-between">
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-neon-cyan" />
+            <div className="w-2 h-2 rounded-full bg-emerald-400/80" />
             <span className="font-display uppercase tracking-widest text-[11px] font-bold text-slate-300">
               {isAdmin ? 'SECURITY COMMAND' : 'RECOVERY PORTAL'}
             </span>
@@ -86,7 +86,7 @@ export const Sidebar: React.FC = () => {
         <button
           onClick={toggleSidebar}
           title={isCollapsed ? 'Expand Sidebar (Ctrl+B)' : 'Collapse Sidebar (Ctrl+B)'}
-          className={`p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-white/5 transition-all ${
+          className={`p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all ${
             isCollapsed ? 'mx-auto' : ''
           }`}
         >
@@ -238,7 +238,7 @@ export const Sidebar: React.FC = () => {
                     <div className="flex items-center justify-between flex-1">
                       <span>Notifications</span>
                       {unreadCount > 0 && (
-                        <span className="px-1.5 py-0.2 rounded-full bg-cyan-500 text-black font-bold text-[10px]">
+                        <span className="px-1.5 py-0.2 rounded-full bg-white text-black font-bold text-[10px]">
                           {unreadCount}
                         </span>
                       )}
@@ -321,7 +321,7 @@ export const Sidebar: React.FC = () => {
                 onMouseLeave={() => setHoveredItem(null)}
               >
                 <NavLink to="/search" className={({ isActive }) => getLinkClasses(isActive)}>
-                  <Search className={`w-4 h-4 flex-shrink-0 text-cyan-400 ${isCollapsed ? '' : 'mr-3'}`} />
+                  <Search className={`w-4 h-4 flex-shrink-0 text-neutral-300 ${isCollapsed ? '' : 'mr-3'}`} />
                   {!isCollapsed && <span>Search & Browse</span>}
                 </NavLink>
                 {renderTooltip('Search & Browse')}
@@ -378,7 +378,7 @@ export const Sidebar: React.FC = () => {
                     <div className="flex items-center justify-between flex-1">
                       <span>Notifications</span>
                       {unreadCount > 0 && (
-                        <span className="px-1.5 py-0.2 rounded-full bg-cyan-500 text-black font-bold text-[10px]">
+                        <span className="px-1.5 py-0.2 rounded-full bg-white text-black font-bold text-[10px]">
                           {unreadCount}
                         </span>
                       )}
@@ -405,18 +405,18 @@ export const Sidebar: React.FC = () => {
         )}
       </div>
 
-      {/* Futuristic Telemetry Footer */}
+      {/* Telemetry Footer */}
       <div className="p-3 border-t border-white/10 bg-[#050811]/60">
         {!isCollapsed ? (
           <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] text-slate-400 font-mono">
-            <span className="flex items-center gap-1.5 text-cyan-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+            <span className="flex items-center gap-1.5 text-neutral-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80" />
               GSFC SECURE
             </span>
             <span>PRESS ⌘B</span>
           </div>
         ) : (
-          <div className="text-center font-mono text-[9px] text-cyan-400">
+          <div className="text-center font-mono text-[9px] text-neutral-400">
             ⌘B
           </div>
         )}

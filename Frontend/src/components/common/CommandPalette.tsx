@@ -63,7 +63,7 @@ export const CommandPalette: React.FC<{ isOpen: boolean; onClose: () => void }> 
       title: 'Search & Browse Database',
       subtitle: 'Faceted lookup of all campus reports and found property',
       category: 'Navigation',
-      icon: <Search className="w-4 h-4 text-cyan-400" />,
+      icon: <Search className="w-4 h-4 text-neutral-300" />,
       action: () => navigate('/search'),
       keywords: ['find', 'search', 'browse', 'filter', 'items'],
       shortcut: 'S',
@@ -142,9 +142,9 @@ export const CommandPalette: React.FC<{ isOpen: boolean; onClose: () => void }> 
       subtitle: 'Toggle between expanded navigation and compact icon dock',
       category: 'Interface',
       icon: isCollapsed ? (
-        <PanelLeftOpen className="w-4 h-4 text-cyan-400" />
+        <PanelLeftOpen className="w-4 h-4 text-neutral-300" />
       ) : (
-        <PanelLeftClose className="w-4 h-4 text-cyan-400" />
+        <PanelLeftClose className="w-4 h-4 text-neutral-300" />
       ),
       action: () => toggleSidebar(),
       keywords: ['sidebar', 'collapse', 'expand', 'dock', 'toggle'],
@@ -159,7 +159,7 @@ export const CommandPalette: React.FC<{ isOpen: boolean; onClose: () => void }> 
             title: 'Security Command Overview',
             subtitle: 'Central operations desk, KPI telemetry, and case SLA',
             category: 'Security Staff',
-            icon: <Shield className="w-4 h-4 text-cyan-400" />,
+            icon: <Shield className="w-4 h-4 text-neutral-300" />,
             action: () => navigate('/admin'),
             keywords: ['admin', 'dashboard', 'security', 'operations'],
           },
@@ -253,8 +253,8 @@ export const CommandPalette: React.FC<{ isOpen: boolean; onClose: () => void }> 
             className="relative w-full max-w-2xl bg-[#090D1A]/95 border border-white/15 rounded-2xl shadow-2xl overflow-hidden z-10 text-white"
           >
             {/* Search Input Bar */}
-            <div className="flex items-center px-4 py-3.5 border-b border-white/10 bg-[#0D1424]/80">
-              <Search className="w-5 h-5 text-cyan-400 mr-3 flex-shrink-0 animate-pulse" />
+            <div className="flex items-center px-4 py-3.5 border-b border-white/[0.08] bg-[#0E1118]/80">
+              <Search className="w-5 h-5 text-neutral-300 mr-3 flex-shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
@@ -278,7 +278,7 @@ export const CommandPalette: React.FC<{ isOpen: boolean; onClose: () => void }> 
             <div className="max-h-96 overflow-y-auto p-2 space-y-1 scrollbar-thin">
               {filteredCommands.length === 0 ? (
                 <div className="py-12 text-center text-slate-400">
-                  <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-30 text-cyan-400" />
+                  <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-30 text-neutral-400" />
                   <p className="text-sm font-medium">No matching commands or destinations</p>
                   <p className="text-xs text-slate-500 mt-1">
                     Try searching for "lost", "claims", "vaults", or "search"
@@ -297,14 +297,14 @@ export const CommandPalette: React.FC<{ isOpen: boolean; onClose: () => void }> 
                       onMouseEnter={() => setSelectedIndex(idx)}
                       className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-all duration-150 ${
                         isSelected
-                          ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/10 border border-cyan-500/40 text-white shadow-neon-cyan'
+                          ? 'bg-white/[0.08] border border-white/[0.16] text-white shadow-sm'
                           : 'text-slate-300 hover:bg-white/5 border border-transparent'
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div
                           className={`p-2 rounded-lg flex-shrink-0 ${
-                            isSelected ? 'bg-cyan-500/20 text-cyan-300' : 'bg-white/5 text-slate-400'
+                            isSelected ? 'bg-white/[0.12] text-white' : 'bg-white/5 text-slate-400'
                           }`}
                         >
                           {item.icon}
@@ -327,7 +327,7 @@ export const CommandPalette: React.FC<{ isOpen: boolean; onClose: () => void }> 
                           </span>
                         )}
                         {isSelected && (
-                          <CornerDownLeft className="w-4 h-4 text-cyan-400 animate-pulse" />
+                          <CornerDownLeft className="w-4 h-4 text-white" />
                         )}
                       </div>
                     </div>
@@ -337,7 +337,7 @@ export const CommandPalette: React.FC<{ isOpen: boolean; onClose: () => void }> 
             </div>
 
             {/* Telemetry Footer */}
-            <div className="px-4 py-2.5 bg-[#050811] border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+            <div className="px-4 py-2.5 bg-[#08090C] border-t border-white/[0.08] flex items-center justify-between text-[11px] text-slate-400">
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1 font-mono">
                   <kbd className="px-1 py-0.5 rounded bg-white/10 text-slate-300 text-[10px]">↑</kbd>
@@ -349,7 +349,7 @@ export const CommandPalette: React.FC<{ isOpen: boolean; onClose: () => void }> 
                   to select
                 </span>
               </div>
-              <div className="font-mono text-cyan-400 text-[10px] uppercase tracking-wider">
+              <div className="font-mono text-neutral-400 text-[10px] uppercase tracking-wider">
                 GSFC RECOVERY HUB • v2.4
               </div>
             </div>
