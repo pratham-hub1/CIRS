@@ -33,6 +33,7 @@ import { DynamicTicker } from '../../components/common/DynamicTicker';
 import { celebrateConfetti } from '../../lib/confetti';
 import { useWarmTextBounce } from '../../hooks/useWarmTextBounce';
 import { KineticText } from '../../components/common/KineticText';
+import { KineticCard } from '../../components/common/KineticCard';
 
 export const Register: React.FC = () => {
   const { register } = useAuth();
@@ -203,7 +204,7 @@ export const Register: React.FC = () => {
               style={{ y: titleBounceY }}
               className="text-4xl xl:text-5xl font-display font-semibold tracking-tight text-white leading-[1.15]"
             >
-              <KineticText text="Join the recovery ecosystem of GSFC University." mode="char" stagger={0.024} delay={0.25} repeatOnView={true} cursor={true} />
+              <KineticText text="Join the recovery ecosystem of GSFC University." mode="char" stagger={0.024} delay={0.25} repeatOnView={true} />
             </motion.h1>
 
             <motion.p
@@ -220,29 +221,33 @@ export const Register: React.FC = () => {
             </motion.p>
 
             <div className="space-y-3.5 pt-2">
-              <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
-                <CheckCircle2 className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
-                <div>
-                  <motion.h4 style={{ y: titleBounceY }} className="text-sm font-semibold text-white">
-                    Automated Matching Radar
-                  </motion.h4>
-                  <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 mt-0.5">
-                    Instant candidate correlation when matching lost reports and found articles appear.
-                  </motion.p>
+              <KineticCard delay={0.35} repeatOnView={true} threshold={0.1}>
+                <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.15] transition-all">
+                  <CheckCircle2 className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
+                  <div>
+                    <motion.h4 style={{ y: titleBounceY }} className="text-sm font-semibold text-white">
+                      Automated Matching Radar
+                    </motion.h4>
+                    <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 mt-0.5">
+                      Instant candidate correlation when matching lost reports and found articles appear.
+                    </motion.p>
+                  </div>
                 </div>
-              </div>
+              </KineticCard>
 
-              <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
-                <ShieldCheck className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
-                <div>
-                  <motion.h4 style={{ y: titleBounceY }} className="text-sm font-semibold text-white">
-                    Cryptographic Collection Pass
-                  </motion.h4>
-                  <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 mt-0.5">
-                    Single-use digital token issued for secure physical custody handover.
-                  </motion.p>
+              <KineticCard delay={0.5} repeatOnView={true} threshold={0.1}>
+                <div className="flex items-start space-x-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.15] transition-all">
+                  <ShieldCheck className="w-5 h-5 text-neutral-300 shrink-0 mt-0.5" />
+                  <div>
+                    <motion.h4 style={{ y: titleBounceY }} className="text-sm font-semibold text-white">
+                      Cryptographic Collection Pass
+                    </motion.h4>
+                    <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 mt-0.5">
+                      Single-use digital token issued for secure physical custody handover.
+                    </motion.p>
+                  </div>
                 </div>
-              </div>
+              </KineticCard>
             </div>
           </div>
 
@@ -268,7 +273,7 @@ export const Register: React.FC = () => {
 
         {/* Right Column: Registration Form with 3D Tilt & Specular Sheen GlassCard */}
         <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 relative z-10 my-auto w-full">
-          <FadeIn className="w-full max-w-lg">
+          <KineticCard delay={0.25} duration={0.65} repeatOnView={true} threshold={0.1} className="w-full max-w-lg">
             {/* Mobile Header */}
             <div className="lg:hidden text-center mb-8">
               <div className="w-11 h-11 rounded-xl bg-white text-black font-display font-bold flex items-center justify-center text-sm mx-auto mb-3">
@@ -291,7 +296,7 @@ export const Register: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <motion.h2 style={{ y: titleBounceY }} className="text-xl font-display font-semibold text-white tracking-tight">
-                    <KineticText text="Register Account" mode="char" stagger={0.04} delay={0.3} repeatOnView={true} cursor={true} />
+                    <KineticText text="Register Account" mode="char" stagger={0.04} delay={0.3} repeatOnView={true} />
                   </motion.h2>
                   <motion.span style={{ y: subtextBounceY }} className="text-[11px] font-mono text-neutral-400 inline-block">
                     Step 1 of 1
@@ -541,9 +546,7 @@ export const Register: React.FC = () => {
                   rightIcon={<ArrowRight className="w-4 h-4 shrink-0" />}
                   className="w-full py-2.5 text-xs font-semibold mt-2"
                 >
-                  <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                    Create Institutional Account
-                  </motion.span>
+                  Create Institutional Account
                 </Button>
               </form>
 
@@ -563,7 +566,7 @@ export const Register: React.FC = () => {
                 Identity Verification via GSFC Directory Services
               </motion.span>
             </div>
-          </FadeIn>
+          </KineticCard>
         </div>
       </div>
 
@@ -583,7 +586,7 @@ export const Register: React.FC = () => {
               style={{ y: titleBounceY }}
               className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight"
             >
-              <KineticText text="Verified campus identity at every step." mode="char" stagger={0.022} delay={0.2} repeatOnView={true} threshold={0.15} cursor={true} />
+              <KineticText text="Verified campus identity at every step." mode="char" stagger={0.022} delay={0.2} repeatOnView={true} threshold={0.15} />
             </motion.h2>
             <motion.p
               style={{ y: bodyBounceY }}
@@ -601,80 +604,86 @@ export const Register: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <GlassCard enableTilt enableSheen className="p-7 space-y-4">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
-                <Cpu className="w-5 h-5 text-neutral-200" />
-              </div>
-              <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
-                <KineticText text="Institutional Domain Check" mode="char" stagger={0.02} delay={0.25} repeatOnView={true} threshold={0.15} />
-              </motion.h3>
-              <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
-                <KineticText
-                  text="Registration requires active university affiliation ending in @gsfcuniversity.ac.in, keeping public trolls and unauthorized outsiders out."
-                  mode="word"
-                  stagger={0.035}
-                  delay={0.45}
-                  repeatOnView={true}
-                  threshold={0.15}
-                />
-              </motion.p>
-              <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                  Zero spoofing attack surface
-                </motion.span>
-              </div>
-            </GlassCard>
+            <KineticCard delay={0.25} repeatOnView={true} threshold={0.15} className="h-full">
+              <GlassCard enableTilt enableSheen className="p-7 space-y-4 h-full">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
+                  <Cpu className="w-5 h-5 text-neutral-200" />
+                </div>
+                <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
+                  <KineticText text="Institutional Domain Check" mode="char" stagger={0.02} delay={0.25} repeatOnView={true} threshold={0.15} />
+                </motion.h3>
+                <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
+                  <KineticText
+                    text="Registration requires active university affiliation ending in @gsfcuniversity.ac.in, keeping public trolls and unauthorized outsiders out."
+                    mode="word"
+                    stagger={0.035}
+                    delay={0.45}
+                    repeatOnView={true}
+                    threshold={0.15}
+                  />
+                </motion.p>
+                <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                    Zero spoofing attack surface
+                  </motion.span>
+                </div>
+              </GlassCard>
+            </KineticCard>
 
-            <GlassCard enableTilt enableSheen className="p-7 space-y-4">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
-                <Key className="w-5 h-5 text-neutral-200" />
-              </div>
-              <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
-                <KineticText text="Encrypted Auth Vault" mode="char" stagger={0.02} delay={0.3} repeatOnView={true} threshold={0.15} />
-              </motion.h3>
-              <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
-                <KineticText
-                  text="Credentials are authenticated against cryptographic key derivation protocols, protecting student and faculty records at rest and in transit."
-                  mode="word"
-                  stagger={0.035}
-                  delay={0.5}
-                  repeatOnView={true}
-                  threshold={0.15}
-                />
-              </motion.p>
-              <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                  Argon2id hashing standard
-                </motion.span>
-              </div>
-            </GlassCard>
+            <KineticCard delay={0.4} repeatOnView={true} threshold={0.15} className="h-full">
+              <GlassCard enableTilt enableSheen className="p-7 space-y-4 h-full">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
+                  <Key className="w-5 h-5 text-neutral-200" />
+                </div>
+                <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
+                  <KineticText text="Encrypted Auth Vault" mode="char" stagger={0.02} delay={0.3} repeatOnView={true} threshold={0.15} />
+                </motion.h3>
+                <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
+                  <KineticText
+                    text="Credentials are authenticated against cryptographic key derivation protocols, protecting student and faculty records at rest and in transit."
+                    mode="word"
+                    stagger={0.035}
+                    delay={0.5}
+                    repeatOnView={true}
+                    threshold={0.15}
+                  />
+                </motion.p>
+                <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                    Argon2id hashing standard
+                  </motion.span>
+                </div>
+              </GlassCard>
+            </KineticCard>
 
-            <GlassCard enableTilt enableSheen className="p-7 space-y-4">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
-                <FileCheck2 className="w-5 h-5 text-neutral-200" />
-              </div>
-              <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
-                <KineticText text="Transparent Adjudication" mode="char" stagger={0.02} delay={0.35} repeatOnView={true} threshold={0.15} />
-              </motion.h3>
-              <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
-                <KineticText
-                  text="File lost cases, submit ownership evidence, and communicate securely with custodians through an immutable timestamped messaging log."
-                  mode="word"
-                  stagger={0.035}
-                  delay={0.55}
-                  repeatOnView={true}
-                  threshold={0.15}
-                />
-              </motion.p>
-              <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                  100% auditable history
-                </motion.span>
-              </div>
-            </GlassCard>
+            <KineticCard delay={0.55} repeatOnView={true} threshold={0.15} className="h-full">
+              <GlassCard enableTilt enableSheen className="p-7 space-y-4 h-full">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
+                  <FileCheck2 className="w-5 h-5 text-neutral-200" />
+                </div>
+                <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
+                  <KineticText text="Transparent Adjudication" mode="char" stagger={0.02} delay={0.35} repeatOnView={true} threshold={0.15} />
+                </motion.h3>
+                <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
+                  <KineticText
+                    text="File lost cases, submit ownership evidence, and communicate securely with custodians through an immutable timestamped messaging log."
+                    mode="word"
+                    stagger={0.035}
+                    delay={0.55}
+                    repeatOnView={true}
+                    threshold={0.15}
+                  />
+                </motion.p>
+                <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                    100% auditable history
+                  </motion.span>
+                </div>
+              </GlassCard>
+            </KineticCard>
           </div>
 
           {/* Institutional Tenancy Footer */}

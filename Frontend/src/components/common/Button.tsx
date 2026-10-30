@@ -28,7 +28,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const baseStyles =
-      'inline-flex flex-row items-center justify-center font-medium rounded-xl transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-white/40 disabled:opacity-40 disabled:pointer-events-none select-none tracking-normal whitespace-nowrap';
+      'inline-flex flex-row flex-nowrap items-center justify-center font-medium rounded-xl transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-white/40 disabled:opacity-40 disabled:pointer-events-none select-none tracking-normal whitespace-nowrap';
 
     const variants = {
       primary:
@@ -60,15 +60,15 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(baseStyles, variants[variant], sizes[size], className)}
         {...props}
       >
-        <span className="inline-flex flex-row items-center justify-center gap-2 whitespace-nowrap">
+        <span className="inline-flex flex-row flex-nowrap items-center justify-center gap-2 whitespace-nowrap">
           {isLoading ? (
             <Loader2 className="w-4 h-4 animate-spin shrink-0" />
           ) : (
             leftIcon && <span className="shrink-0 inline-flex items-center">{leftIcon}</span>
           )}
-          <span className="inline-block whitespace-nowrap">{children}</span>
+          <span className="inline-flex items-center whitespace-nowrap">{children}</span>
           {!isLoading && rightIcon && (
-            <span className="shrink-0 inline-flex items-center ml-0.5">{rightIcon}</span>
+            <span className="shrink-0 inline-flex items-center ml-1">{rightIcon}</span>
           )}
         </span>
       </motion.button>

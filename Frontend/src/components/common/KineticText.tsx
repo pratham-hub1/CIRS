@@ -14,8 +14,6 @@ export interface KineticTextProps {
   repeatOnView?: boolean;
   /** Viewport intersection threshold (0.1 = 10% visible, 0.4 = 40% visible) */
   threshold?: number;
-  /** Optional active cursor during typing */
-  cursor?: boolean;
   /** Additional CSS class names */
   className?: string;
 }
@@ -32,7 +30,6 @@ export const KineticText: React.FC<KineticTextProps> = ({
   delay = 0,
   repeatOnView = true,
   threshold = 0.2,
-  cursor = false,
   className = '',
 }) => {
   const containerRef = useRef<HTMLSpanElement>(null);
@@ -109,12 +106,6 @@ export const KineticText: React.FC<KineticTextProps> = ({
             {wordIndex < words.length - 1 && <span className="inline-block">&nbsp;</span>}
           </span>
         ))}
-        {cursor && (
-          <span
-            className="inline-block w-[2px] h-[0.9em] bg-white ml-0.5 align-baseline animate-[pulse_0.75s_infinite]"
-            aria-hidden="true"
-          />
-        )}
       </motion.span>
     );
   }
@@ -140,12 +131,6 @@ export const KineticText: React.FC<KineticTextProps> = ({
           {idx < words.length - 1 && <span className="inline-block">&nbsp;</span>}
         </span>
       ))}
-      {cursor && (
-        <span
-          className="inline-block w-[2px] h-[0.9em] bg-white ml-0.5 align-baseline animate-[pulse_0.75s_infinite]"
-          aria-hidden="true"
-        />
-      )}
     </motion.span>
   );
 };

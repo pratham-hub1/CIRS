@@ -12,6 +12,7 @@ import { DynamicTicker } from '../../components/common/DynamicTicker';
 import { celebrateConfetti } from '../../lib/confetti';
 import { useWarmTextBounce } from '../../hooks/useWarmTextBounce';
 import { KineticText } from '../../components/common/KineticText';
+import { KineticCard } from '../../components/common/KineticCard';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
@@ -104,7 +105,7 @@ export const Login: React.FC = () => {
               style={{ y: titleBounceY }}
               className="text-4xl xl:text-5xl font-display font-semibold tracking-tight text-white leading-[1.15]"
             >
-              <KineticText text="Autonomous item recovery across campus grounds." mode="char" stagger={0.024} delay={0.25} repeatOnView={true} cursor={true} />
+              <KineticText text="Autonomous item recovery across campus grounds." mode="char" stagger={0.024} delay={0.25} repeatOnView={true} />
             </motion.h1>
 
             <motion.p
@@ -120,32 +121,38 @@ export const Login: React.FC = () => {
               />
             </motion.p>
 
-            {/* Metric cards (Containers stay completely fixed; only typography bounces) */}
+            {/* Metric cards (Smooth kinetic fade-in synchronized with typography) */}
             <div className="grid grid-cols-3 gap-3 pt-4">
-              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
-                <motion.div style={{ y: titleBounceY }} className="text-2xl font-display font-semibold text-white">
-                  98.4%
-                </motion.div>
-                <motion.div style={{ y: subtextBounceY }} className="text-xs text-neutral-400 mt-1">
-                  Resolution Rate
-                </motion.div>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
-                <motion.div style={{ y: titleBounceY }} className="text-2xl font-display font-semibold text-white">
-                  &lt; 24h
-                </motion.div>
-                <motion.div style={{ y: subtextBounceY }} className="text-xs text-neutral-400 mt-1">
-                  Custody Turnaround
-                </motion.div>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
-                <motion.div style={{ y: titleBounceY }} className="text-2xl font-display font-semibold text-white">
-                  100%
-                </motion.div>
-                <motion.div style={{ y: subtextBounceY }} className="text-xs text-neutral-400 mt-1">
-                  Audit Traceability
-                </motion.div>
-              </div>
+              <KineticCard delay={0.35} repeatOnView={true} threshold={0.1}>
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.15] transition-all">
+                  <motion.div style={{ y: titleBounceY }} className="text-2xl font-display font-semibold text-white">
+                    98.4%
+                  </motion.div>
+                  <motion.div style={{ y: subtextBounceY }} className="text-xs text-neutral-400 mt-1">
+                    Resolution Rate
+                  </motion.div>
+                </div>
+              </KineticCard>
+              <KineticCard delay={0.45} repeatOnView={true} threshold={0.1}>
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.15] transition-all">
+                  <motion.div style={{ y: titleBounceY }} className="text-2xl font-display font-semibold text-white">
+                    &lt; 24h
+                  </motion.div>
+                  <motion.div style={{ y: subtextBounceY }} className="text-xs text-neutral-400 mt-1">
+                    Custody Turnaround
+                  </motion.div>
+                </div>
+              </KineticCard>
+              <KineticCard delay={0.55} repeatOnView={true} threshold={0.1}>
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.15] transition-all">
+                  <motion.div style={{ y: titleBounceY }} className="text-2xl font-display font-semibold text-white">
+                    100%
+                  </motion.div>
+                  <motion.div style={{ y: subtextBounceY }} className="text-xs text-neutral-400 mt-1">
+                    Audit Traceability
+                  </motion.div>
+                </div>
+              </KineticCard>
             </div>
           </div>
 
@@ -171,7 +178,7 @@ export const Login: React.FC = () => {
 
         {/* Right Column: Interactive Sign In Card */}
         <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 relative z-10 my-auto w-full">
-          <FadeIn className="w-full max-w-md">
+          <KineticCard delay={0.25} duration={0.65} repeatOnView={true} threshold={0.1} className="w-full max-w-md">
             {/* Mobile Header */}
             <div className="lg:hidden text-center mb-8">
               <div className="w-11 h-11 rounded-xl bg-white text-black font-display font-bold flex items-center justify-center text-sm mx-auto mb-3">
@@ -194,7 +201,7 @@ export const Login: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <motion.h2 style={{ y: titleBounceY }} className="text-xl font-display font-semibold text-white tracking-tight">
-                    <KineticText text="Sign In" mode="char" stagger={0.045} delay={0.3} repeatOnView={true} cursor={true} />
+                    <KineticText text="Sign In" mode="char" stagger={0.045} delay={0.3} repeatOnView={true} />
                   </motion.h2>
                   <motion.span style={{ y: subtextBounceY }} className="text-[11px] font-mono text-neutral-400 inline-block">
                     GSFC SSO
@@ -278,9 +285,7 @@ export const Login: React.FC = () => {
                   rightIcon={<ArrowRight className="w-4 h-4 shrink-0" />}
                   className="w-full py-2.5 text-xs font-semibold mt-2"
                 >
-                  <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                    Authenticate Session
-                  </motion.span>
+                  Authenticate Session
                 </Button>
               </form>
 
@@ -300,7 +305,7 @@ export const Login: React.FC = () => {
                 End-to-End Encrypted Session • Argon2id Key Derivation
               </motion.span>
             </div>
-          </FadeIn>
+          </KineticCard>
         </div>
       </div>
 
@@ -320,7 +325,7 @@ export const Login: React.FC = () => {
               style={{ y: titleBounceY }}
               className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight"
             >
-              <KineticText text="Engineered for campus-wide recovery precision." mode="char" stagger={0.022} delay={0.2} repeatOnView={true} threshold={0.15} cursor={true} />
+              <KineticText text="Engineered for campus-wide recovery precision." mode="char" stagger={0.022} delay={0.2} repeatOnView={true} threshold={0.15} />
             </motion.h2>
             <motion.p
               style={{ y: bodyBounceY }}
@@ -338,80 +343,86 @@ export const Login: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <GlassCard enableTilt enableSheen className="p-7 space-y-4">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
-                <Cpu className="w-5 h-5 text-neutral-200" />
-              </div>
-              <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
-                <KineticText text="Multi-Attribute AI Correlation" mode="char" stagger={0.02} delay={0.25} repeatOnView={true} threshold={0.15} />
-              </motion.h3>
-              <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
-                <KineticText
-                  text="Automated matching engine scans category, chromatic profiles, brand markings, and geo-spatial timestamp logs to surface verified lost/found pairs."
-                  mode="word"
-                  stagger={0.035}
-                  delay={0.45}
-                  repeatOnView={true}
-                  threshold={0.15}
-                />
-              </motion.p>
-              <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                  Neural matching threshold: 85%+
-                </motion.span>
-              </div>
-            </GlassCard>
+            <KineticCard delay={0.25} repeatOnView={true} threshold={0.15} className="h-full">
+              <GlassCard enableTilt enableSheen className="p-7 space-y-4 h-full">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
+                  <Cpu className="w-5 h-5 text-neutral-200" />
+                </div>
+                <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
+                  <KineticText text="Multi-Attribute AI Correlation" mode="char" stagger={0.02} delay={0.25} repeatOnView={true} threshold={0.15} />
+                </motion.h3>
+                <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
+                  <KineticText
+                    text="Automated matching engine scans category, chromatic profiles, brand markings, and geo-spatial timestamp logs to surface verified lost/found pairs."
+                    mode="word"
+                    stagger={0.035}
+                    delay={0.45}
+                    repeatOnView={true}
+                    threshold={0.15}
+                  />
+                </motion.p>
+                <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                    Neural matching threshold: 85%+
+                  </motion.span>
+                </div>
+              </GlassCard>
+            </KineticCard>
 
-            <GlassCard enableTilt enableSheen className="p-7 space-y-4">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
-                <Key className="w-5 h-5 text-neutral-200" />
-              </div>
-              <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
-                <KineticText text="Cryptographic Custody Pass" mode="char" stagger={0.02} delay={0.3} repeatOnView={true} threshold={0.15} />
-              </motion.h3>
-              <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
-                <KineticText
-                  text="Approved claimants receive a single-use digital redemption token. Physical custody desks scan and burn tokens upon verified property handover."
-                  mode="word"
-                  stagger={0.035}
-                  delay={0.5}
-                  repeatOnView={true}
-                  threshold={0.15}
-                />
-              </motion.p>
-              <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                  Zero identity impersonation risk
-                </motion.span>
-              </div>
-            </GlassCard>
+            <KineticCard delay={0.4} repeatOnView={true} threshold={0.15} className="h-full">
+              <GlassCard enableTilt enableSheen className="p-7 space-y-4 h-full">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
+                  <Key className="w-5 h-5 text-neutral-200" />
+                </div>
+                <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
+                  <KineticText text="Cryptographic Custody Pass" mode="char" stagger={0.02} delay={0.3} repeatOnView={true} threshold={0.15} />
+                </motion.h3>
+                <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
+                  <KineticText
+                    text="Approved claimants receive a single-use digital redemption token. Physical custody desks scan and burn tokens upon verified property handover."
+                    mode="word"
+                    stagger={0.035}
+                    delay={0.5}
+                    repeatOnView={true}
+                    threshold={0.15}
+                  />
+                </motion.p>
+                <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                    Zero identity impersonation risk
+                  </motion.span>
+                </div>
+              </GlassCard>
+            </KineticCard>
 
-            <GlassCard enableTilt enableSheen className="p-7 space-y-4">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
-                <FileCheck2 className="w-5 h-5 text-neutral-200" />
-              </div>
-              <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
-                <KineticText text="100% Chain-of-Custody Audit" mode="char" stagger={0.02} delay={0.35} repeatOnView={true} threshold={0.15} />
-              </motion.h3>
-              <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
-                <KineticText
-                  text="Immutable event stream records every intake, security locker transfer, claimant appeal, and custodian resolution with cryptographic verification."
-                  mode="word"
-                  stagger={0.035}
-                  delay={0.55}
-                  repeatOnView={true}
-                  threshold={0.15}
-                />
-              </motion.p>
-              <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                  SHA-256 tamper-evident telemetry
-                </motion.span>
-              </div>
-            </GlassCard>
+            <KineticCard delay={0.55} repeatOnView={true} threshold={0.15} className="h-full">
+              <GlassCard enableTilt enableSheen className="p-7 space-y-4 h-full">
+                <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
+                  <FileCheck2 className="w-5 h-5 text-neutral-200" />
+                </div>
+                <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
+                  <KineticText text="100% Chain-of-Custody Audit" mode="char" stagger={0.02} delay={0.35} repeatOnView={true} threshold={0.15} />
+                </motion.h3>
+                <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
+                  <KineticText
+                    text="Immutable event stream records every intake, security locker transfer, claimant appeal, and custodian resolution with cryptographic verification."
+                    mode="word"
+                    stagger={0.035}
+                    delay={0.55}
+                    repeatOnView={true}
+                    threshold={0.15}
+                  />
+                </motion.p>
+                <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <motion.span style={{ y: subtextBounceY }} className="inline-block">
+                    SHA-256 tamper-evident telemetry
+                  </motion.span>
+                </div>
+              </GlassCard>
+            </KineticCard>
           </div>
 
           {/* Institutional Tenancy Footer */}
