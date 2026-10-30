@@ -56,14 +56,14 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
     let lastScrollY = window.scrollY || 0;
 
     const handleWheel = (e: WheelEvent) => {
-      const delta = Math.max(-28, Math.min(28, e.deltaY * 0.15));
+      const delta = Math.max(-16, Math.min(16, e.deltaY * 0.08));
       targetScrollVelocity += delta;
     };
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY || 0;
       const diff = currentScrollY - lastScrollY;
-      targetScrollVelocity += diff * 0.3;
+      targetScrollVelocity += Math.max(-16, Math.min(16, diff * 0.15));
       lastScrollY = currentScrollY;
     };
 
@@ -74,14 +74,14 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
     const count = particleCount;
 
     for (let i = 0; i < count; i++) {
-      const depth = Math.random() * 1.2 + 0.6; // 0.6 to 1.8 depth layer
+      const depth = Math.random() * 0.9 + 0.5; // 0.5 to 1.4 depth layer
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35,
-        radius: (Math.random() * 1.4 + 0.8) * depth,
-        alpha: Math.min(0.85, Math.random() * 0.45 + 0.35),
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        radius: (Math.random() * 0.9 + 0.6) * depth,
+        alpha: Math.random() * 0.3 + 0.15, // soft glow 0.15 - 0.45
         depth,
       });
     }
@@ -90,25 +90,26 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
       ctx.clearRect(0, 0, width, height);
 
       // Smooth scroll velocity interpolation & decay
-      scrollVelocity += (targetScrollVelocity - scrollVelocity) * 0.12;
-      targetScrollVelocity *= 0.88;
+      scrollVelocity += (targetScrollVelocity - scrollVelocity) * 0.1;
+      targetScrollVelocity *= 0.86;
 
-      const isFast = Math.abs(scrollVelocity) > 0.4;
+      // Only fast scrolling triggers subtle micro-streak; normal scrolling remains calm circular nodes
+      const isFast = Math.abs(scrollVelocity) > 2.8;
 
-      // Draw connections when not warping rapidly
-      if (Math.abs(scrollVelocity) < 6) {
-        const connDamping = Math.max(0.2, 1 - Math.abs(scrollVelocity) / 6);
+      // Draw subtle mesh connections when calm
+      if (Math.abs(scrollVelocity) < 4) {
+        const connDamping = Math.max(0.1, 1 - Math.abs(scrollVelocity) / 4);
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
             const dx = particles[i].x - particles[j].x;
             const dy = particles[i].y - particles[j].y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 130) {
-              const lineAlpha = (1 - dist / 130) * 0.12 * connDamping;
+            if (dist < 95) {
+              const lineAlpha = (1 - dist / 95) * 0.07 * connDamping;
               ctx.beginPath();
               ctx.strokeStyle = `rgba(255, 255, 255, ${lineAlpha})`;
-              ctx.lineWidth = 0.7;
+              ctx.lineWidth = 0.55;
               ctx.moveTo(particles[i].x, particles[i].y);
               ctx.lineTo(particles[j].x, particles[j].y);
               ctx.stroke();
@@ -122,8 +123,8 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
         p.x += p.vx;
         p.y += p.vy;
 
-        // Dynamic vertical parallax displacement from scroll
-        p.y -= scrollVelocity * p.depth * 1.6;
+        // Gentle vertical parallax displacement from scroll (calm, non-distracting)
+        p.y -= scrollVelocity * p.depth * 0.65;
 
         // Seamless screen wrap-around
         if (p.x < 0) p.x = width;
@@ -136,25 +137,26 @@ export const AmbientCanvas: React.FC<AmbientCanvasProps> = ({
           const mdx = p.x - mouse.x;
           const mdy = p.y - mouse.y;
           const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-          if (mdist < 140 && mdist > 0) {
-            const force = (1 - mdist / 140) * 0.8;
+          if (mdist < 110 && mdist > 0) {
+            const force = (1 - mdist / 110) * 0.5;
             p.x += (mdx / mdist) * force;
             p.y += (mdy / mdist) * force;
           }
         }
 
-        // Draw particle node or elongated speed streak
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+        // Render calm node or subtle capped micro-streak (no heavy rain effect)
         if (isFast) {
-          const streak = -scrollVelocity * p.depth * 3.2;
+          const rawStreak = -scrollVelocity * p.depth * 0.6;
+          const streak = Math.max(-14, Math.min(14, rawStreak));
           ctx.beginPath();
-          ctx.lineWidth = p.radius * 2;
-          ctx.strokeStyle = `rgba(255, 255, 255, ${p.alpha * 0.9})`;
+          ctx.lineWidth = Math.min(1.2, p.radius * 0.9);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${p.alpha * 0.35})`;
           ctx.lineCap = 'round';
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(p.x, p.y + streak);
           ctx.stroke();
         } else {
+          ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
           ctx.fill();
