@@ -6,6 +6,7 @@ import { StorageLocationName, STORAGE_LOCATION_LABELS } from '../../types/enums'
 import { Modal } from '../../components/common/Modal';
 import { PageTransition, StaggerContainer, StaggerItem } from '../../components/common/AnimatedTransitions';
 import { Button } from '../../components/common/Button';
+import { GlassCard } from '../../components/common/GlassCard';
 import { useToast } from '../../context/ToastContext';
 import { celebrateConfetti } from '../../lib/confetti';
 
@@ -110,39 +111,38 @@ export const AdminStorageLocations: React.FC = () => {
       ) : (
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {locations.map((loc) => (
-            <StaggerItem
-              key={loc.id}
-              className="bg-[#12151D] rounded-2xl border border-white/[0.08] p-5 flex flex-col justify-between group hover:border-white/[0.16] transition-all"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/[0.04] text-neutral-300 flex items-center justify-center border border-white/[0.06]">
-                    <Building2 className="w-5 h-5" />
+            <StaggerItem key={loc.id}>
+              <GlassCard enableTilt enableSheen className="p-5 flex flex-col justify-between h-full">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/[0.04] text-neutral-300 flex items-center justify-center border border-white/[0.06]">
+                      <Building2 className="w-5 h-5" />
+                    </div>
+                    <button
+                      onClick={() => handleOpenEdit(loc)}
+                      className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/[0.05] transition-colors"
+                      title="Edit Location"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleOpenEdit(loc)}
-                    className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/[0.05] transition-colors"
-                    title="Edit Location"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                </div>
 
-                <h3 className="font-semibold text-white text-base">
-                  {STORAGE_LOCATION_LABELS[loc.name] || loc.name}
-                </h3>
-                <span className="text-xs text-neutral-500 font-mono block mt-0.5">
-                  ID: {loc.id}
-                </span>
-
-                <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center text-xs text-neutral-400">
-                  <Package className="w-4 h-4 mr-2 text-neutral-500" />
-                  <span>
-                    Secured Inventory:{' '}
-                    <strong className="text-white font-medium">{loc._count?.items ?? 0} items</strong>
+                  <h3 className="font-semibold text-white text-base">
+                    {STORAGE_LOCATION_LABELS[loc.name] || loc.name}
+                  </h3>
+                  <span className="text-xs text-neutral-500 font-mono block mt-0.5">
+                    ID: {loc.id}
                   </span>
+
+                  <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center text-xs text-neutral-400">
+                    <Package className="w-4 h-4 mr-2 text-neutral-500" />
+                    <span>
+                      Secured Inventory:{' '}
+                      <strong className="text-white font-medium">{loc._count?.items ?? 0} items</strong>
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </GlassCard>
             </StaggerItem>
           ))}
         </StaggerContainer>

@@ -15,6 +15,8 @@ import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
 import { RoleBadge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
+import { GlassCard } from '../../components/common/GlassCard';
+import { DynamicTicker } from '../../components/common/DynamicTicker';
 import { FadeIn } from '../../components/common/AnimatedTransitions';
 import { useToast } from '../../context/ToastContext';
 import { NotificationPreference } from '../../types/auth';
@@ -120,10 +122,13 @@ export const ProfileSettings: React.FC = () => {
         </p>
       </div>
 
+      {/* Dynamic Telemetry Marquee with Interactive Hover Pause */}
+      <DynamicTicker className="rounded-2xl border border-white/[0.08]" />
+
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Left Column: Personal Profile */}
         <div className="md:col-span-7 space-y-6">
-          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 sm:p-7">
+          <GlassCard enableTilt enableSheen className="p-6 sm:p-7">
             <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/[0.06]">
               <div className="w-14 h-14 rounded-full bg-neutral-800 border border-white/10 text-white flex items-center justify-center font-bold text-lg">
                 {user?.name
@@ -196,10 +201,10 @@ export const ProfileSettings: React.FC = () => {
                 </Button>
               </div>
             </form>
-          </div>
+          </GlassCard>
 
           {/* Account Role Information */}
-          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 space-y-3">
+          <GlassCard enableTilt enableSheen className="p-6 space-y-3">
             <div className="flex items-center space-x-2 text-xs font-semibold text-white">
               <Shield className="w-4 h-4 text-neutral-400" />
               <span>Permission Tier: {user?.role || 'STUDENT'}</span>
@@ -207,12 +212,12 @@ export const ProfileSettings: React.FC = () => {
             <p className="text-xs text-neutral-400 leading-relaxed">
               Your account grants access to submit lost &amp; found reports, file ownership claims, receive match alerts, and redeem collection tokens.
             </p>
-          </div>
+          </GlassCard>
         </div>
 
         {/* Right Column: Notification Preferences */}
         <div className="md:col-span-5 space-y-6">
-          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 sm:p-7">
+          <GlassCard enableTilt enableSheen className="p-6 sm:p-7">
             <div className="flex items-center space-x-2.5 mb-4 pb-4 border-b border-white/[0.06]">
               <Bell className="w-4 h-4 text-neutral-400" />
               <h3 className="text-sm font-semibold text-white">Alert Preferences</h3>
@@ -271,7 +276,7 @@ export const ProfileSettings: React.FC = () => {
                 </div>
               </form>
             )}
-          </div>
+          </GlassCard>
         </div>
       </div>
     </FadeIn>

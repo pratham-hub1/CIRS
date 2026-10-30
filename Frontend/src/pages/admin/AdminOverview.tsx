@@ -30,6 +30,8 @@ import { adminService } from '../../services/adminService';
 import { AdminAnalyticsData } from '../../types/admin';
 import { ItemCategory, ItemStatus, CATEGORY_LABELS, STATUS_LABELS } from '../../types/enums';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { GlassCard } from '../../components/common/GlassCard';
+import { DynamicTicker } from '../../components/common/DynamicTicker';
 import { StaggerContainer, StaggerItem, FadeIn } from '../../components/common/AnimatedTransitions';
 
 const PIE_COLORS = [
@@ -164,10 +166,13 @@ export const AdminOverview: React.FC = () => {
         </div>
       </FadeIn>
 
-      {/* Metric Cards Grid */}
+      {/* Dynamic Telemetry Marquee with Interactive Hover Pause */}
+      <DynamicTicker className="rounded-2xl border border-white/[0.08]" />
+
+      {/* Metric Cards Grid (3D Interactive Tilt Glass Cards) */}
       <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StaggerItem>
-          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 hover:border-white/[0.14] transition-all">
+          <GlassCard enableTilt enableSheen className="p-6">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
                 Total Registered Cases
@@ -182,11 +187,11 @@ export const AdminOverview: React.FC = () => {
               <span className="mx-1.5 text-neutral-600">•</span>
               <span className="text-emerald-400">{metrics?.totalFound || 0} In Custody</span>
             </div>
-          </div>
+          </GlassCard>
         </StaggerItem>
 
         <StaggerItem>
-          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 hover:border-white/[0.14] transition-all">
+          <GlassCard enableTilt enableSheen className="p-6">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
                 Clearance Rate
@@ -200,11 +205,11 @@ export const AdminOverview: React.FC = () => {
               <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
               <span>{metrics?.totalReturned || 0} returned to owners</span>
             </div>
-          </div>
+          </GlassCard>
         </StaggerItem>
 
         <StaggerItem>
-          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 hover:border-white/[0.14] transition-all">
+          <GlassCard enableTilt enableSheen className="p-6">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
                 Pending Claims
@@ -217,11 +222,11 @@ export const AdminOverview: React.FC = () => {
             <div className="mt-3 pt-2.5 border-t border-white/[0.06] text-[11px] text-neutral-400 font-mono">
               <span>Awaiting staff review</span>
             </div>
-          </div>
+          </GlassCard>
         </StaggerItem>
 
         <StaggerItem>
-          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-6 hover:border-white/[0.14] transition-all">
+          <GlassCard enableTilt enableSheen className="p-6">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400 block">
                 Active Holds
@@ -234,7 +239,7 @@ export const AdminOverview: React.FC = () => {
             <div className="mt-3 pt-2.5 border-t border-white/[0.06] text-[11px] text-neutral-400 font-mono">
               <span>Ready for collection token</span>
             </div>
-          </div>
+          </GlassCard>
         </StaggerItem>
       </StaggerContainer>
 

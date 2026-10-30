@@ -38,6 +38,7 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { Button } from '../../components/common/Button';
+import { GlassCard } from '../../components/common/GlassCard';
 import { FadeIn } from '../../components/common/AnimatedTransitions';
 import { SubmitClaimModal } from '../claims/SubmitClaimModal';
 import { formatRelativeTime } from '../../lib/utils';
@@ -308,8 +309,8 @@ export const ItemDetails: React.FC = () => {
         </div>
       </div>
 
-      {/* Case Lifecycle Progress Tracker */}
-      <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-5 sm:p-6">
+      {/* Case Lifecycle Progress Tracker (3D Interactive Tilt Glass Card) */}
+      <GlassCard enableTilt enableSheen className="p-5 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-400">
             LIFECYCLE STATUS
@@ -343,13 +344,13 @@ export const ItemDetails: React.FC = () => {
             </div>
           ))}
         </div>
-      </div>
+      </GlassCard>
 
       {/* Main Case Overview Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Photos & Custody info */}
         <div className="space-y-6">
-          <div className="bg-[#12151D] rounded-2xl border border-white/[0.07] p-4 overflow-hidden">
+          <GlassCard enableTilt enableSheen className="p-4 overflow-hidden">
             {imagesList.length > 0 ? (
               <div className="space-y-3">
                 <div
@@ -389,11 +390,11 @@ export const ItemDetails: React.FC = () => {
                 <span className="text-xs">No photographic evidence attached</span>
               </div>
             )}
-          </div>
+          </GlassCard>
 
           {/* Custody Vault Card */}
           {item.storageLocation && (
-            <div className="p-5 rounded-2xl bg-[#12151D] border border-white/[0.07] space-y-2">
+            <GlassCard enableTilt enableSheen className="p-5 space-y-2">
               <div className="flex items-center space-x-2 text-xs font-semibold text-white">
                 <Archive className="w-4 h-4 text-neutral-400" />
                 <span>Secured Custody Vault</span>
@@ -402,14 +403,14 @@ export const ItemDetails: React.FC = () => {
               <p className="text-xs text-neutral-400">
                 Official campus item custody repository
               </p>
-            </div>
+            </GlassCard>
           )}
         </div>
 
         {/* Right Column (2 Cols): Specifications, Details, Messages & Matches */}
         <div className="lg:col-span-2 space-y-6">
           {/* Main Info Card */}
-          <div className="p-6 sm:p-7 rounded-2xl bg-[#12151D] border border-white/[0.07] space-y-6">
+          <GlassCard enableTilt enableSheen className="p-6 sm:p-7 space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/[0.06]">
               <div className="flex items-center space-x-2.5">
                 <ItemTypeBadge type={item.type} />
@@ -482,7 +483,7 @@ export const ItemDetails: React.FC = () => {
                 </span>
               </div>
             </div>
-          </div>
+          </GlassCard>
 
           {/* Candidate Matches Section (Private to owner & staff) */}
           {canViewPrivateDetails && matches.length > 0 && (
