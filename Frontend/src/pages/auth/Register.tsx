@@ -120,7 +120,7 @@ export const Register: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await register({
+      const regUser = await register({
         name: name.trim(),
         email: trimmedEmail,
         password,
@@ -128,6 +128,19 @@ export const Register: React.FC = () => {
         departmentId: departmentId.trim() || undefined,
         role,
       });
+      try {
+        sessionStorage.setItem(
+          'cirs_welcome_event',
+          JSON.stringify({
+            type: 'register',
+            role: regUser?.role || role || 'STUDENT',
+            name: name.trim() || trimmedEmail.split('@')[0],
+            timestamp: Date.now(),
+          })
+        );
+      } catch {
+        // storage fallback
+      }
       celebrateConfetti();
       success('Account registered successfully! Welcome to CIRS.');
       navigate('/dashboard', { replace: true });
@@ -447,10 +460,10 @@ export const Register: React.FC = () => {
                 type="submit"
                 variant="primary"
                 isLoading={isSubmitting}
+                rightIcon={<ArrowRight className="w-4 h-4 shrink-0" />}
                 className="w-full py-2.5 text-xs font-semibold mt-2"
               >
-                <span>Create Institutional Account</span>
-                <ArrowRight className="w-4 h-4 ml-1.5" />
+                Create Institutional Account
               </Button>
             </form>
 

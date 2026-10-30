@@ -33,7 +33,20 @@ export const Login: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await login({ email: email.trim(), password });
+      const loggedUser = await login({ email: email.trim(), password });
+      try {
+        sessionStorage.setItem(
+          'cirs_welcome_event',
+          JSON.stringify({
+            type: 'login',
+            role: loggedUser?.role || 'STUDENT',
+            name: loggedUser?.name || email.trim().split('@')[0],
+            timestamp: Date.now(),
+          })
+        );
+      } catch {
+        // storage fallback
+      }
       celebrateConfetti();
       success('Authenticated successfully. Welcome back!');
       navigate(from, { replace: true });
@@ -200,10 +213,10 @@ export const Login: React.FC = () => {
                 type="submit"
                 variant="primary"
                 isLoading={isSubmitting}
+                rightIcon={<ArrowRight className="w-4 h-4 shrink-0" />}
                 className="w-full py-2.5 text-xs font-semibold mt-2"
               >
-                <span>Authenticate Session</span>
-                <ArrowRight className="w-4 h-4 ml-1.5" />
+                Authenticate Session
               </Button>
             </form>
 
