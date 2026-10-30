@@ -14,8 +14,8 @@ interface AuthContextValue {
   isFaculty: boolean;
   isAdmin: boolean;
   isDemoMode: boolean;
-  login: (payload: LoginPayload) => Promise<void>;
-  register: (payload: RegisterPayload) => Promise<void>;
+  login: (payload: LoginPayload) => Promise<any>;
+  register: (payload: RegisterPayload) => Promise<any>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   toggleDemoMode: (enabled?: boolean) => void;
@@ -100,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await authService.login(payload);
       setUser(res.user);
       setIsDemoMode(apiClient.isDemoMode());
+      return res.user;
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.register(payload);
       // Auto login through the actual backend after successful registration
-      await login({ email: payload.email, password: payload.password });
+      return await login({ email: payload.email, password: payload.password });
     } finally {
       setIsLoading(false);
     }

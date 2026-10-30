@@ -7,6 +7,7 @@ import { PageTransition } from '../common/AnimatedTransitions';
 import { SidebarProvider, useSidebar } from '../../context/SidebarContext';
 import { CommandPalette } from '../common/CommandPalette';
 import { AmbientCanvas } from '../common/AmbientCanvas';
+import { WelcomeTransitionOverlay } from '../common/WelcomeTransitionOverlay';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 import {
@@ -114,6 +115,7 @@ const LayoutContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#08090C] flex flex-col font-sans text-slate-100 antialiased selection:bg-white selection:text-black relative">
       <AmbientCanvas particleCount={32} className="opacity-40" />
+      <WelcomeTransitionOverlay />
       <div className="relative z-10 flex flex-col min-h-screen">
         <Header
           onToggleMobileMenu={openMobileMenu}
