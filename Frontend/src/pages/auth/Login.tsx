@@ -11,7 +11,7 @@ import { GlassCard } from '../../components/common/GlassCard';
 import { DynamicTicker } from '../../components/common/DynamicTicker';
 import { celebrateConfetti } from '../../lib/confetti';
 import { useWarmTextBounce } from '../../hooks/useWarmTextBounce';
-import { TypewriterText } from '../../components/common/TypewriterText';
+import { KineticText } from '../../components/common/KineticText';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
@@ -96,7 +96,7 @@ export const Login: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                <TypewriterText text="CENTRAL RECOVERY SYSTEM • LIVE TELEMETRY" speed={16} delay={100} cursor={false} />
+                <KineticText text="CENTRAL RECOVERY SYSTEM • LIVE TELEMETRY" mode="char" stagger={0.016} delay={0.1} repeatOnView={true} />
               </motion.span>
             </div>
 
@@ -104,18 +104,19 @@ export const Login: React.FC = () => {
               style={{ y: titleBounceY }}
               className="text-4xl xl:text-5xl font-display font-semibold tracking-tight text-white leading-[1.15]"
             >
-              <TypewriterText text="Autonomous item recovery across campus grounds." speed={26} delay={250} />
+              <KineticText text="Autonomous item recovery across campus grounds." mode="char" stagger={0.024} delay={0.25} repeatOnView={true} cursor={true} />
             </motion.h1>
 
             <motion.p
               style={{ y: bodyBounceY }}
               className="text-base text-neutral-400 font-normal leading-relaxed"
             >
-              <TypewriterText
+              <KineticText
                 text="A unified institutional network pairing lost and found articles with multi-attribute AI correlation and cryptographic custody verification."
-                speed={12}
-                delay={900}
-                cursor={false}
+                mode="word"
+                stagger={0.045}
+                delay={0.65}
+                repeatOnView={true}
               />
             </motion.p>
 
@@ -180,7 +181,7 @@ export const Login: React.FC = () => {
                 CIRS
               </motion.h1>
               <motion.p style={{ y: subtextBounceY }} className="text-xs text-neutral-400 mt-1">
-                <TypewriterText text="Campus Item Recovery System • GSFC University" speed={20} delay={200} />
+                <KineticText text="Campus Item Recovery System • GSFC University" mode="char" stagger={0.02} delay={0.2} repeatOnView={true} />
               </motion.p>
             </div>
 
@@ -193,14 +194,14 @@ export const Login: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <motion.h2 style={{ y: titleBounceY }} className="text-xl font-display font-semibold text-white tracking-tight">
-                    <TypewriterText text="Sign In" speed={40} delay={350} />
+                    <KineticText text="Sign In" mode="char" stagger={0.045} delay={0.3} repeatOnView={true} cursor={true} />
                   </motion.h2>
                   <motion.span style={{ y: subtextBounceY }} className="text-[11px] font-mono text-neutral-400 inline-block">
                     GSFC SSO
                   </motion.span>
                 </div>
                 <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400">
-                  <TypewriterText text="Enter your institutional credentials to access your cases." speed={16} delay={650} cursor={false} />
+                  <KineticText text="Enter your institutional credentials to access your cases." mode="word" stagger={0.05} delay={0.5} repeatOnView={true} />
                 </motion.p>
               </div>
 
@@ -312,21 +313,27 @@ export const Login: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono">
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
               <motion.span style={{ y: subtextBounceY }} className="inline-block">
-                INSTITUTIONAL RECOVERY INFRASTRUCTURE
+                <KineticText text="INSTITUTIONAL RECOVERY INFRASTRUCTURE" mode="char" stagger={0.016} delay={0.1} repeatOnView={true} threshold={0.15} />
               </motion.span>
             </div>
             <motion.h2
               style={{ y: titleBounceY }}
               className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight"
             >
-              Engineered for campus-wide recovery precision.
+              <KineticText text="Engineered for campus-wide recovery precision." mode="char" stagger={0.022} delay={0.2} repeatOnView={true} threshold={0.15} cursor={true} />
             </motion.h2>
             <motion.p
               style={{ y: bodyBounceY }}
               className="text-sm text-neutral-400 leading-relaxed"
             >
-              CIRS replaces manual lost &amp; found registries with automated multi-attribute matching,
-              cryptographic token redemption, and real-time physical custody ledgering.
+              <KineticText
+                text="CIRS replaces manual lost & found registries with automated multi-attribute matching, cryptographic token redemption, and real-time physical custody ledgering."
+                mode="word"
+                stagger={0.04}
+                delay={0.5}
+                repeatOnView={true}
+                threshold={0.15}
+              />
             </motion.p>
           </div>
 
@@ -336,10 +343,17 @@ export const Login: React.FC = () => {
                 <Cpu className="w-5 h-5 text-neutral-200" />
               </div>
               <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
-                Multi-Attribute AI Correlation
+                <KineticText text="Multi-Attribute AI Correlation" mode="char" stagger={0.02} delay={0.25} repeatOnView={true} threshold={0.15} />
               </motion.h3>
               <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
-                Automated matching engine scans category, chromatic profiles, brand markings, and geo-spatial timestamp logs to surface verified lost/found pairs.
+                <KineticText
+                  text="Automated matching engine scans category, chromatic profiles, brand markings, and geo-spatial timestamp logs to surface verified lost/found pairs."
+                  mode="word"
+                  stagger={0.035}
+                  delay={0.45}
+                  repeatOnView={true}
+                  threshold={0.15}
+                />
               </motion.p>
               <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -354,10 +368,17 @@ export const Login: React.FC = () => {
                 <Key className="w-5 h-5 text-neutral-200" />
               </div>
               <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
-                Cryptographic Custody Pass
+                <KineticText text="Cryptographic Custody Pass" mode="char" stagger={0.02} delay={0.3} repeatOnView={true} threshold={0.15} />
               </motion.h3>
               <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
-                Approved claimants receive a single-use digital redemption token. Physical custody desks scan and burn tokens upon verified property handover.
+                <KineticText
+                  text="Approved claimants receive a single-use digital redemption token. Physical custody desks scan and burn tokens upon verified property handover."
+                  mode="word"
+                  stagger={0.035}
+                  delay={0.5}
+                  repeatOnView={true}
+                  threshold={0.15}
+                />
               </motion.p>
               <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -372,10 +393,17 @@ export const Login: React.FC = () => {
                 <FileCheck2 className="w-5 h-5 text-neutral-200" />
               </div>
               <motion.h3 style={{ y: titleBounceY }} className="text-base font-semibold text-white">
-                100% Chain-of-Custody Audit
+                <KineticText text="100% Chain-of-Custody Audit" mode="char" stagger={0.02} delay={0.35} repeatOnView={true} threshold={0.15} />
               </motion.h3>
               <motion.p style={{ y: bodyBounceY }} className="text-xs text-neutral-400 leading-relaxed">
-                Immutable event stream records every intake, security locker transfer, claimant appeal, and custodian resolution with cryptographic verification.
+                <KineticText
+                  text="Immutable event stream records every intake, security locker transfer, claimant appeal, and custodian resolution with cryptographic verification."
+                  mode="word"
+                  stagger={0.035}
+                  delay={0.55}
+                  repeatOnView={true}
+                  threshold={0.15}
+                />
               </motion.p>
               <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
