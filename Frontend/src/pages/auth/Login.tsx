@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion, useScroll, useVelocity, useSpring, useTransform, useMotionValue } from 'framer-motion';
 import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Sparkles, CheckCircle2, Cpu, Key, FileCheck2, ChevronDown, Activity, Award } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -23,6 +24,57 @@ export const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const from = (location.state as any)?.from?.pathname || '/dashboard';
+
+  // Subtle & warm spring bounce on text when scrolling or wheeling
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+
+  // Primary text spring (stiffness: 160, damping: 24, mass: 0.6) - warm, organic
+  const smoothVelocity = useSpring(scrollVelocity, {
+    stiffness: 160,
+    damping: 24,
+    mass: 0.6,
+  });
+  const textBounceY = useTransform(smoothVelocity, [-1200, 0, 1200], [4.5, 0, -4.5]);
+
+  // Secondary text spring (slightly softer for organic micro-lag)
+  const smoothVelocitySubtle = useSpring(scrollVelocity, {
+    stiffness: 120,
+    damping: 22,
+    mass: 0.8,
+  });
+  const subtextBounceY = useTransform(smoothVelocitySubtle, [-1200, 0, 1200], [6, 0, -6]);
+
+  // Interactive mouse wheel impulse
+  const wheelOffset = useMotionValue(0);
+  const smoothWheel = useSpring(wheelOffset, { stiffness: 180, damping: 22, mass: 0.5 });
+
+  useEffect(() => {
+    let decayTimer: any;
+    const handleWheel = (e: WheelEvent) => {
+      const delta = Math.max(-6, Math.min(6, e.deltaY * 0.035));
+      wheelOffset.set(delta);
+      clearTimeout(decayTimer);
+      decayTimer = setTimeout(() => {
+        wheelOffset.set(0);
+      }, 60);
+    };
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      clearTimeout(decayTimer);
+    };
+  }, [wheelOffset]);
+
+  const combinedBounceY = useTransform(
+    [textBounceY, smoothWheel],
+    ([scrollVal, wheelVal]: any) => Number(scrollVal) + Number(wheelVal)
+  );
+
+  const combinedSubtextBounceY = useTransform(
+    [subtextBounceY, smoothWheel],
+    ([scrollVal, wheelVal]: any) => Number(scrollVal) + Number(wheelVal) * 1.2
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,33 +127,45 @@ export const Login: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-white text-black font-display font-bold flex items-center justify-center text-sm tracking-wider shadow-sm">
               CI
             </div>
-            <div>
+            <motion.div style={{ y: combinedBounceY }}>
               <span className="font-display font-bold tracking-tight text-white text-base">
                 CIRS
               </span>
               <span className="block text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
                 GSFC UNIVERSITY
               </span>
-            </div>
+            </motion.div>
           </div>
 
           {/* Center Hero Copy */}
           <div className="max-w-xl space-y-6 my-auto py-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono">
+            <motion.div
+              style={{ y: combinedBounceY }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono"
+            >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>CENTRAL RECOVERY SYSTEM • LIVE TELEMETRY</span>
-            </div>
+            </motion.div>
 
-            <h1 className="text-4xl xl:text-5xl font-display font-semibold tracking-tight text-white leading-[1.15]">
+            <motion.h1
+              style={{ y: combinedBounceY }}
+              className="text-4xl xl:text-5xl font-display font-semibold tracking-tight text-white leading-[1.15]"
+            >
               Autonomous item recovery across campus grounds.
-            </h1>
+            </motion.h1>
 
-            <p className="text-base text-neutral-400 font-normal leading-relaxed">
+            <motion.p
+              style={{ y: combinedSubtextBounceY }}
+              className="text-base text-neutral-400 font-normal leading-relaxed"
+            >
               A unified institutional network pairing lost and found articles with multi-attribute AI correlation and cryptographic custody verification.
-            </p>
+            </motion.p>
 
             {/* Metric cards */}
-            <div className="grid grid-cols-3 gap-3 pt-4">
+            <motion.div
+              style={{ y: combinedSubtextBounceY }}
+              className="grid grid-cols-3 gap-3 pt-4"
+            >
               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
                 <div className="text-2xl font-display font-semibold text-white">98.4%</div>
                 <div className="text-xs text-neutral-400 mt-1">Resolution Rate</div>
@@ -114,11 +178,14 @@ export const Login: React.FC = () => {
                 <div className="text-2xl font-display font-semibold text-white">100%</div>
                 <div className="text-xs text-neutral-400 mt-1">Audit Traceability</div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Bottom Security Pledge & Scroll Anchor */}
-          <div className="flex items-center justify-between text-xs text-neutral-400 pt-6 border-t border-white/[0.06]">
+          <motion.div
+            style={{ y: combinedSubtextBounceY }}
+            className="flex items-center justify-between text-xs text-neutral-400 pt-6 border-t border-white/[0.06]"
+          >
             <div className="flex items-center space-x-2.5">
               <ShieldCheck className="w-4 h-4 text-neutral-300 shrink-0" />
               <span>Restricted to verified students, faculty members, and security personnel.</span>
@@ -130,23 +197,28 @@ export const Login: React.FC = () => {
               <span>Platform Architecture</span>
               <ChevronDown className="w-3.5 h-3.5 animate-bounce" />
             </a>
-          </div>
+          </motion.div>
         </div>
 
         {/* Right Column: Interactive Sign In Card */}
         <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 relative z-10 my-auto w-full">
           <FadeIn className="w-full max-w-md">
             {/* Mobile Header */}
-            <div className="lg:hidden text-center mb-8">
+            <motion.div style={{ y: combinedBounceY }} className="lg:hidden text-center mb-8">
               <div className="w-11 h-11 rounded-xl bg-white text-black font-display font-bold flex items-center justify-center text-sm mx-auto mb-3">
                 CI
               </div>
               <h1 className="text-2xl font-display font-bold text-white">CIRS</h1>
               <p className="text-xs text-neutral-400 mt-1">Campus Item Recovery System • GSFC University</p>
-            </div>
+            </motion.div>
 
-            <div className="bg-[#12151D]/90 backdrop-blur-2xl p-7 sm:p-9 rounded-3xl border border-white/[0.08] shadow-2xl space-y-6">
-              <div>
+            {/* Interactive Sign-In GlassCard with 3D Tilt & Specular Sheen Hover Effect */}
+            <GlassCard
+              enableTilt
+              enableSheen
+              className="p-7 sm:p-9 rounded-3xl border border-white/[0.08] hover:border-white/[0.22] hover:shadow-[0_24px_60px_rgba(0,0,0,0.7)] transition-all duration-300 space-y-6"
+            >
+              <motion.div style={{ y: combinedBounceY }}>
                 <div className="flex items-center justify-between mb-1">
                   <h2 className="text-xl font-display font-semibold text-white tracking-tight">
                     Sign In
@@ -156,7 +228,7 @@ export const Login: React.FC = () => {
                 <p className="text-xs text-neutral-400">
                   Enter your institutional credentials to access your cases.
                 </p>
-              </div>
+              </motion.div>
 
               {errorMessage && (
                 <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 font-medium flex items-center gap-2.5">
@@ -166,7 +238,7 @@ export const Login: React.FC = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
+                <motion.div style={{ y: combinedSubtextBounceY }}>
                   <label
                     htmlFor="email"
                     className="block text-xs font-medium text-neutral-300 mb-1.5"
@@ -190,9 +262,9 @@ export const Login: React.FC = () => {
                   <p className="mt-1.5 text-[11px] text-neutral-500">
                     Must end with @gsfcuniversity.ac.in
                   </p>
-                </div>
+                </motion.div>
 
-                <div>
+                <motion.div style={{ y: combinedSubtextBounceY }}>
                   <label
                     htmlFor="password"
                     className="block text-xs font-medium text-neutral-300 mb-1.5"
@@ -220,7 +292,7 @@ export const Login: React.FC = () => {
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                </div>
+                </motion.div>
 
                 <Button
                   type="submit"
@@ -233,18 +305,24 @@ export const Login: React.FC = () => {
                 </Button>
               </form>
 
-              <div className="pt-4 border-t border-white/[0.06] text-center text-xs text-neutral-400">
+              <motion.div
+                style={{ y: combinedSubtextBounceY }}
+                className="pt-4 border-t border-white/[0.06] text-center text-xs text-neutral-400"
+              >
                 Need an institutional account?{' '}
                 <Link to="/register" className="font-semibold text-white hover:underline">
                   Create one now
                 </Link>
-              </div>
-            </div>
+              </motion.div>
+            </GlassCard>
 
-            <div className="mt-6 text-center text-[11px] text-neutral-500 flex items-center justify-center space-x-1.5">
+            <motion.div
+              style={{ y: combinedSubtextBounceY }}
+              className="mt-6 text-center text-[11px] text-neutral-500 flex items-center justify-center space-x-1.5"
+            >
               <ShieldCheck className="w-3.5 h-3.5 text-neutral-400" />
               <span>End-to-End Encrypted Session • Argon2id Key Derivation</span>
-            </div>
+            </motion.div>
           </FadeIn>
         </div>
       </div>
@@ -255,20 +333,32 @@ export const Login: React.FC = () => {
 
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-20 lg:py-28 space-y-16">
           <div className="text-center max-w-3xl mx-auto space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono">
+            <motion.div
+              style={{ y: combinedBounceY }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-neutral-300 text-xs font-mono"
+            >
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
               <span>INSTITUTIONAL RECOVERY INFRASTRUCTURE</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">
+            </motion.div>
+            <motion.h2
+              style={{ y: combinedBounceY }}
+              className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight"
+            >
               Engineered for campus-wide recovery precision.
-            </h2>
-            <p className="text-sm text-neutral-400 leading-relaxed">
+            </motion.h2>
+            <motion.p
+              style={{ y: combinedSubtextBounceY }}
+              className="text-sm text-neutral-400 leading-relaxed"
+            >
               CIRS replaces manual lost &amp; found registries with automated multi-attribute matching,
               cryptographic token redemption, and real-time physical custody ledgering.
-            </p>
+            </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <motion.div
+            style={{ y: combinedSubtextBounceY }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
+          >
             <GlassCard enableTilt enableSheen className="p-7 space-y-4">
               <div className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white">
                 <Cpu className="w-5 h-5 text-neutral-200" />
@@ -316,16 +406,19 @@ export const Login: React.FC = () => {
                 <span>SHA-256 tamper-evident telemetry</span>
               </div>
             </GlassCard>
-          </div>
+          </motion.div>
 
           {/* Institutional Tenancy Footer */}
-          <div className="pt-12 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
+          <motion.div
+            style={{ y: combinedSubtextBounceY }}
+            className="pt-12 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4"
+          >
             <div className="flex items-center space-x-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span className="font-mono text-neutral-400">GSFC UNIVERSITY INSTANCE • CIRS v2.4</span>
             </div>
             <span>End-to-End Encrypted Session • Authorized Academic Personnel Only</span>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
