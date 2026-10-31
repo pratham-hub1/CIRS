@@ -12,6 +12,7 @@ import {
   AppealStatus,
   Channel,
   QuestionSource,
+  FileVisibility,
 } from '@prisma/client';
 
 export {
@@ -28,6 +29,7 @@ export {
   AppealStatus,
   Channel,
   QuestionSource,
+  FileVisibility,
 };
 
 export const CATEGORY_VERIFICATION_LEVEL_MAP: Record<ItemCategory, VerificationLevel> = {

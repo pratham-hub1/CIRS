@@ -29,6 +29,26 @@ import {
 } from '../../domain/enums';
 import { getVerificationQuestionsForCategory } from '../../domain/verification-questions';
 
+function extractFileId(fileRef?: string): string {
+  if (!fileRef) return '';
+  const match = fileRef.match(/\/files\/([a-zA-Z0-9_-]+)/);
+  if (match) {
+    return match[1];
+  }
+  return fileRef.trim();
+}
+
+function formatClaimDocuments<T extends { documents?: any[] }>(claim: T): T {
+  if (!claim || !claim.documents) return claim;
+  return {
+    ...claim,
+    documents: claim.documents.map((doc: any) => ({
+      ...doc,
+      url: doc.fileId ? `/api/v1/files/${doc.fileId}` : (doc.url || `/api/v1/files/${doc.id}`),
+    })),
+  };
+}
+
 @Injectable()
 export class ClaimsService {
   private readonly logger = new Logger(ClaimsService.name);
@@ -156,7 +176,7 @@ export class ClaimsService {
         documents: dto.documents && dto.documents.length > 0
           ? {
               create: dto.documents.map((doc) => ({
-                url: doc.url,
+                fileId: extractFileId(doc.fileId || doc.url),
                 docType: doc.docType,
               })),
             }
@@ -201,14 +221,14 @@ export class ClaimsService {
       });
     }
 
-    return claim;
+    return formatClaimDocuments(claim);
   }
 
   /**
    * List claims submitted by the current user.
    */
   async getMyClaims(user: AuthUser) {
-    return this.prisma.claim.findMany({
+    const claims = await this.prisma.claim.findMany({
       where: { claimantId: user.id },
       include: {
         item: {
@@ -227,6 +247,8 @@ export class ClaimsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    return claims.map((c) => formatClaimDocuments(c));
   }
 
   /**
@@ -267,7 +289,7 @@ export class ClaimsService {
       throw new ForbiddenException('You do not have permission to view this claim');
     }
 
-    return claim;
+    return formatClaimDocuments(claim);
   }
 
   /**
@@ -402,13 +424,19 @@ export class ClaimsService {
       );
     }
 
-    return this.prisma.claimDocument.create({
+    const fId = extractFileId(dto.fileId || dto.url);
+    const doc = await this.prisma.claimDocument.create({
       data: {
         claimId,
-        url: dto.url,
+        fileId: fId,
         docType: dto.docType,
       },
     });
+
+    return {
+      ...doc,
+      url: `/api/v1/files/${doc.fileId}`,
+    };
   }
 
   /**

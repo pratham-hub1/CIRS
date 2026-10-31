@@ -19,6 +19,27 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../../domain/enums';
 import { applyCampusScope } from '../../common/repositories/scoped.repository';
 
+function extractFileId(fileRef: string): string {
+  if (!fileRef) return fileRef;
+  const match = fileRef.match(/\/files\/([a-zA-Z0-9_-]+)/);
+  if (match) {
+    return match[1];
+  }
+  return fileRef.trim();
+}
+
+function formatItemImages<T extends { images?: any[] }>(item: T): T {
+  if (!item || !item.images) return item;
+  return {
+    ...item,
+    images: item.images.map((img: any) => ({
+      ...img,
+      fileId: img.fileId,
+      url: img.fileId ? `/api/v1/files/${img.fileId}` : (img.url || `/api/v1/files/${img.id}`),
+    })),
+  };
+}
+
 @Injectable()
 export class ItemsService {
   private readonly logger = new Logger(ItemsService.name);
@@ -115,8 +136,8 @@ export class ItemsService {
         storageLocationId: dto.storageLocationId || null,
         images: dto.images && dto.images.length > 0
           ? {
-              create: dto.images.map((url, index) => ({
-                url,
+              create: dto.images.map((imgRef, index) => ({
+                fileId: extractFileId(imgRef),
                 sortOrder: index,
               })),
             }
@@ -159,7 +180,7 @@ export class ItemsService {
       await this.matchingService.runMatchingForItem(item);
     }
 
-    return item;
+    return formatItemImages(item);
   }
 
   /**
@@ -188,7 +209,7 @@ export class ItemsService {
       ];
     }
 
-    return this.prisma.item.findMany({
+    const items = await this.prisma.item.findMany({
       where,
       include: {
         images: true,
@@ -197,6 +218,8 @@ export class ItemsService {
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
+
+    return items.map((item) => formatItemImages(item));
   }
 
   /**
@@ -207,7 +230,7 @@ export class ItemsService {
       reporterId: user.id,
     });
 
-    return this.prisma.item.findMany({
+    const items = await this.prisma.item.findMany({
       where,
       include: {
         images: true,
@@ -215,6 +238,8 @@ export class ItemsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    return items.map((item) => formatItemImages(item));
   }
 
   /**
@@ -247,13 +272,15 @@ export class ItemsService {
     const isStaff = user.role === Role.ADMIN;
 
     if (isOwner || isStaff) {
-      return item;
+      return formatItemImages(item);
     }
 
     // Mask for community access (FR-12, INT-5)
     return serializePublicItem({
       ...item,
-      images: item.images.map((img) => img.url),
+      images: (item.images || []).map((img: any) =>
+        img.fileId ? `/api/v1/files/${img.fileId}` : (img.url || `/api/v1/files/${img.id}`),
+      ),
     });
   }
 
@@ -334,7 +361,7 @@ export class ItemsService {
       },
     });
 
-    return updated;
+    return formatItemImages(updated);
   }
 
   /**

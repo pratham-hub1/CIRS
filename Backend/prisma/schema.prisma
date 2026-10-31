@@ -99,6 +99,11 @@ enum QuestionSource {
   MANUAL
 }
 
+enum FileVisibility {
+  AUTHENTICATED
+  PRIVATE
+}
+
 model Campus {
   id               String            @id @default(uuid())
   name             String
@@ -151,6 +156,7 @@ model User {
   decidedAppeals         Appeal[]                @relation("AdminAppeals")
   caseMessages           CaseMessage[]
   auditLogs              AuditLog[]              @relation("AuditActor")
+  uploadedFiles          File[]
 
   @@map("user")
 }
@@ -229,10 +235,11 @@ model Item {
 model ItemImage {
   id        String   @id @default(uuid())
   itemId    String
-  url       String
+  fileId    String
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
   @@map("item_image")
 }
@@ -274,10 +281,11 @@ model Claim {
 model ClaimDocument {
   id        String   @id @default(uuid())
   claimId   String
-  url       String
+  fileId    String
   docType   String
   createdAt DateTime @default(now())
   claim     Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
   @@map("claim_document")
 }
@@ -401,4 +409,20 @@ model AuditLog {
 
   @@index([targetType, targetId])
   @@map("audit_log")
+}
+
+model File {
+  id           String         @id @default(uuid())
+  storageKey   String         @unique
+  mimeType     String
+  sizeBytes    Int
+  visibility   FileVisibility
+  uploadedById String
+  uploadedBy   User           @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt    DateTime       @default(now())
+
+  itemImages     ItemImage[]
+  claimDocuments ClaimDocument[]
+
+  @@map("file")
 }

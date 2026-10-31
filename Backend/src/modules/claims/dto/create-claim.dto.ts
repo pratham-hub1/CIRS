@@ -20,8 +20,12 @@ export class ClaimAnswerInput {
 
 export class ClaimDocumentInput {
   @IsString()
-  @IsNotEmpty()
-  url!: string;
+  @IsOptional()
+  fileId?: string;
+
+  @IsString()
+  @IsOptional()
+  url?: string;
 
   @IsString()
   @IsNotEmpty()

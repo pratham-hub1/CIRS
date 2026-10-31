@@ -1,9 +1,13 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class AddDocumentDto {
   @IsString()
-  @IsNotEmpty()
-  url!: string;
+  @IsOptional()
+  fileId?: string;
+
+  @IsString()
+  @IsOptional()
+  url?: string;
 
   @IsString()
   @IsNotEmpty()

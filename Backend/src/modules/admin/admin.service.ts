@@ -103,7 +103,15 @@ export class AdminService {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-      items,
+      items: items.map((item) => ({
+        ...item,
+        images: item.images
+          ? item.images.map((img: any) => ({
+              ...img,
+              url: img.fileId ? `/api/v1/files/${img.fileId}` : (img.url || `/api/v1/files/${img.id}`),
+            }))
+          : item.images,
+      })),
     };
   }
 

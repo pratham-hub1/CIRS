@@ -38,7 +38,7 @@ export class VerificationService {
    */
   async getClaims(adminUser: AuthUser, status?: ClaimStatus) {
     const itemWhere = applyCampusScope(adminUser.campusId, {});
-    return this.prisma.claim.findMany({
+    const claims = await this.prisma.claim.findMany({
       where: {
         item: itemWhere,
         ...(status ? { status } : {}),
@@ -67,6 +67,14 @@ export class VerificationService {
       },
       orderBy: { createdAt: 'asc' },
     });
+
+    return claims.map((claim) => ({
+      ...claim,
+      documents: (claim.documents || []).map((doc: any) => ({
+        ...doc,
+        url: doc.fileId ? `/api/v1/files/${doc.fileId}` : (doc.url || `/api/v1/files/${doc.id}`),
+      })),
+    }));
   }
 
   /**
